@@ -53,12 +53,12 @@ class ControlPanel(wx.Panel):
         
         """ FloatSpin Controls """
         # Vertical Floatspin control
-        self.vertcontrol=LocSpin(self, wx.ID_ANY, min_val=-20, max_val=20, increment=0.2, value=0, extrastyle=FS.FS_LEFT, poslabel='S', neglabel='I')
+        self.vertcontrol=LocSpin(self, wx.ID_ANY, min_val=-20, max_val=20, increment=0.1, value=0, extrastyle=FS.FS_LEFT, poslabel='S', neglabel='I')
         self.vertcontrol.SetFormat('%f')
         self.vertcontrol.SetDigits(1)
 #    
         # Horizontal Floatspin control
-        self.horzcontrol=LocSpin(self, wx.ID_ANY, min_val=-20, max_val=20, increment=0.2, value=0, extrastyle=FS.FS_LEFT, poslabel='T', neglabel='N')
+        self.horzcontrol=LocSpin(self, wx.ID_ANY, min_val=-20, max_val=20, increment=0.1, value=0, extrastyle=FS.FS_LEFT, poslabel='T', neglabel='N')
         self.horzcontrol.SetFormat('%f')
         self.horzcontrol.SetDigits(1)
                 

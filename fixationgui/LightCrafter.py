@@ -14,7 +14,7 @@ class wxLightCrafterFrame(wx.Frame):
         displayLC = wx.Display(numdisplays-1)
 
         geometry = displayLC.GetGeometry()
-        print 'Top Left' + str(geometry.GetTopLeft())
+        #print 'Top Left' + str(geometry.GetTopLeft())
         self.SetPosition(geometry.GetTopLeft())
         self.SetSize(geometry.GetSize())
 
@@ -46,7 +46,7 @@ class LightCrafterCanvas(wx.Window):
 
         self._cursor=0
         self._center = wx.Point2D(size[0]/2,size[1]/2)
-        self._location = self._center
+        self._location = wx.Point2D(self._center.x, self._center.y)
         self._penColor = wx.Pen(wx.GREEN,1,wx.SOLID)
         self._brushColor = wx.Brush(wx.GREEN,wx.SOLID)
         self._fixsize = 5
@@ -57,11 +57,13 @@ class LightCrafterCanvas(wx.Window):
         wx.EVT_SIZE(self, self.OnSize)
 
     def SetFixationCenter(self,location):
-        self._center = self._center+location
+        self._center.x = self._center.x-location.x
+        self._center.y = self._center.y+location.y
         self.SetFixationLocation(wx.Point2D(0,0))
 
     def SetFixationLocation(self,location):
-        self._location = self._center+location
+        self._location.x = self._center.x-location.x
+        self._location.y = self._center.y+location.y        
         self.Repaint()
 
     def SetFixationColor(self, penColor, brushColor):
@@ -122,7 +124,7 @@ if __name__=='__main__':
     displayLC = wx.Display(numdisplays-1)
 
     geometry = displayLC.GetGeometry()
-    print 'Top Left' + str(geometry.GetTopLeft())
+    #print 'Top Left' + str(geometry.GetTopLeft())
     frame=wxLightCrafterFrame(pos=geometry.GetTopLeft(),size=geometry.GetSize())
 
     frame.Show()

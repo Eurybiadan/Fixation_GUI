@@ -52,7 +52,7 @@ class LocSpin( wx.lib.agw.floatspin.FloatSpin ):
         curr = self._textctrl.GetValue()
         
         # Added by Robert Cooper to handle input of a number with a string after it
-        print curr
+##        print curr
         # First determine if there are any letter characters in the string.
         if( re.search('[a-zA-Z]',curr) != None):
             # If there are, check if they're the characters for our positive and negative label
