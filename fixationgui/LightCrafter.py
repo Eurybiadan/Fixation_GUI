@@ -53,8 +53,8 @@ class LightCrafterCanvas(wx.Window):
 
         self.OnSize(None)
 
-        wx.EVT_PAINT(self, self.OnPaint)
-        wx.EVT_SIZE(self, self.OnSize)
+        wx.EvtHandler.Bind(self, wx.EVT_PAINT, self.OnPaint)
+        wx.EvtHandler.Bind(self, wx.EVT_SIZE, self.OnSize)
 
     def SetFixationCenter(self,location):
         self._center.x = self._center.x-location.x
@@ -85,7 +85,7 @@ class LightCrafterCanvas(wx.Window):
     def OnSize(self, event):
         self.thisSize = self.GetClientSize()
 
-        self._Buffer = wx.EmptyBitmap(*self.thisSize)
+        self._Buffer = wx.Bitmap(*self.thisSize)
         self.Repaint()
 
     def Repaint(self):

@@ -10,7 +10,6 @@ def __init__(self):
         #self.parent = parent
 
 def run(name):
-    print "Oh hai "+name
     app=wx.App()
     frame=wxFixationFrame(None)
     frame.Show()

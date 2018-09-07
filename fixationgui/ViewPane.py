@@ -4,6 +4,7 @@ import wx
 import math
 from math import fabs
 from decimal import *
+import numpy as np
 
 # Sets Up The Imaging Space So That It Will Be Automatically Refreshed Using A Double Buffer As The ViewPane And Cursor Location Are Changed
 class ViewPane(wx.Window):
@@ -60,9 +61,9 @@ class ViewPane(wx.Window):
         self._hasbkgrd = False
 
         # Initialize Backgrounds and the buffer for double buffering
-        self._Bkgrd=wx.EmptyBitmap(1,1)
-        self._CurrentBkgrd=wx.EmptyBitmap(1,1)
-        self._Buffer=wx.EmptyBitmap(1,1)
+        self._Bkgrd=wx.Bitmap(1,1)
+        self._CurrentBkgrd=wx.Bitmap(1,1)
+        self._Buffer=wx.Bitmap(1,1)
 
         # Performs an onSize to initialize all the size-dependent variables
         self.OnSize(None)
@@ -167,9 +168,10 @@ class ViewPane(wx.Window):
     def ToDegrees(self, pos):
         # If it isn't a Point2D, then upconvert it to one
         if type(pos) is wx.Point:
-            pos = wx.Point2DFromPoint(pos)
-        
-        relativepos = pos-self._center
+            pos = wx.Point2D(pos)
+
+
+        relativepos = wx.Point2D(np.subtract(pos.Get(), self._center.Get()))
 
         degreehorz = round(relativepos.x/self._pixperdeg,1)
 
@@ -193,7 +195,7 @@ class ViewPane(wx.Window):
         win_w,win_h=self.GetClientSize()
         
         # Initialize the second buffer (in the double buffer) for drawing
-        self._Buffer=wx.EmptyBitmap(win_w,win_h)
+        self._Buffer=wx.Bitmap(win_w,win_h)
         
         self._center = wx.Point2D(win_w/2.0,win_h/2.0)
         
@@ -233,7 +235,7 @@ class ViewPane(wx.Window):
     def SetBkgrdPan(self, panxy):
         # We want the user to have the point their mouse is at be the center of the image.
         # So, offset the current point by it position relative to the image's top right corner.
-        panxy = wx.Point2DFromPoint(panxy)
+        panxy = wx.Point2D(panxy)
 
         # If the image hasn't been panned yet, or if it isn't contained in the image
         if not self.IsMOffsetSet(): 
@@ -288,10 +290,10 @@ class ViewPane(wx.Window):
             # Rotate it about its center
             oldloc = self._pananchor-self._bkgrd_origin
             newloc = oldloc* (1+self._deltascale)
-            print "Pan Anchor"
-            print self._pananchor
-            print "Origin:"
-            print self._bkgrd_origin
+            #print "Pan Anchor"
+            #print self._pananchor
+            #print "Origin:"
+            #print self._bkgrd_origin
 
             self._bkgrd_origin = self._bkgrd_origin-(newloc-oldloc)
             pass        
@@ -351,7 +353,7 @@ class ViewPane(wx.Window):
         dc.SetPen(self.BLKPEN)
         
         # Draw Row lines
-        for rowNum in xrange(numRows + 1):
+        for rowNum in range(numRows + 1):
             if rowNum==5 or rowNum==10 or rowNum==20 or rowNum==25:
                 dc.SetPen(self.THINREDPEN)
             else:
@@ -359,7 +361,7 @@ class ViewPane(wx.Window):
             dc.DrawLine(0,rowNum*cellHgt,width,rowNum*cellHgt)
             
         # Draw Column lines
-        for colNum in xrange(numCols+1):
+        for colNum in range(numCols+1):
             if colNum==5 or colNum==10 or colNum==20 or colNum==25:
                 dc.SetPen(self.THINREDPEN)
             else:

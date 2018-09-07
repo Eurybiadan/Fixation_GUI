@@ -6,7 +6,7 @@ Created on Sep 20, 2013
 
 import wx
 from array import array
-from serial import SerialException
+
     
     
 class CursorPanel(wx.Panel):
@@ -24,36 +24,36 @@ class CursorPanel(wx.Panel):
         self.SetBackgroundColour('black')
         self._rootparent = rootparent
         
-        labelFont = wx.Font(9,wx.SWISS,wx.NORMAL,wx.BOLD,False)
+        labelFont = wx.Font(9,wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD,False)
         
         # Create the sizer for the miniPanel
         minipanesizer = wx.BoxSizer(wx.VERTICAL)
         
         widgetLabel = wx.StaticText(self,wx.ID_ANY,self.GetName())
         widgetLabel.SetForegroundColour('white')
-        widgetLabel.SetFont(wx.Font(9,wx.SWISS,wx.NORMAL,wx.BOLD,False))
+        widgetLabel.SetFont(wx.Font(9,wx.FONTFAMILY_SWISS,wx.FONTSTYLE_NORMAL,wx.FONTWEIGHT_BOLD,False))
         
         minipanesizer.Add(widgetLabel,0,wx.ALIGN_CENTER)
         
         # Create pens for this class
-        self.BLKPEN = wx.Pen(wx.BLACK,3,wx.SOLID)
-        self.WHITEPEN = wx.Pen(wx.WHITE,3,wx.SOLID)
-        self.MAGPEN = wx.Pen( (255,0,255),3,wx.SOLID)
-        self.REDPEN = wx.Pen(wx.RED,3,wx.SOLID)
-        self.GRNPEN = wx.Pen(wx.Color(0,255,0,255),3,wx.SOLID)
-        self.BLUPEN = wx.Pen(wx.BLUE,3,wx.SOLID)
-        self.YLWPEN = wx.Pen('Yellow',3,wx.SOLID)
-        self.GRAYPEN  = wx.Pen(wx.Color(75,75,75,255),3,wx.SOLID)
+        self.BLKPEN = wx.Pen(wx.BLACK,3,wx.PENSTYLE_SOLID)
+        self.WHITEPEN = wx.Pen(wx.WHITE,3,wx.PENSTYLE_SOLID)
+        self.MAGPEN = wx.Pen( wx.Colour(255,0,255),3,wx.PENSTYLE_SOLID)
+        self.REDPEN = wx.Pen(wx.RED,3,wx.PENSTYLE_SOLID)
+        self.GRNPEN = wx.Pen(wx.Colour(0,255,0,255),3,wx.PENSTYLE_SOLID)
+        self.BLUPEN = wx.Pen(wx.BLUE,3,wx.PENSTYLE_SOLID)
+        self.YLWPEN = wx.Pen('Yellow',3,wx.PENSTYLE_SOLID)
+        self.GRAYPEN  = wx.Pen(wx.Colour(75,75,75,255),3,wx.PENSTYLE_SOLID)
         
         # Create brushes for this class
         self.WHTBRSH_TRANS = wx.Brush(wx.WHITE,wx.TRANSPARENT)
-        self.MAGENTABRSH = wx.Brush( (255,0,255),wx.SOLID)
-        self.REDBRSH = wx.Brush(wx.RED,wx.SOLID)
-        self.GREENBRSH = wx.Brush(wx.Color(0,255,0,255),wx.SOLID)
-        self.BLUEBRSH = wx.Brush(wx.BLUE,wx.SOLID)
-        self.YELLOWBRSH = wx.Brush('Yellow',wx.SOLID)
-        self.WHITEBRSH = wx.Brush(wx.WHITE,wx.SOLID)
-        self.GRAYBRSH  = wx.Brush(wx.Color(75,75,75,255),wx.SOLID)
+        self.MAGENTABRSH = wx.Brush( wx.Colour(255,0,255),wx.BRUSHSTYLE_SOLID)
+        self.REDBRSH = wx.Brush(wx.RED,wx.BRUSHSTYLE_SOLID)
+        self.GREENBRSH = wx.Brush(wx.Colour(0,255,0,255),wx.BRUSHSTYLE_SOLID)
+        self.BLUEBRSH = wx.Brush(wx.BLUE,wx.BRUSHSTYLE_SOLID)
+        self.YELLOWBRSH = wx.Brush('Yellow',wx.BRUSHSTYLE_SOLID)
+        self.WHITEBRSH = wx.Brush(wx.WHITE,wx.BRUSHSTYLE_SOLID)
+        self.GRAYBRSH  = wx.Brush(wx.Colour(75,75,75,255),wx.BRUSHSTYLE_SOLID)
         
         # Constants for transmission to the Arduino
         self.ARDMAG=63519
@@ -76,7 +76,7 @@ class CursorPanel(wx.Panel):
         # Make the cursor types for each button.
         
         # Cross (Serial command: 6,3)
-        self._cross = wx.EmptyBitmap(self._iconsize,self._iconsize)
+        self._cross = wx.Bitmap(self._iconsize,self._iconsize)
         crosspoints = [(12, 2, 12, 23), (2, 12, 23, 12)]
         dc = wx.MemoryDC()
         dc.SelectObject(self._cross)
@@ -90,7 +90,7 @@ class CursorPanel(wx.Panel):
         self._cursorpressed = self._crossButton
         
         # Open Square (Serial command: 6,1,1)
-        self._osquare = wx.EmptyBitmap(self._iconsize,self._iconsize)
+        self._osquare = wx.Bitmap(self._iconsize,self._iconsize)
         dc.SelectObject(self._osquare)
         dc.SetPen(self.GRAYPEN)
         dc.DrawRectangle(4,4,17,17)
@@ -99,7 +99,7 @@ class CursorPanel(wx.Panel):
         
         # Closed Square (Serial command: 6,0,1)
         
-        self._csquare = wx.EmptyBitmap(self._iconsize,self._iconsize)
+        self._csquare = wx.Bitmap(self._iconsize,self._iconsize)
         dc.SelectObject(self._csquare)
         dc.SetBrush(self.GRAYBRSH)
         dc.DrawRectangle(4,4,17,17)
@@ -107,7 +107,7 @@ class CursorPanel(wx.Panel):
         self._csquareButton = wx.BitmapButton(self,wx.ID_ANY,self._csquare,style=wx.BU_AUTODRAW, name='Closed Square')
         
         # Closed Circle (Serial command: 6,2,1)
-        self._circle = wx.EmptyBitmap(self._iconsize,self._iconsize)
+        self._circle = wx.Bitmap(self._iconsize,self._iconsize)
         dc.SelectObject(self._circle)
         dc.SetBrush(self.GRAYBRSH)
         dc.DrawCircle(12,12,9)
@@ -134,38 +134,38 @@ class CursorPanel(wx.Panel):
         self.buttonList = []
         
         # Magenta
-        magentaico = wx.EmptyBitmapRGBA(self._iconsize,self._iconsize,255,0,255,255)
-        magentaicodown = wx.EmptyBitmapRGBA(self._iconsize,self._iconsize,255,0,255,255)        
+        magentaico = wx.Bitmap.FromRGBA(self._iconsize,self._iconsize,255,0,255,255)
+        magentaicodown = wx.Bitmap.FromRGBA(self._iconsize,self._iconsize,255,0,255,255)        
         magButton  = wx.BitmapButton(self,wx.ID_ANY,magentaico,style=wx.BU_AUTODRAW, name='Magenta')
         magButton.SetBitmapDisabled(magentaicodown)
         self.buttonList.append(magButton)
         # Red
-        redico     = wx.EmptyBitmapRGBA(self._iconsize,self._iconsize,255,0,0,255)
-        redicodown     = wx.EmptyBitmapRGBA(self._iconsize,self._iconsize,255,0,0,255)
+        redico     = wx.Bitmap.FromRGBA(self._iconsize,self._iconsize,255,0,0,255)
+        redicodown     = wx.Bitmap.FromRGBA(self._iconsize,self._iconsize,255,0,0,255)
         redButton  = wx.BitmapButton(self,wx.ID_ANY,redico,style=wx.BU_AUTODRAW, name='Red')
         redButton.SetBitmapDisabled(redicodown)
         self.buttonList.append(redButton)
         # Yellow
-        yellowico  = wx.EmptyBitmapRGBA(self._iconsize,self._iconsize,255,255,0,255)
-        yellowicodown  = wx.EmptyBitmapRGBA(self._iconsize,self._iconsize,255,255,0,255)
+        yellowico  = wx.Bitmap.FromRGBA(self._iconsize,self._iconsize,255,255,0,255)
+        yellowicodown  = wx.Bitmap.FromRGBA(self._iconsize,self._iconsize,255,255,0,255)
         yelButton  = wx.BitmapButton(self,wx.ID_ANY,yellowico,style=wx.BU_AUTODRAW, name='Yellow')
         yelButton.SetBitmapDisabled(yellowicodown)
         self.buttonList.append(yelButton)
         # Green
-        greenico   = wx.EmptyBitmapRGBA(self._iconsize,self._iconsize,0,255,0,255)
-        greenicodown   = wx.EmptyBitmapRGBA(self._iconsize,self._iconsize,0,255,0,255)
+        greenico   = wx.Bitmap.FromRGBA(self._iconsize,self._iconsize,0,255,0,255)
+        greenicodown   = wx.Bitmap.FromRGBA(self._iconsize,self._iconsize,0,255,0,255)
         grnButton  = wx.BitmapButton(self,wx.ID_ANY,greenico,style=wx.BU_AUTODRAW, name='Green')
         grnButton.SetBitmapDisabled(greenicodown)
         self.buttonList.append(grnButton)        
         # Blue
-        blueico    = wx.EmptyBitmapRGBA(self._iconsize,self._iconsize,0,0,255,255)
-        blueicodown    = wx.EmptyBitmapRGBA(self._iconsize,self._iconsize,0,0,255,255)
+        blueico    = wx.Bitmap.FromRGBA(self._iconsize,self._iconsize,0,0,255,255)
+        blueicodown    = wx.Bitmap.FromRGBA(self._iconsize,self._iconsize,0,0,255,255)
         bluButton  = wx.BitmapButton(self,wx.ID_ANY,blueico,style=wx.BU_AUTODRAW, name='Blue')
         bluButton.SetBitmapDisabled(blueicodown)
         self.buttonList.append(bluButton)
         # White
-        whiteico   = wx.EmptyBitmapRGBA(self._iconsize,self._iconsize,255,255,255,255)
-        whiteicodown   = wx.EmptyBitmapRGBA(self._iconsize,self._iconsize,255,255,255,255)
+        whiteico   = wx.Bitmap.FromRGBA(self._iconsize,self._iconsize,255,255,255,255)
+        whiteicodown   = wx.Bitmap.FromRGBA(self._iconsize,self._iconsize,255,255,255,255)
         
         whtButton  = wx.BitmapButton(self,wx.ID_ANY,whiteico,style=wx.BU_AUTODRAW, name='White')
         whtButton.SetBitmapDisabled(whiteicodown)
@@ -204,7 +204,7 @@ class CursorPanel(wx.Panel):
     
     def RedrawCursors(self):
         
-        self._cross = wx.EmptyBitmap(self._iconsize,self._iconsize)
+        self._cross = wx.Bitmap(self._iconsize,self._iconsize)
         crosspoints = [(12, 2, 12, 23), (2, 12, 23, 12)]
         dc = wx.MemoryDC()
         dc.SelectObject(self._cross)
@@ -219,7 +219,7 @@ class CursorPanel(wx.Panel):
         self._crossButton.SetBitmapLabel(self._cross)
                 
         # Open Square
-        self._osquare = wx.EmptyBitmap(self._iconsize,self._iconsize)
+        self._osquare = wx.Bitmap(self._iconsize,self._iconsize)
         dc.SelectObject(self._osquare)
         if self._cursorpressed is self._osquareButton:
             dc.SetPen(self._curpencolor)
@@ -230,7 +230,7 @@ class CursorPanel(wx.Panel):
         self._osquareButton.SetBitmapLabel(self._osquare)
         
         # Closed Square
-        self._csquare = wx.EmptyBitmap(self._iconsize,self._iconsize)
+        self._csquare = wx.Bitmap(self._iconsize,self._iconsize)
         dc.SelectObject(self._csquare)
         if self._cursorpressed is self._csquareButton:
             dc.SetBrush(self._curbrshcolor)
@@ -244,7 +244,7 @@ class CursorPanel(wx.Panel):
         self._csquareButton.SetBitmapLabel(self._csquare)
         
         # Closed Circle
-        self._circle = wx.EmptyBitmap(self._iconsize,self._iconsize)
+        self._circle = wx.Bitmap(self._iconsize,self._iconsize)
         dc.SelectObject(self._circle)
         if self._cursorpressed is self._circleButton:
             dc.SetBrush(self._curbrshcolor)

@@ -3,8 +3,6 @@ import os
 import wx
 import math
 import wx.lib.agw.floatspin as FS
-import cPickle as pickle
-import string
 
 from time import sleep
 from ViewPane import ViewPane
@@ -114,26 +112,26 @@ class wxFixationFrame(wx.Frame):
         self.viewpane=ViewPane(self.imagespace,size=(513,513))
         
         # Create left label
-        ltext=wx.Font(13, wx.SWISS,wx.NORMAL,wx.BOLD,False)
+        ltext=wx.Font(13, wx.FONTFAMILY_SWISS,wx.FONTSTYLE_NORMAL,wx.FONTWEIGHT_BOLD,False)
         left_text='\n\nN\na\ns\na\nl'
         self.l_text=wx.StaticText(self.imagespace,wx.ID_ANY,left_text,style=wx.ALIGN_CENTER)
         self.l_text.SetForegroundColour('white')
         self.l_text.SetFont(ltext)
 
         # Create top label
-        stext=wx.Font(13, wx.SWISS, wx.NORMAL, wx.BOLD, False)
+        stext=wx.Font(13, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, False)
         superior=wx.StaticText(self.imagespace,wx.ID_ANY,'Superior',style=wx.ALIGN_CENTER)
         superior.SetForegroundColour('white')
         superior.SetFont(stext)
         
         # Create bottom label
-        stext=wx.Font(13, wx.SWISS, wx.NORMAL, wx.BOLD, False)
+        stext=wx.Font(13, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, False)
         inferior=wx.StaticText(self.imagespace,wx.ID_ANY,'Inferior',style=wx.ALIGN_CENTER)
         inferior.SetForegroundColour('white')
         inferior.SetFont(stext)
         
         # Create right label
-        rtext=wx.Font(13, wx.SWISS,wx.NORMAL,wx.BOLD,False)
+        rtext=wx.Font(13, wx.FONTFAMILY_SWISS,wx.FONTSTYLE_NORMAL,wx.FONTWEIGHT_BOLD,False)
         right_text='T\ne\nm\np\no\nr\na\nl'
         self.r_text=wx.StaticText(self.imagespace,wx.ID_ANY,right_text,style=wx.ALIGN_CENTER)
         self.r_text.SetForegroundColour('white')
@@ -220,7 +218,7 @@ class wxFixationFrame(wx.Frame):
         self.saveon=self.saveMenu.AppendRadioItem(self.id_save_on,'On')
         self.saveon.Check(True)
         self.Bind(wx.EVT_MENU,self.OnSavePress,self.saveon)
-        fileMenu.AppendMenu(wx.ID_ANY,'Save On Record',self.saveMenu)
+        fileMenu.Append(wx.ID_ANY,'Save On Record',self.saveMenu)
         
 #         self.Bind(wx.EVT_MENU,sel)
         fileMenu.AppendSeparator()
@@ -237,21 +235,21 @@ class wxFixationFrame(wx.Frame):
         self.Bind(wx.EVT_MENU,self.OnFillPress,self.off_fill)
         self.on_fill=self.fillMenu.AppendRadioItem(self.id_on_fill,'On')
         self.Bind(wx.EVT_MENU,self.OnFillPress,self.on_fill)
-        alignmentMenu.AppendMenu(wx.ID_ANY,'Fill Screen',self.fillMenu)
+        alignmentMenu.Append(wx.ID_ANY,'Fill Screen',self.fillMenu)
         # Alignment
         self.alignMenu=wx.Menu()
         self.off_align=self.alignMenu.AppendRadioItem(self.id_off_align,'Off')
         self.Bind(wx.EVT_MENU,self.OnAlignPress,self.off_align)
         self.on_align=self.alignMenu.AppendRadioItem(self.id_on_align,'On')
         self.Bind(wx.EVT_MENU,self.OnAlignPress,self.on_align)
-        alignmentMenu.AppendMenu(wx.ID_ANY,'Alignment',self.alignMenu)
+        alignmentMenu.Append(wx.ID_ANY,'Alignment',self.alignMenu)
         # Grid
         self.gridMenu=wx.Menu()
         self.off_grid=self.gridMenu.AppendRadioItem(self.id_off_grid,'Off')
         self.Bind(wx.EVT_MENU,self.OnGridPress,self.off_grid)
         self.on_grid=self.gridMenu.AppendRadioItem(self.id_on_grid,'On')
         self.Bind(wx.EVT_MENU,self.OnGridPress,self.on_grid)
-        alignmentMenu.AppendMenu(wx.ID_ANY,'Grid',self.gridMenu)
+        alignmentMenu.Append(wx.ID_ANY,'Grid',self.gridMenu)
                 
         # Compounds the Menu Bar
         self.SetMenuBar(menubar)
@@ -407,15 +405,20 @@ class wxFixationFrame(wx.Frame):
     def OnSaveProtocolLoc(self, evt):
         
         #If it doesn't exist, then prompt for the location before continuing...
-        dialog=wx.FileDialog(self,'Save Location List As:',"","",'CSV (Comma delimited)|*.csv',wx.SAVE|wx.FD_OVERWRITE_PROMPT)
+        dialog=wx.FileDialog(self,'Save Location List As:',"","",'CSV (Comma delimited)|*.csv',wx.SAVE)
         if dialog.ShowModal()==wx.ID_OK:
             self._locationpath=dialog.GetDirectory()
             self._locationfname=dialog.GetFilename()
             dialog.Destroy()
-            
-            self._locfileobj = open(self._locationpath + os.sep + self._locationfname,'w') # Write the header
-            self._locfileobj.write("Eye,Horizontal Location,Vertical Location,Horizontal FOV,Vertical FOV\n")        
-            self._locfileobj.close()    
+
+            if os.path.isfile(self._locationpath + os.sep + self._locationfname):
+                md=wx.MessageDialog(self, "Protocol already exists!", "Protocol already exists! Overwrite?",wx.ICON_QUESTION|wx.YES_NO|wx.CANCEL)
+                md.ShowModal()
+
+
+                self._locfileobj = open(self._locationpath + os.sep + self._locationfname,'w') # Write the header
+                self._locfileobj.write("Eye,Horizontal Location,Vertical Location,Horizontal FOV,Vertical FOV\n")
+                self._locfileobj.close()
 
     def OnOpenProtocol(self, evt):
         dialog=wx.FileDialog(self,'Select protocol file:',self.header_dir,'',

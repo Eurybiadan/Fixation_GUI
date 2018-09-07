@@ -83,7 +83,7 @@ class ControlPanel(wx.Panel):
         self._cursorpane = paneWidgets.CursorPanel(self,parent)
         
         sizer = wx.GridBagSizer()
-        sizer.AddGrowableCol(4)
+        sizer.AddGrowableCol(0, 4)
         """ Eye Selection Buttons """
         sizer.Add(eye_label, (0,0), (1,4), wx.EXPAND|wx.TOP,10)
         sizer.Add(oseyesizer,  (1,0), (1,1), wx.ALIGN_CENTER)
