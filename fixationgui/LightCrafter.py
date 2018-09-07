@@ -47,7 +47,7 @@ class LightCrafterCanvas(wx.Window):
         self._cursor=0
         self._center = wx.Point2D(size[0]/2,size[1]/2)
         self._location = wx.Point2D(self._center.x, self._center.y)
-        self._penColor = wx.Pen(wx.GREEN,1,wx.SOLID)
+        self._penColor = wx.Pen(wx.GREEN,3,wx.SOLID)
         self._brushColor = wx.Brush(wx.GREEN,wx.SOLID)
         self._fixsize = 5
 
@@ -110,7 +110,7 @@ class LightCrafterCanvas(wx.Window):
         elif self._cursor is 3:
             dc.SetBrush(self._brushColor)
             dc.DrawCircle(self._location.x,self._location.y, floor(self._fixsize/2))
-            
+
         del dc # need to get rid of the MemoryDC before Update() is called.
         self.Refresh(eraseBackground=False)
         self.Update()
