@@ -47,8 +47,9 @@ class LightCrafterCanvas(wx.Window):
         self._cursor=0
         self._center = wx.Point2D(size[0]/2,size[1]/2)
         self._location = wx.Point2D(self._center.x, self._center.y)
-        self._penColor = wx.Pen(wx.GREEN,3,wx.SOLID)
-        self._brushColor = wx.Brush(wx.GREEN,wx.SOLID)
+        self._penColor = wx.Pen(wx.GREEN, 3, wx.PENSTYLE_SOLID)
+        self._brushColor = wx.Brush(wx.GREEN, wx.BRUSHSTYLE_SOLID)
+
         self._fixsize = 5
 
         self.OnSize(None)
@@ -96,12 +97,14 @@ class LightCrafterCanvas(wx.Window):
         dc.DrawRectangle(0,0,*self.thisSize)
         
         dc.SetPen(self._penColor)
+        dc.SetBrush(self._brushColor)
         tlcx = self._location.x-(self._fixsize/2)
         tlcy = self._location.y-(self._fixsize/2)
-            
+
         # Draw the fixation shape
-        if self._cursor is 0:            
-            dc.CrossHair(self._location.x,self._location.y)            
+        if self._cursor is 0:
+            dc.DrawLine(0, self._location.y, self.thisSize.x, self._location.y)
+            dc.DrawLine(self._location.x, 0, self._location.x, self.thisSize.y)
         elif self._cursor is 1:
             dc.SetBrush(self._brushColor)
             dc.DrawRectangle(tlcx,tlcy,self._fixsize,self._fixsize)
