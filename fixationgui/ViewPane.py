@@ -44,18 +44,18 @@ class ViewPane(wx.Window):
         self.marked_loc=[]
 
         # Set up pens we'll use
-        self.BLKPEN = wx.Pen(wx.BLACK,1,wx.SOLID)
-        self.THINREDPEN = wx.Pen(wx.RED,1,wx.SOLID)
-        self.MEDREDPEN = wx.Pen(wx.RED,3,wx.SOLID)
-        self.MEDYELLOWPEN = wx.Pen('Yellow',2,wx.SOLID) 
-        self.WHTPEN = wx.Pen(wx.WHITE,1,wx.SOLID)
+        self.BLKPEN = wx.Pen(wx.BLACK,1,wx.PENSTYLE_SOLID)
+        self.THINORANGEPEN = wx.Pen((255, 79, 0), 1, wx.PENSTYLE_SOLID)
+        self.MEDORANGEPEN = wx.Pen((255, 79, 0), 3, wx.PENSTYLE_SOLID)
+        self.MEDCYANPEN = wx.Pen((0, 183, 235), 2, wx.PENSTYLE_SOLID)
+        self.WHTPEN = wx.Pen(wx.WHITE,1,wx.PENSTYLE_SOLID)
         
         # Set up brushes we'll use
         self.WHTBRSH_TRANS = wx.Brush(wx.WHITE,wx.TRANSPARENT)
-        self.GRYBRSH = wx.Brush((50,50,50),wx.SOLID)
+        self.GRYBRSH = wx.Brush((50,50,50),wx.BRUSHSTYLE_SOLID)
 
         # Set up font's we'll use
-        self.MSEFONT = wx.Font(11,wx.SWISS,wx.NORMAL,wx.BOLD,False)
+        self.MSEFONT = wx.Font(11,wx.SWISS,wx.FONTSTYLE_NORMAL,wx.FONTWEIGHT_BOLD,False)
 
         # Originally doesn't have an image background.
         self._hasbkgrd = False
@@ -355,7 +355,7 @@ class ViewPane(wx.Window):
         # Draw Row lines
         for rowNum in range(numRows + 1):
             if rowNum==5 or rowNum==10 or rowNum==20 or rowNum==25:
-                dc.SetPen(self.THINREDPEN)
+                dc.SetPen(self.THINORANGEPEN)
             else:
                 dc.SetPen(self.BLKPEN)
             dc.DrawLine(0,rowNum*cellHgt,width,rowNum*cellHgt)
@@ -363,20 +363,20 @@ class ViewPane(wx.Window):
         # Draw Column lines
         for colNum in range(numCols+1):
             if colNum==5 or colNum==10 or colNum==20 or colNum==25:
-                dc.SetPen(self.THINREDPEN)
+                dc.SetPen(self.THINORANGEPEN)
             else:
                 dc.SetPen(self.BLKPEN)
             dc.DrawLine(colNum*cellWid,0,colNum*cellWid,height)
         
         # Draws Center Lines
-        dc.SetPen(self.MEDREDPEN)
+        dc.SetPen(self.MEDORANGEPEN)
         dc.DrawLine(0,self._numgridlines/2*cellHgt,width,self._numgridlines/2*cellHgt)
         dc.DrawLine(self._numgridlines/2*cellWid,0,self._numgridlines/2*cellWid,height)
         
         # Draws Viewable Region Circle - use the graphics context because its actually
         # Got a bit of AA in it (can do floating point drawing)
         brush = gc.CreateBrush( self.WHTBRSH_TRANS ) 
-        pen   = gc.CreatePen( self.MEDYELLOWPEN )
+        pen   = gc.CreatePen(self.MEDCYANPEN)
         
         gc.SetBrush(brush)
         gc.SetPen(pen)
@@ -401,7 +401,7 @@ class ViewPane(wx.Window):
                 
         # Draws Current fixation box
         gc.SetBrush(wx.Brush(wx.WHITE,wx.TRANSPARENT))
-        gc.SetPen(wx.Pen(wx.RED,2,wx.SOLID))
+        gc.SetPen(wx.Pen(wx.WHITE,2,wx.SOLID))
         
 
         # Since the Window is fixed at 513x513, the "_center is the _center row/column of pixels at 256.5,256.5
