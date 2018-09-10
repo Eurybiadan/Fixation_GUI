@@ -123,7 +123,7 @@ class ProtocolPane(wx.Panel):
         self.list.DeleteAllItems()
 
     def UpdateProtocolList(self):
-        degree_sign= u'\N{DEGREE SIGN}'
+        degree_sign =  u'\N{DEGREE SIGN}'
 
         self.list.DeleteAllItems()
 
@@ -138,9 +138,9 @@ class ProtocolPane(wx.Panel):
                 remaincolor = round(item['num']*255.0/item['reqnum'])
             
             self.list.InsertStringItem( ind,    str(numremain))
-            self.list.SetStringItem(    ind, 1, str(item['fov'][0])+degree_sign+ 'x ' + str(item['fov'][1])+degree_sign)
-            self.list.SetStringItem(    ind, 2, item['eye'])
-            self.list.SetStringItem(    ind, 3, item['loc'][0] + ', ' + item['loc'][1] )
+            self.list.SetStringItem(ind, 1, str(item['fov'][0])+degree_sign+ 'x ' + str(item['fov'][1])+degree_sign)
+            self.list.SetStringItem(ind, 2, item['eye'])
+            self.list.SetStringItem(ind, 3, item['loc'][0] + ', ' + item['loc'][1] )
             self.list.SetItemBackgroundColour( ind, (remaincolor,remaincolor,remaincolor) )
 
     # This method updates the protocol based on an input set. If the input doesn't match any
