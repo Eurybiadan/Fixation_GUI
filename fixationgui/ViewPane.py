@@ -100,7 +100,7 @@ class ViewPane(wx.Window):
         self.marked_loc.append((self.hfov,self.vfov,self._fixLoc))
         self.Repaint()
 
-    def ClearLocations(self):
+    def clear_locations(self):
         self.marked_loc=[]
         self.Repaint()
 

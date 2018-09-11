@@ -146,17 +146,20 @@ class LocSpin( wx.lib.agw.floatspin.FloatSpin ):
             self._textctrl.DiscardEdits()
             self._value = value
             
-    def GetLabelValue(self):
+    def get_label_value(self):
         
         return self._textctrl.GetValue()
-            
-    def SetPosLabel(self,label):
+
+    def get_value(self):
+        return self._value
+
+    def set_positive_label(self, label):
         self._poslabel = label
     
-    def SetNegLabel(self,label):
+    def set_negative_label(self, label):
         self._neglabel = label
         
-    def FlipLabels(self):
+    def flip_labels(self):
         label=self._poslabel
         self._poslabel = self._neglabel
         self._neglabel = label

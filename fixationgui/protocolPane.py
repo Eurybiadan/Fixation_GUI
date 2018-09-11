@@ -11,143 +11,116 @@ import csv
 import re
 import string
 
-class ProtocolPane(wx.Panel):
-    def __init__(self,parent,id=-1,pos=wx.DefaultPosition,size=wx.DefaultSize,style=wx.SIMPLE_BORDER,name=''):
 
-        super(ProtocolPane,self).__init__(parent,id,pos,size,style,name)
+class ProtocolPane(wx.Panel):
+    def __init__(self, parent, id=-1, pos=wx.DefaultPosition, size=wx.DefaultSize, style=wx.SIMPLE_BORDER, name=''):
+
+        super(ProtocolPane, self).__init__(parent, id, pos, size, style, name)
         self.SetBackgroundColour('black')
 
         self.pattern = re.compile("[ntsiNTIS]")
-        
-        
-        self.list = wx.ListCtrl(self, style=wx.LC_REPORT,size=(270,-1))
+
+        self.list = wx.ListCtrl(self, style=wx.LC_REPORT, size=(285, -1))
         self.list.SetBackgroundColour('black')
-        self.list.SetTextColour((236,118,0))
-        self.list.InsertColumn(0, '# Remaining', format=wx.LIST_FORMAT_CENTER, width=80)
-        self.list.InsertColumn(1, 'FOV', format=wx.LIST_FORMAT_CENTER, width=60)
-        self.list.InsertColumn(2, 'Eye', format=wx.LIST_FORMAT_CENTER, width=30)
-        self.list.InsertColumn(3, 'Location', format=wx.LIST_FORMAT_CENTER, width=90)
+        self.list.SetTextColour((0, 183, 235))
+        self.list.InsertColumn(0, '# Aq', format=wx.LIST_FORMAT_CENTER, width=40)
+        self.list.InsertColumn(1, 'Location', format=wx.LIST_FORMAT_CENTER, width=80)
+        self.list.InsertColumn(2, 'FOV', format=wx.LIST_FORMAT_CENTER, width=75)
+        self.list.InsertColumn(3, 'Eye', format=wx.LIST_FORMAT_CENTER, width=30)
 
         vbox2 = wx.BoxSizer(wx.VERTICAL)
 
         vbox2.Add(self.list, 1)
-        
+
         self.SetSizer(vbox2)
         vbox2.SetSizeHints(self)
 
         # Initialize the data structure which will hold the protocol
         self._protocol = list()
 
-##        with open('R:\\Rob Cooper\\Fixation_GUI - Subprocess\\test_protocol.csv','rb') as csvfile:
-##            protoreader = csv.reader(csvfile, delimiter=',', quotechar='"')
-##
-##            for row in protoreader:
-##
-##                # Remove whatever non-number characters are around the value, and force the number to be float
-##                horzloc = row[4].replace(" ","")
-##                horzdir = self.pattern.findall(horzloc)
-##                horzloc = string.strip(horzloc, "ntsiNTIS")
-##                
-##                vertloc = row[5].replace(" ","")
-##                vertdir = self.pattern.findall(vertloc)
-##                vertloc = string.strip(vertloc, "ntsiNTIS")
-##
-##
-##                horzdir = ('' if not horzdir else horzdir[0])
-##                vertdir = ('' if not vertdir else vertdir[0])
-##
-##                try: # Attempt the conversion to float- if this fails, there are incorrect characters here!
-##                    horzloc = str(float(horzloc)) + horzdir           
-##                except ValueError: # HANDLE THIS ERROR
-##                    return
-##
-##                try: # If it is at 0,0, the user may not have set it to 0.0- so convert it to that for comparison
-##                    vertloc = str(float(vertloc)) + vertdir
-##                except ValueError:
-##                    return
-##
-##                self._protocol.append(dict( num=int(0),
-##                                            reqnum=int(row[0]),
-##                                            fov=( float( row[1].replace(" ","") ) , # Make sure to strip any spaces the user put in...
-##                                                  float( row[2].replace(" ","") ) ),
-##                                            eye=row[3],
-##                                            loc=(horzloc, vertloc) ))
-##                
-##        self.UpdateProtocolList()
+    def load_protocol(self, path):
+        with open(path, 'r') as csvfile:
+            header = next(csvfile, None)
+            header = header.split(',')
 
-    def LoadProtocol(self, path):
-        with open(path,'rb') as csvfile:
             protoreader = csv.reader(csvfile, delimiter=',', quotechar='"')
 
-            for row in protoreader:
+            if header[0].strip() == "v0.1":
+                for row in protoreader:
+                    exists = False
+                    num_aq = 0
+                    try: # Attempt the conversion to direction- if this fails, there are incorrect characters here!
+                        if float(row[1]) > 0:
+                            if row[5] == "OD":
+                                horzloc = str(float(row[1])) + " T"
+                            else:
+                                horzloc = str(float(row[1])) + " N"
+                        elif float(row[1]) < 0:
+                            if row[5] == "OD":
+                                horzloc = str(float(row[1])) + " N"
+                            else:
+                                horzloc = str(float(row[1])) + " T"
+                        else:
+                            horzloc = str(float(row[1]))
 
-                # Remove whatever non-number characters are around the value, and force the number to be float
-                horzloc = row[4].replace(" ","")
-                horzdir = self.pattern.findall(horzloc)
-                horzloc = string.strip(horzloc, "ntsiNTIS")
-                
-                vertloc = row[5].replace(" ","")
-                vertdir = self.pattern.findall(vertloc)
-                vertloc = string.strip(vertloc, "ntsiNTIS")
+                        if float(row[2]) > 0:
+                            vertloc = str(float(row[2])) + " S"
+                        elif float(row[2]) < 0:
+                            vertloc = str(float(row[2])) + " I"
+                        else:
+                            vertloc = str(float(row[2]))
 
+                    except ValueError:
+                        return
 
-                horzdir = ('' if not horzdir else horzdir[0])
-                vertdir = ('' if not vertdir else vertdir[0])
+                    newentry = dict(loc=(horzloc, vertloc),
+                                    fov=(row[3], row[4]),
+                                    eye=row[5],
+                                    num_obtained=int(0))
 
-                try: # Attempt the conversion to float- if this fails, there are incorrect characters here!
-                    horzloc = str(float(horzloc)) + horzdir           
-                except ValueError: # HANDLE THIS ERROR
-                    return
+                    for entry in self._protocol:
+                        if entry['fov'] == newentry['fov'] and \
+                           entry['eye'] == newentry['eye'] and \
+                           entry['loc'] == newentry['loc']:
 
-                try: # If it is at 0,0, the user may not have set it to 0.0- so convert it to that for comparison
-                    vertloc = str(float(vertloc)) + vertdir
-                except ValueError:
-                    return
+                            exists = True
+                            break
 
-                self._protocol.append(dict( num=int(0),
-                                            reqnum=int(row[0]),
-                                            fov=( float( row[1].replace(" ","") ) , # Make sure to strip any spaces the user put in...
-                                                  float( row[2].replace(" ","") ) ),
-                                            eye=row[3],
-                                            loc=(horzloc, vertloc) ))
-            self.UpdateProtocolList()
-        
+                    if not exists:
+                        self._protocol.append(newentry)
 
-    def SetProtocol(self, newproto):
-        
+            self.update_protocol_list()
+
+    def set_protocol(self, newproto):
+
         self._protocol = newproto
         self.list.UpdateProtocolList()
 
-    def ClearProtocol(self):
+    def is_protocol_empty(self):
+        return not self._protocol
+
+    def clear_protocol(self):
         self._protocol = []
         self.list.DeleteAllItems()
 
-    def UpdateProtocolList(self):
-        degree_sign =  u'\N{DEGREE SIGN}'
-
-        self.list.DeleteAllItems()
+    def update_protocol_list(self):
+        degree_sign = u'\N{DEGREE SIGN}'
 
         for item in self._protocol:
-            
+
             ind = self.list.GetItemCount()
-            numremain = item['reqnum']-item['num']
-##            print item
-            if numremain < 0:
-                remaincolor = round(255.0)
-            else:
-                remaincolor = round(item['num']*255.0/item['reqnum'])
-            
-            self.list.InsertStringItem( ind,    str(numremain))
-            self.list.SetStringItem(ind, 1, str(item['fov'][0])+degree_sign+ 'x ' + str(item['fov'][1])+degree_sign)
-            self.list.SetStringItem(ind, 2, item['eye'])
-            self.list.SetStringItem(ind, 3, item['loc'][0] + ', ' + item['loc'][1] )
-            self.list.SetItemBackgroundColour( ind, (remaincolor,remaincolor,remaincolor) )
+
+            self.list.InsertItem(ind, str(item['num_obtained']))
+            self.list.SetItem(ind, 1, item['loc'][0] + ', ' + item['loc'][1])
+            self.list.SetItem(ind, 2, str(item['fov'][0]) + degree_sign + 'x ' + str(item['fov'][1]) + degree_sign)
+            self.list.SetItem(ind, 3, item['eye'])
+            self.list.SetItemBackgroundColour(ind, (255, 79, 0))
 
     # This method updates the protocol based on an input set. If the input doesn't match any
     # of the currently loaded protocol, add the new location/settings to the list.
-    def UpdateProtocol(self, location, eyesign, curfov):
+    def update_protocol(self, location, eyesign, curfov):
 
-        existed = False
+        exist = False
 
         if eyesign == -1:
             seleye = "OS"
@@ -155,17 +128,17 @@ class ProtocolPane(wx.Panel):
             seleye = "OD"
 
         # Condition the location a little bit
-        location = (location[0].replace(" ",""), location[1].replace(" ",""))
+        location = (location[0].replace(" ", ""), location[1].replace(" ", ""))
 
         for item in self._protocol:
 
             if item['fov'] == curfov and item['eye'] == seleye and item['loc'] == location:
-
                 item['num'] += 1
-                existed = True
+                exist = True
                 break
 
-        if not existed:   
-            self._protocol.append(dict( num=1,reqnum=int(0), fov=(curfov[0],curfov[1]), eye=seleye, loc=location ) )
+        if not exist:
+            self._protocol.append(dict(num=1, num_obtained=int(0),
+                                       fov=(curfov[0], curfov[1]), eye=seleye, loc=location))
 
-        self.UpdateProtocolList()
+        self.update_protocol_list()

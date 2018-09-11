@@ -267,41 +267,41 @@ class CursorPanel(wx.Panel):
                 if button.GetName() == "Magenta": # Magenta is 63519
                     self._curpencolor  = self.MAGPEN
                     self._curbrshcolor = self.MAGENTABRSH
-                    self._rootparent.UpdateColor(self._curpencolor, self._curbrshcolor)
+                    self._rootparent.update_fixation_color(self._curpencolor, self._curbrshcolor)
                 elif button.GetName() == "Red": # Red is 63488
                     self._curpencolor  = self.REDPEN
                     self._curbrshcolor = self.REDBRSH
-                    self._rootparent.UpdateColor(self._curpencolor, self._curbrshcolor)
+                    self._rootparent.update_fixation_color(self._curpencolor, self._curbrshcolor)
                 elif button.GetName() == "Yellow": # Yellow is 65504
                     self._curpencolor  = self.YLWPEN
                     self._curbrshcolor = self.YELLOWBRSH
-                    self._rootparent.UpdateColor(self._curpencolor, self._curbrshcolor)
+                    self._rootparent.update_fixation_color(self._curpencolor, self._curbrshcolor)
                 elif button.GetName() == "Green": # Green is 2016
                     self._curpencolor  = self.GRNPEN
                     self._curbrshcolor = self.GREENBRSH
-                    self._rootparent.UpdateColor(self._curpencolor, self._curbrshcolor)
+                    self._rootparent.update_fixation_color(self._curpencolor, self._curbrshcolor)
                 elif button.GetName() == "Blue": # Blue is 2047
                     self._curpencolor  = self.BLUPEN
                     self._curbrshcolor = self.BLUEBRSH
-                    self._rootparent.UpdateColor(self._curpencolor, self._curbrshcolor)
+                    self._rootparent.update_fixation_color(self._curpencolor, self._curbrshcolor)
                 elif button.GetName() == "White": # White is 65535
                     self._curpencolor  = self.WHITEPEN
                     self._curbrshcolor = self.WHITEBRSH
-                    self._rootparent.UpdateColor(self._curpencolor, self._curbrshcolor)
+                    self._rootparent.update_fixation_color(self._curpencolor, self._curbrshcolor)
                 break 
         
         
         if pressed is self._crossButton:
-            self._rootparent.UpdateCursor(self.CROSS)
+            self._rootparent.update_fixation_cursor(self.CROSS)
             self._cursorpressed = self._crossButton
         elif pressed is self._osquareButton:
-            self._rootparent.UpdateCursor(self.SQOPEN)
+            self._rootparent.update_fixation_cursor(self.SQOPEN)
             self._cursorpressed = self._osquareButton
         elif pressed is self._csquareButton:
-            self._rootparent.UpdateCursor(self.SQCLOSE)
+            self._rootparent.update_fixation_cursor(self.SQCLOSE)
             self._cursorpressed = self._csquareButton
         elif pressed is self._circleButton:
-            self._rootparent.UpdateCursor(self.CIRCLE)
+            self._rootparent.update_fixation_cursor(self.CIRCLE)
             self._cursorpressed = self._circleButton
 
         self.RedrawCursors()
@@ -310,7 +310,7 @@ class CursorPanel(wx.Panel):
         
         obj = evt.GetEventObject()
         val = obj.GetValue()
-        self._rootparent.UpdateCursorSize(val)
+        self._rootparent.update_fixation_cursor_size(val)
         
 class ImInitPanel(wx.Panel):
     '''

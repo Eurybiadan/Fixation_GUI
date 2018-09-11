@@ -48,7 +48,7 @@ class wxFixationFrame(wx.Frame):
         self.SaveLoc = True
 
         # Allows Exit Button to Close Serial Communication
-        self.Bind(wx.EVT_CLOSE, self.OnQuit)
+        self.Bind(wx.EVT_CLOSE, self.on_quit)
 
         # Allows For Arrow Keys And Keys In General
         self.Bind(wx.EVT_CHAR_HOOK, self.on_keyboard_press)
@@ -73,7 +73,7 @@ class wxFixationFrame(wx.Frame):
         horzsizer.Add(self.imagespace, proportion=0, flag=wx.ALIGN_CENTER | wx.EXPAND)
         horzsizer.Add(self.control, proportion=0, flag=wx.ALIGN_RIGHT | wx.EXPAND)
 
-        self.initMenu()
+        self.init_menubar()
 
         # Displays Main Panel
         self.SetSizerAndFit(horzsizer)
@@ -92,9 +92,9 @@ class wxFixationFrame(wx.Frame):
             except:
                 pass
             # Spawn the pair of listener threads so we can detect changes in the comm Queues passed by Savior
-            self.fovListener = QueueListener(fovQueue, self.SetFOV)  # This will recieve a tuple of sizes
+            self.fovListener = QueueListener(fovQueue, self.set_FOV)  # This will recieve a tuple of sizes
             self.fovListener.start()
-            self.captListener = QueueListener(captureQueue, self.MarkLocation)  # This will recieve a simple 1 value
+            self.captListener = QueueListener(captureQueue, self.mark_location)  # This will recieve a simple 1 value
             self.captListener.start()
 
     def initViewPane(self, parent):
@@ -154,11 +154,11 @@ class wxFixationFrame(wx.Frame):
         self.control = ControlPanel(parent, id=wx.ID_ANY)
 
         # Bind all the events to the control panel
-        self.control.vertcontrol.Bind(FS.EVT_FLOATSPIN, self.OnVertSpin)
-        self.control.horzcontrol.Bind(FS.EVT_FLOATSPIN, self.OnHorzSpin)
+        self.control.vertcontrol.Bind(FS.EVT_FLOATSPIN, self.on_vert_spin)
+        self.control.horzcontrol.Bind(FS.EVT_FLOATSPIN, self.on_horz_spin)
 
-        self.control.OS.Bind(wx.EVT_RADIOBUTTON, self.OnEyeSelect)
-        self.control.OD.Bind(wx.EVT_RADIOBUTTON, self.OnEyeSelect)
+        self.control.OS.Bind(wx.EVT_RADIOBUTTON, self.on_eye_select)
+        self.control.OD.Bind(wx.EVT_RADIOBUTTON, self.on_eye_select)
 
         self.control._iminitpane.selectim.Bind(wx.EVT_BUTTON, self.on_button_press)
         self.control._iminitpane.initalign.Bind(wx.EVT_BUTTON, self.on_button_press)
@@ -167,7 +167,7 @@ class wxFixationFrame(wx.Frame):
         self.control.resetlocs.Bind(wx.EVT_BUTTON, self.on_button_press)
 
     # Menu Bar
-    def initMenu(self):
+    def init_menubar(self):
 
         # System Alignment Options
         self.id_rec_ser = 10001
@@ -203,7 +203,7 @@ class wxFixationFrame(wx.Frame):
         #         self.Bind(wx.EVT_MENU,sel)
         fileMenu.AppendSeparator()
         fileMenu.Append(wx.ID_EXIT, 'Exit\tCtrl+Q')
-        self.Bind(wx.EVT_MENU, self.OnQuit, id=wx.ID_EXIT)
+        self.Bind(wx.EVT_MENU, self.on_quit, id=wx.ID_EXIT)
 
         # Open a background image
         alignmentMenu.Append(wx.ID_OPEN, 'Open Background Image...\tCtrl+B')
@@ -317,7 +317,7 @@ class wxFixationFrame(wx.Frame):
             self.control.SetState(state)
             self.viewpane.SetState(state)
         elif button is self.control.resetlocs:
-            self.viewpane.ClearLocations()
+            self.viewpane.clear_locations()
             self._locationfname = None
 
         elif button is self.control.anchorbut:
@@ -330,7 +330,7 @@ class wxFixationFrame(wx.Frame):
             # self._intercept = self._intercept+offset
 
             # self._intercept = wx.Point(round(self._intercept.x), round(self._intercept.y))
-            self.LCCanvas.SetFixationCenter(offset)
+            self.LCCanvas.set_fixation_centerpoint(offset)
             self.update_fixation_location(wx.Point2D(0, 0))  # With the new intercept chosen, snap to that center
 
 
@@ -354,7 +354,7 @@ class wxFixationFrame(wx.Frame):
 
         x, y = self.degrees_to_screenpix(degrees.x, degrees.y)
 
-        self.LCCanvas.SetFixationLocation(wx.Point2D(x, y))
+        self.LCCanvas.set_fixation_location(wx.Point2D(x, y))
 
     def set_vertical_fov(self, degrees):
         self.viewpane.SetVFOV(degrees)
@@ -362,7 +362,7 @@ class wxFixationFrame(wx.Frame):
     def set_horizontal_fov(self, degrees):
         self.viewpane.SetHFOV(degrees)
 
-    def on_set_save_protocol_location(self, evt):
+    def on_set_save_protocol_location(self, evt=None):
 
         # If it doesn't exist, then prompt for the location before continuing...
         dialog = wx.FileDialog(self, 'Save Location List As:', "", "", 'CSV (Comma delimited)|*.csv', wx.SAVE)
@@ -371,16 +371,18 @@ class wxFixationFrame(wx.Frame):
             self._locationfname = dialog.GetFilename()
             dialog.Destroy()
 
+            result = wx.ID_YES
             if os.path.isfile(self._locationpath + os.sep + self._locationfname):
-                md = wx.MessageDialog(self, "Protocol already exists!", "Protocol already exists! Overwrite?",
+                md = wx.MessageDialog(self, "Protocol file already exists!", "Protocol file already exists! Overwrite?",
                                       wx.ICON_QUESTION | wx.YES_NO | wx.CANCEL)
-                md.ShowModal()
+                result = md.ShowModal()
 
+            if result == wx.ID_YES:
                 self._locfileobj = open(self._locationpath + os.sep + self._locationfname, 'w')  # Write the header
-                self._locfileobj.write("Eye,Horizontal Location,Vertical Location,Horizontal FOV,Vertical FOV\n")
+                self._locfileobj.write("v0.1,Horizontal Location,Vertical Location,Horizontal FOV,Vertical FOV,Eye\n")
                 self._locfileobj.close()
 
-    def on_open_protocol_file(self, evt):
+    def on_open_protocol_file(self, evt=None):
         dialog = wx.FileDialog(self, 'Select protocol file:', self.header_dir, '',
                                'CSV files (*.csv)|*.csv', wx.FD_OPEN)
 
@@ -390,20 +392,33 @@ class wxFixationFrame(wx.Frame):
             dialog.Destroy()
 
             protopath = self.header_dir + os.sep + protofname
-            self.protocolpane.LoadProtocol(protopath)
 
-    ##        self.UpdateProtocol(self.vert_loc,self.horz_loc)
+            result = wx.ID_NO
+            if not self.protocolpane.is_protocol_empty():
+                md = wx.MessageDialog(self, "Protocol already exists! Overwrite or Append to existing protocol?",
+                                      "Protocol already exists!", wx.ICON_QUESTION | wx.YES_NO | wx.CANCEL)
+                md.SetYesNoCancelLabels("Overwrite", "Append", "Cancel")
+                result = md.ShowModal()
 
-    def on_clear_protocol(self, evt):
+            if result == wx.ID_YES:
+                self.protocolpane.clear_protocol()
+                self.viewpane.clear_locations()
+                self.protocolpane.load_protocol(protopath)
+            elif result == wx.ID_NO:
+                self.protocolpane.load_protocol(protopath)
+
+    ##        self.update_protocol(self.vert_loc,self.horz_loc)
+
+    def on_clear_protocol(self, evt=None):
         dlg = wx.MessageDialog(None, 'Are you sure you want to clear the protocol?', 'Clear Protocol',
                                wx.YES_NO | wx.ICON_QUESTION)
         result = dlg.ShowModal()
         if result == wx.ID_YES:
-            self.protocolpane.ClearProtocol()
-            self.viewpane.ClearLocations()
+            self.protocolpane.clear_protocol()
+            self.viewpane.clear_locations()
             self._locationfname = None
 
-    def on_open_background_image(self, evt):
+    def on_open_background_image(self, evt=None):
         dialog = wx.FileDialog(self, 'Select background image:', self.header_dir, self.filename,
                                'Image files (*.jpg,*.jpeg,*.bmp,*.png,*.tif,*.tiff)| *.jpg;*.jpeg;*.bmp;*.png;*.tif;*.tiff|' +
                                'JP(E)G images (*.jpg,*.jpeg)|*.jpg;*.jpeg|BMP images (*.bmp)|*.bmp' +
@@ -490,94 +505,81 @@ class wxFixationFrame(wx.Frame):
         else:
             event.Skip()
 
-    def OnEyeSelect(self, event):
-        # Changes Cursor And Location Names Based On OnEyeSelect Selected cursor
+    def on_eye_select(self, event):
+        # Changes Cursor And Location Names Based On on_eye_select Selected cursor
         state = str(self.control.OS.GetValue())
         if state == 'True':  # If it is OS, eyesign is -1
             self._eyesign = -1
             self.r_text.SetLabel('T\ne\nm\np\no\nr\na\nl')
             self.l_text.SetLabel(' \n \nN\na\ns\na\nl\n \n')
-            self.control.horzcontrol.FlipLabels()
+            self.control.horzcontrol.flip_labels()
             self.update_fixation_location()
         elif state == 'False':  # If it is OD, eyesign is 1
             self._eyesign = 1
             self.r_text.SetLabel(' \n \nN\na\ns\na\nl\n \n')
             self.l_text.SetLabel('T\ne\nm\np\no\nr\na\nl')
-            self.control.horzcontrol.FlipLabels()
+            self.control.horzcontrol.flip_labels()
             self.update_fixation_location()
 
-    def OnVertSpin(self, event):
+    def on_vert_spin(self, event):
         # Entering a vertical location value using the subclass
         y_ent = self.control.vertcontrol.GetValue()
         self.vert_loc = round(float(y_ent), 2)
         self.update_fixation_location()
 
-    def OnHorzSpin(self, event):
+    def on_horz_spin(self, event):
         # Entering a horizontal location value using the subclass
         x_ent = self.control.horzcontrol.GetValue()
-        self.horz_loc = round(float(x_ent), 1)
+        self.horz_loc = round(float(x_ent), 2)
         self.update_fixation_location()
 
-    def MarkLocation(self, data):
+    def mark_location(self, data):
 
         # "Poison pill" shutdown of the Fixation GUI.
         if data == -1:
-            self.OnQuit(wx.EVT_CLOSE)
+            self.on_quit(wx.EVT_CLOSE)
             return
 
         # Marks the current lcoation of the fixation target, and dumps it to a file
         self.viewpane.MarkLocation()
-        self.UpdateProtocol(self.control.horzcontrol.GetLabelValue(), self.control.vertcontrol.GetLabelValue())
-        self.SaveLocation(self.control.horzcontrol.GetLabelValue(), self.control.vertcontrol.GetLabelValue())
+        self.update_protocol(self.control.horzcontrol.get_label_value(), self.control.vertcontrol.get_label_value())
+        self.save_location(self.control.horzcontrol.get_value(), self.control.vertcontrol.get_value())
 
-    def SetFOV(self, fov):
-
+    def set_FOV(self, fov):
         if fov != -1:
             self.viewpane.SetFOV(fov)
 
-    def UpdateColor(self, penColor, brushColor):
+    def update_fixation_color(self, penColor, brushColor):
         # This method allows the user to change the color on the LightCrafter DLP.
-        self.LCCanvas.SetFixationColor(penColor, brushColor)
+        self.LCCanvas.set_fixation_color(penColor, brushColor)
 
-    def UpdateCursor(self, cursor):
+    def update_fixation_cursor(self, cursor):
         # This method allows the user to change the cursor type on the LightCrafter DLP.
-        self.LCCanvas.SetFixationCursor(cursor)
+        self.LCCanvas.set_fixation_cursor(cursor)
 
-    def UpdateCursorSize(self, size):
+    def update_fixation_cursor_size(self, size):
         # This method allows the user to change the cursor size on the LightCrafter DLP.
-        self.LCCanvas.SetFixationSize(size)
+        self.LCCanvas.set_fixation_size(size)
 
-    def ResetFixLoc(self, event):
+    def reset_fixation_location(self, event):
         # Reset fixation target Location 
         self.horz_loc = 0.0
         self.vert_loc = 0.0
 
         self.update_fixation_location()
 
-    def UpdateProtocol(self, horzloc, vertloc):
-        # Send a query to our protocol pane, marking a new location if there is one, or fulfilling a protocol requirement
-        self.protocolpane.UpdateProtocol(
-            (self.control.horzcontrol.GetLabelValue(), self.control.vertcontrol.GetLabelValue()), self._eyesign,
+    def update_protocol(self, horzloc, vertloc):
+        # Send a query to our protocol pane, marking a new location if there is one or fulfilling a protocol requirement
+        self.protocolpane.update_protocol(
+            (self.control.horzcontrol.get_label_value(), self.control.vertcontrol.get_label_value()), self._eyesign,
             self.viewpane.GetFOV())
 
-    def SaveLocation(self, horzloc, vertloc):
+    def save_location(self, horzloc, vertloc, vidnum=-1):
 
         # Create a file that we will dump all of the relevant information to
         if self._locationfname is None:
             # If it doesn't exist, then prompt for the location before continuing...
-            dialog = wx.FileDialog(self, 'Save Location List As:', "", "", 'CSV (Comma delimited)|*.csv',
-                                   wx.SAVE | wx.FD_OVERWRITE_PROMPT)
-            if dialog.ShowModal() == wx.ID_OK:
-                self._locationpath = dialog.GetDirectory()
-                self._locationfname = dialog.GetFilename()
-                dialog.Destroy()
-
-                self._locfileobj = open(self._locationpath + os.sep + self._locationfname, 'w')  # Write the header
-                self._locfileobj.write("Eye,Horizontal Location,Vertical Location,Horizontal FOV,Vertical FOV\n")
-                self._locfileobj.close()
-
-            else:
-                return
+            self.on_set_save_protocol_location()
 
         try:
             self._locfileobj = open(self._locationpath + os.sep + self._locationfname, 'a')
@@ -590,22 +592,19 @@ class wxFixationFrame(wx.Frame):
                 pass
         ##                print "File is already open, continuing..."
 
-        if self.SaveLoc is False:  # If we're not supposed to save the location, just save the FOV
-            horzloc = ""
-            vertloc = ""
-
         if self._eyesign == -1:
             eye = "OS"
         else:
             eye = "OD"
 
-        self._locfileobj.write(eye + "," + horzloc + "," + vertloc + "," + str(self.viewpane.GetHFOV()) + "," + str(
-            self.viewpane.GetVFOV()) + "\n")
+        self._locfileobj.write(format(vidnum, '0>4') + "," + horzloc + "," + vertloc + "," +
+                               str(self.viewpane.GetHFOV()) + "," + str(self.viewpane.GetVFOV()) +
+                               "," + eye + "\n")
 
         self._locfileobj.close()
 
     # Saves The Aligned ViewPane
-    def SaveViewPane(self, event):
+    def save_viewpane(self, event):
         context = wx.ClientDC(self.imagespace)
         memory = wx.MemoryDC()
         x, y = self.imagespace.ClientSize
@@ -630,7 +629,7 @@ class wxFixationFrame(wx.Frame):
         sleep(0.05)
 
     # Exits The Application
-    def OnQuit(self, event):
+    def on_quit(self, event):
 
         if self.withSerial:
             # self.ArduinoSerial.close()
