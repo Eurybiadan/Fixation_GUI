@@ -633,7 +633,7 @@ class QueueListener(threading.Thread):
         self.serversock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.serversock.bind((self.HOST, self.PORT))
         print("Listening for a careless whisper from a queue thread...")
-        self.serversock.listen(2)
+        self.serversock.listen(1)
         conn, addr = self.serversock.accept()
 
         while True:
@@ -642,11 +642,15 @@ class QueueListener(threading.Thread):
 
                 splitmsg = recvmsg.split(";")
 
-
                 if len(splitmsg) == 2:
                     self.callback(int(splitmsg[0]), splitmsg[1])
                 else:
                     self.callback(int(splitmsg[0]), splitmsg[1:])
+
+                if int(splitmsg[0]) == -1:
+                    conn.shutdown(socket.SHUT_RD)
+                    conn.close()
+                    return
             except ConnectionResetError:
                 print("Lost connection to the image whisperer!")
                 md = wx.MessageDialog(None, "Lost connection to the image whisperer! Protocol list will no longer update.",

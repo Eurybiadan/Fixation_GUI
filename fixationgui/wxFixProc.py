@@ -49,11 +49,11 @@ class QueueWhisperer(threading.Thread):
                 msg = msg[:-1]
 
                 self.serversock.sendall(msg)
-            except Queue.Empty:
-                self.serversock
-                # return
+
             except RuntimeError:
                 print("Lost connection to the image listener!")
+                self.serversock.shutdown(socket.SHUT_WR)
+                self.serversock.close()
                 if self.mainGUI:
                     self.mainGUI.kill()
                 return
