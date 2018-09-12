@@ -66,37 +66,37 @@ class ViewPane(wx.Window):
         self._Buffer=wx.Bitmap(1,1)
 
         # Performs an onSize to initialize all the size-dependent variables
-        self.OnSize(None)
-        self.SetFixLocInDeg(wx.Point2D(0,0))
-        self.Bind(wx.EVT_SIZE,self.OnSize)
-        self.Bind(wx.EVT_PAINT,self.OnPaint)
+        self.on_size(None)
+        self.set_fix_loc_in_deg(wx.Point2D(0, 0))
+        self.Bind(wx.EVT_SIZE, self.on_size)
+        self.Bind(wx.EVT_PAINT, self.on_paint)
         
         # All Mouse Event Handlers
-        self.Bind(wx.EVT_ENTER_WINDOW,self.OnEnter)
-        self.Bind(wx.EVT_LEAVE_WINDOW,self.OnExit)
+        self.Bind(wx.EVT_ENTER_WINDOW, self.on_enter)
+        self.Bind(wx.EVT_LEAVE_WINDOW, self.on_exit)
 
-    def SetFOV(self,fov):
-        self.hfov,self.vfov = fov
+    def set_fov(self, fov):
+        self.hfov, self.vfov = list(map(float, fov))
         self.Repaint()
 
-    def SetVFOV(self, fov):
+    def set_v_fov(self, fov):
         self.vfov = fov
         self.Repaint()
      
-    def SetHFOV(self, fov):
+    def set_h_fov(self, fov):
         self.hfov = fov
         self.Repaint()
 
-    def GetVFOV(self):
+    def get_v_fov(self):
         return self.vfov
 
-    def GetHFOV(self):
+    def get_h_fov(self):
         return self.hfov
 
-    def GetFOV(self):
+    def get_fov(self):
         return self.hfov,self.vfov
 
-    def MarkLocation(self):
+    def mark_location(self):
         self.marked_loc.append((self.hfov,self.vfov,self._fixLoc))
         self.Repaint()
 
@@ -104,15 +104,15 @@ class ViewPane(wx.Window):
         self.marked_loc=[]
         self.Repaint()
 
-    def SetBkgrd(self,image):
+    def set_bkgrd(self, image):
         self._Bkgrd = image
         self._CurrentBkgrd = image
         self._hasbkgrd = True
         self.Repaint()
 
-    def SetMouseLoc(self,posinpix,eyesign):
+    def set_mouse_loc(self, posinpix, eyesign):
         
-        degreehorz,degreevert = self.ToDegrees(posinpix)
+        degreehorz,degreevert = self.to_degrees(posinpix)
         
         self._mouseLoc = "("
         
@@ -139,33 +139,33 @@ class ViewPane(wx.Window):
         #print self._mouseLoc
         self.Repaint()
 
-    def SetFixLocInDeg(self,pos):
+    def set_fix_loc_in_deg(self, pos):
         # Updates the location of the fixation target, and repaints the window
         # Remember (0,0) is top left corner, so subtract to go up!
         self._fixLoc = wx.Point2D( (self._center.x + (pos.x*self._pixperdeg)) , self._center.y - (pos.y*self._pixperdeg) )
         #print "x: "+str(pos.x)+" y: "+str(pos.y)+ " fixation ("+str(self._fixLoc.x)+","+str(self._fixLoc.y)+")"
         self.Repaint()
         
-    def SetFixLocInPix(self,pos,eyesign):
+    def set_fix_loc_in_pix(self, pos, eyesign):
         # Updates the location of the fixation target, and repaints the window
         # Remember (0,0) is top left corner, so subtract to go up!
         self._fixLoc = wx.Point2D(pos.x , pos.y )
        # print "x: "+str(pos.x)+" y: "+str(pos.y)+ " fixation ("+str(self._fixLoc.x)+","+str(self._fixLoc.y)+")"
         self.Repaint()
 
-    def SetState(self,state):
+    def set_state(self, state):
         self._state = state
 
-    def GetState(self):
+    def get_state(self):
         return self._state
 
-    def IsAligning(self):
+    def is_aligning(self):
         if self._state > 0 and self._state < 3:
             return True
         else:
             return False
         
-    def ToDegrees(self, pos):
+    def to_degrees(self, pos):
         # If it isn't a Point2D, then upconvert it to one
         if type(pos) is wx.Point:
             pos = wx.Point2D(pos)
@@ -189,7 +189,7 @@ class ViewPane(wx.Window):
         
         return degreehorz,degreevert 
 
-    def OnSize(self,event):
+    def on_size(self, event):
         # Is used whenever the window is resized
         # Get the current allowed size of the Window (that is, this canvas)
         win_w,win_h=self.GetClientSize()
@@ -204,26 +204,26 @@ class ViewPane(wx.Window):
         self.img_yscale=1.0
         
         # When the size changes, so will the degrees to pixel conversion
-        self._pixperdeg = self.DegToPixels((win_w,win_h), self._numgridlines)
+        self._pixperdeg = self.degrees_to_pixels((win_w, win_h), self._numgridlines)
         
         self.Repaint()
 
     def AcceptsFocus(self):
         return True
 
-    def OnEnter(self,event):
+    def on_enter(self, event):
         self.inWindow = True
         event.Skip()
         
-    def OnExit(self,event):
+    def on_exit(self, event):
         self.inWindow = False
         event.Skip()
         
-    def OnPaint(self,event):
+    def on_paint(self, event):
         # Allow For Auto-Refresh
         wx.BufferedPaintDC(self,self._Buffer)
 
-    def DegToPixels(self,sizepixels, degperregion):
+    def degrees_to_pixels(self, sizepixels, degperregion):
         # This method takes in a tuple containing the size to determine the degrees to pix
         # based on the number of degrees over a region
         width  = sizepixels[0]
@@ -232,7 +232,7 @@ class ViewPane(wx.Window):
         # 1 degree box
         return width/degperregion
 
-    def SetBkgrdPan(self, panxy):
+    def set_bkgrd_pan(self, panxy):
         # We want the user to have the point their mouse is at be the center of the image.
         # So, offset the current point by it position relative to the image's top right corner.
         panxy = wx.Point2D(panxy)
@@ -244,7 +244,7 @@ class ViewPane(wx.Window):
         self._bkgrd_origin = panxy-self._mouseOffset
         self.UpdateBkgrd()
 
-    def Contains(self,pos):
+    def contains(self, pos):
         if pos.x > self._bkgrd_origin.x and pos.y > self._bkgrd_origin.y and pos.x < (self._CurrentBkgrd.GetWidth()+self._bkgrd_origin.x) and pos.y < (self._CurrentBkgrd.GetHeight()+self._bkgrd_origin.y):
             return True
         else:
@@ -257,7 +257,7 @@ class ViewPane(wx.Window):
             return False
         
     def SetMouseOffset(self,pos): # This allows the user to click and drag on any part of the image to move it.
-        if pos is not None and self.Contains(pos):
+        if pos is not None and self.contains(pos):
             self._mouseOffset = pos - self._bkgrd_origin
         else:
             self._mouseOffset = None

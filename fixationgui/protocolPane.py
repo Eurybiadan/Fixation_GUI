@@ -94,7 +94,7 @@ class ProtocolPane(wx.Panel):
     def set_protocol(self, newproto):
 
         self._protocol = newproto
-        self.list.UpdateProtocolList()
+        self.update_protocol_list()
 
     def is_protocol_empty(self):
         return not self._protocol
@@ -119,7 +119,7 @@ class ProtocolPane(wx.Panel):
     # This method updates the protocol based on an input set. If the input doesn't match any
     # of the currently loaded protocol, add the new location/settings to the list.
     def update_protocol(self, location, eyesign, curfov):
-
+        degree_sign = u'\N{DEGREE SIGN}'
         exist = False
 
         if eyesign == -1:
@@ -131,14 +131,20 @@ class ProtocolPane(wx.Panel):
         location = (location[0].replace(" ", ""), location[1].replace(" ", ""))
 
         for item in self._protocol:
-
             if item['fov'] == curfov and item['eye'] == seleye and item['loc'] == location:
-                item['num'] += 1
+                item['num_obtained'] += 1
                 exist = True
                 break
 
         if not exist:
-            self._protocol.append(dict(num=1, num_obtained=int(0),
-                                       fov=(curfov[0], curfov[1]), eye=seleye, loc=location))
+            newentry = dict(num=1, num_obtained=int(0),
+                            fov=(curfov[0], curfov[1]), eye=seleye, loc=location)
+            self._protocol.append(newentry)
 
-        self.update_protocol_list()
+            ind = self.list.GetItemCount()
+
+            self.list.InsertItem(ind, str(newentry['num_obtained']))
+            self.list.SetItem(ind, 1, newentry['loc'][0] + ', ' + newentry['loc'][1])
+            self.list.SetItem(ind, 2, str(newentry['fov'][0]) + degree_sign + 'x ' + str(newentry['fov'][1]) + degree_sign)
+            self.list.SetItem(ind, 3, newentry['eye'])
+            self.list.SetItemBackgroundColour(ind, (255, 79, 0))

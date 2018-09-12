@@ -8,7 +8,7 @@ from ViewPane import ViewPane
 from protocolPane import ProtocolPane
 from controlPanel import ControlPanel
 from LightCrafter import wxLightCrafterFrame
-from multiprocessing import Queue
+import socket
 import threading
 
 
@@ -21,14 +21,8 @@ class wxFixationFrame(wx.Frame):
     MINOR_INCREMENT = 0.1
     MAJOR_INCREMENT = 0.75
 
-    def __init__(self, parent=None, fovQueue=None, captureQueue=None, id=wx.ID_ANY):
+    def __init__(self, parent=None, id=wx.ID_ANY):
         wx.Frame.__init__(self, parent, id, 'Automated Fixation Graphical User Interface')
-
-        if fovQueue is None and captureQueue is None:
-            self.Standalone = True
-        else:
-            self.Standalone = False
-            self.MainSaviorFrame = parent
 
         self.withSerial = False
 
@@ -84,18 +78,9 @@ class wxFixationFrame(wx.Frame):
         self.LCCanvas = wxLightCrafterFrame()
         self.LCCanvas.Show()
 
-        if self.Standalone is False:
-            ##            print "Not standlone."
-            try:
-                fovQueue.get(False, 0)
-                captureQueue.get(False, 0)
-            except:
-                pass
-            # Spawn the pair of listener threads so we can detect changes in the comm Queues passed by Savior
-            self.fovListener = QueueListener(fovQueue, self.set_FOV)  # This will recieve a tuple of sizes
-            self.fovListener.start()
-            self.captListener = QueueListener(captureQueue, self.mark_location)  # This will recieve a simple 1 value
-            self.captListener.start()
+        # Spawn the pair of listener threads so we can detect changes in the comm Queues passed by Savior
+        self.fovListener = QueueListener(self.handle_message)  # This will recieve a tuple of sizes
+        self.fovListener.start()
 
     def initViewPane(self, parent):
         # Setting up the ViewPane
@@ -249,6 +234,14 @@ class wxFixationFrame(wx.Frame):
     def get_major_increment(self):
         return self.MAJOR_INCREMENT
 
+    def handle_message(self, datatype, data):
+        switchboard = {
+            -1: self.on_quit,
+            0: self.mark_location,
+            1: self.set_FOV
+        }
+        switchboard.get(datatype)(data)
+
     # Fill Screen
     def on_fill_press(self, event):
         pass
@@ -269,21 +262,21 @@ class wxFixationFrame(wx.Frame):
     def on_mouse_motion(self, event):
         pos = event.GetPosition()
 
-        self.viewpane.SetMouseLoc(pos, self._eyesign)
+        self.viewpane.set_mouse_loc(pos, self._eyesign)
 
         if wx.MouseEvent.LeftIsDown(event):
             # Convert to degrees
-            self.horz_loc, self.vert_loc = self.viewpane.ToDegrees(pos)
+            self.horz_loc, self.vert_loc = self.viewpane.to_degrees(pos)
             self.update_fixation_location()
-        elif wx.MouseEvent.RightIsDown(event) and self.viewpane.GetState() == 1:
-            self.viewpane.SetBkgrdPan(pos)
+        elif wx.MouseEvent.RightIsDown(event) and self.viewpane.get_state() == 1:
+            self.viewpane.set_bkgrd_pan(pos)
 
     def on_left_mouse_button(self, event):
         pos = event.GetPosition()
 
-        self.viewpane.SetMouseLoc(pos, self._eyesign)
+        self.viewpane.set_mouse_loc(pos, self._eyesign)
         # Convert to degrees
-        self.horz_loc, self.vert_loc = self.viewpane.ToDegrees(pos)
+        self.horz_loc, self.vert_loc = self.viewpane.to_degrees(pos)
         self.update_fixation_location()
 
     # To ensure we capture the initial offset from the origin of the image during a panning movement.
@@ -295,7 +288,7 @@ class wxFixationFrame(wx.Frame):
             self.viewpane.SetMouseOffset(None)
 
     def on_mouse_wheel(self, event):
-        if self.viewpane.GetState() is 1 or self.viewpane.GetState() is 2:
+        if self.viewpane.get_state() is 1 or self.viewpane.get_state() is 2:
             self.viewpane.SetBkgrdScale(math.copysign(1.0, event.GetWheelRotation()) * .01)
 
     def on_button_press(self, evt):
@@ -306,7 +299,7 @@ class wxFixationFrame(wx.Frame):
             self.on_open_background_image(None)
         elif button is self.control._iminitpane.initalign:
 
-            state = self.viewpane.GetState() + 1
+            state = self.viewpane.get_state() + 1
 
             if state == 2:
                 self.viewpane.SetPanAnchor()
@@ -315,7 +308,7 @@ class wxFixationFrame(wx.Frame):
 
             # Update the states in the two panels
             self.control.SetState(state)
-            self.viewpane.SetState(state)
+            self.viewpane.set_state(state)
         elif button is self.control.resetlocs:
             self.viewpane.clear_locations()
             self._locationfname = None
@@ -347,7 +340,7 @@ class wxFixationFrame(wx.Frame):
             self.horz_loc = degrees.x
             self.vert_loc = degrees.y
         # Update the respective GUIs
-        self.viewpane.SetFixLocInDeg(degrees)
+        self.viewpane.set_fix_loc_in_deg(degrees)
 
         self.control.vertcontrol.SetValue(degrees.y)
         self.control.horzcontrol.SetValue(degrees.x)
@@ -357,15 +350,15 @@ class wxFixationFrame(wx.Frame):
         self.LCCanvas.set_fixation_location(wx.Point2D(x, y))
 
     def set_vertical_fov(self, degrees):
-        self.viewpane.SetVFOV(degrees)
+        self.viewpane.set_v_fov(degrees)
 
     def set_horizontal_fov(self, degrees):
-        self.viewpane.SetHFOV(degrees)
+        self.viewpane.set_h_fov(degrees)
 
     def on_set_save_protocol_location(self, evt=None):
 
         # If it doesn't exist, then prompt for the location before continuing...
-        dialog = wx.FileDialog(self, 'Save Location List As:', "", "", 'CSV (Comma delimited)|*.csv', wx.SAVE)
+        dialog = wx.FileDialog(self, 'Save Location List As:', "", "", 'CSV (Comma delimited)|*.csv', wx.FD_SAVE)
         if dialog.ShowModal() == wx.ID_OK:
             self._locationpath = dialog.GetDirectory()
             self._locationfname = dialog.GetFilename()
@@ -373,7 +366,7 @@ class wxFixationFrame(wx.Frame):
 
             result = wx.ID_YES
             if os.path.isfile(self._locationpath + os.sep + self._locationfname):
-                md = wx.MessageDialog(self, "Protocol file already exists!", "Protocol file already exists! Overwrite?",
+                md = wx.MessageDialog(self, "Protocol file already exists! Overwrite?", "Protocol file already exists!",
                                       wx.ICON_QUESTION | wx.YES_NO | wx.CANCEL)
                 result = md.ShowModal()
 
@@ -431,7 +424,7 @@ class wxFixationFrame(wx.Frame):
 
             bkgrdim = wx.EmptyBitmap(1, 1)
             bkgrdim.LoadFile(impath, wx.BITMAP_TYPE_ANY)
-            self.viewpane.SetBkgrd(bkgrdim)
+            self.viewpane.set_bkgrd(bkgrdim)
 
     def degrees_to_screenpix(self, deghorz, degvert):
 
@@ -535,19 +528,14 @@ class wxFixationFrame(wx.Frame):
 
     def mark_location(self, data):
 
-        # "Poison pill" shutdown of the Fixation GUI.
-        if data == -1:
-            self.on_quit(wx.EVT_CLOSE)
-            return
-
         # Marks the current lcoation of the fixation target, and dumps it to a file
-        self.viewpane.MarkLocation()
+        self.viewpane.mark_location()
         self.update_protocol(self.control.horzcontrol.get_label_value(), self.control.vertcontrol.get_label_value())
-        self.save_location(self.control.horzcontrol.get_value(), self.control.vertcontrol.get_value())
+        self.save_location(self.control.horzcontrol.get_value(), self.control.vertcontrol.get_value(), str(data))
 
     def set_FOV(self, fov):
         if fov != -1:
-            self.viewpane.SetFOV(fov)
+            self.viewpane.set_fov(fov)
 
     def update_fixation_color(self, penColor, brushColor):
         # This method allows the user to change the color on the LightCrafter DLP.
@@ -572,9 +560,9 @@ class wxFixationFrame(wx.Frame):
         # Send a query to our protocol pane, marking a new location if there is one or fulfilling a protocol requirement
         self.protocolpane.update_protocol(
             (self.control.horzcontrol.get_label_value(), self.control.vertcontrol.get_label_value()), self._eyesign,
-            self.viewpane.GetFOV())
+            self.viewpane.get_fov())
 
-    def save_location(self, horzloc, vertloc, vidnum=-1):
+    def save_location(self, horzloc, vertloc, vidnum="-1"):
 
         # Create a file that we will dump all of the relevant information to
         if self._locationfname is None:
@@ -597,8 +585,9 @@ class wxFixationFrame(wx.Frame):
         else:
             eye = "OD"
 
-        self._locfileobj.write(format(vidnum, '0>4') + "," + horzloc + "," + vertloc + "," +
-                               str(self.viewpane.GetHFOV()) + "," + str(self.viewpane.GetVFOV()) +
+        print(vidnum)
+        self._locfileobj.write(str(vidnum) + "," + str(horzloc) + "," + str(vertloc) + "," +
+                               str(self.viewpane.get_h_fov()) + "," + str(self.viewpane.get_v_fov()) +
                                "," + eye + "\n")
 
         self._locfileobj.close()
@@ -622,20 +611,8 @@ class wxFixationFrame(wx.Frame):
             dialog.Destroy()
         bitmap.SaveFile(self.filename + '.jpeg', wx.BITMAP_TYPE_JPEG)
 
-    # Initiates The Base Diopter Value
-    def diopterbase(self, event):
-        # if self.withSerial:
-        # self.opt.write((2,1))
-        sleep(0.05)
-
     # Exits The Application
-    def on_quit(self, event):
-
-        if self.withSerial:
-            # self.ArduinoSerial.close()
-            self.control._optopane.OnClose(event)
-        # self.settingsSave(self.ScreenPort, self.opto.getPort())
-        # print "Saved settings, and exiting..."
+    def on_quit(self, event=wx.EVT_CLOSE):
 
         self.LCCanvas.Destroy()
         self.Destroy()
@@ -644,24 +621,37 @@ class wxFixationFrame(wx.Frame):
 # This thread class generically listens to a queue, and passes what it receives to a specified function.
 class QueueListener(threading.Thread):
 
-    def __init__(self, queue, func):
+    def __init__(self, func):
 
         threading.Thread.__init__(self)
-
-        self.queue = queue
+        self.setDaemon(True)
         self.callback = func
-
-    ##        print "Spawning queue thread"
+        self.HOST = 'localhost'
+        self.PORT = 1222
 
     def run(self):
-        while True:
-            recv = self.queue.get()
+        self.serversock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.serversock.bind((self.HOST, self.PORT))
+        print("Listening for a careless whisper from a queue thread...")
+        self.serversock.listen(2)
+        conn, addr = self.serversock.accept()
 
-            self.callback(recv)
-            ##            print "Recieved message: "
-            ##            print recv
-            if recv == -1:
-                ##                print "Recieved posion pill, dying..."
+        while True:
+            try:
+                recvmsg = conn.recv(32).decode("utf-8")
+
+                splitmsg = recvmsg.split(";")
+
+
+                if len(splitmsg) == 2:
+                    self.callback(int(splitmsg[0]), splitmsg[1])
+                else:
+                    self.callback(int(splitmsg[0]), splitmsg[1:])
+            except ConnectionResetError:
+                print("Lost connection to the image whisperer!")
+                md = wx.MessageDialog(None, "Lost connection to the image whisperer! Protocol list will no longer update.",
+                                      "Lost connection to the image whisperer!", wx.ICON_ERROR | wx.OK)
+                md.ShowModal()
                 return
 
 

@@ -8,7 +8,7 @@ if defined _OLD_CODEPAGE (
     "%SystemRoot%\System32\chcp.com" 65001 > nul
 )
 
-set "VIRTUAL_ENV=C:\Users\Robert F Cooper\Documents\Fixation_GUI\venv"
+set "VIRTUAL_ENV=C:\Users\Robert F Cooper\Documents\Fixation_GUI"
 
 if not defined PROMPT (
     set "PROMPT=$P$G"
@@ -36,7 +36,8 @@ if defined _OLD_VIRTUAL_PATH (
     set "_OLD_VIRTUAL_PATH=%PATH%"
 )
 
-set "PATH=%VIRTUAL_ENV%\Scripts;%PATH%"
+set "PATH=%VIRTUAL_ENV%\venv\Scripts;%PATH%"
+set "PYTHONPATH=%VIRTUAL_ENV%\fixationgui;%VIRTUAL_ENV%\fixationWidgets;"
 
 :END
 if defined _OLD_CODEPAGE (

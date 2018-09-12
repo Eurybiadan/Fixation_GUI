@@ -147,7 +147,6 @@ class LocSpin( wx.lib.agw.floatspin.FloatSpin ):
             self._value = value
             
     def get_label_value(self):
-        
         return self._textctrl.GetValue()
 
     def get_value(self):
