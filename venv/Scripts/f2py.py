@@ -1,6 +1,9 @@
-#!c:\users\robert~1\docume~1\fixati~1\venv\scripts\python.exe
+#!c:\windows\system32\cmd.exe /c python.exe
 # See http://cens.ioc.ee/projects/f2py2e/
 from __future__ import division, print_function
+
+import os; activate_this=os.path.join(os.path.dirname(os.path.realpath(__file__)), 'activate_this.py'); exec(compile(open(activate_this).read(), activate_this, 'exec'), dict(__file__=activate_this)); del os, activate_this
+
 
 import os
 import sys
