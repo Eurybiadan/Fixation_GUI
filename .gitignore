@@ -1,6 +1,6 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
-*.py[co]
+*.py[cod]
 *$py.class
 
 # C extensions
@@ -15,6 +15,9 @@ __pycache__/
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
+
+# Our virtual environment must be generated each time we run.
+venv/
 
 # Unit test / coverage reports
 htmlcov/
