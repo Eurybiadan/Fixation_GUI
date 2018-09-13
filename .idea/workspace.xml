@@ -56,11 +56,11 @@
     <session id="507116416">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="1" />
+          <entry key="project.closed" value="2" />
           <entry key="project.open.time.18" value="1" />
           <entry key="project.open.time.3" value="1" />
-          <entry key="project.open.time.46" value="1" />
-          <entry key="project.opened" value="3" />
+          <entry key="project.open.time.46" value="2" />
+          <entry key="project.opened" value="4" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
@@ -94,9 +94,10 @@
           <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/fixationgui/wxFixGUI.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="786">
-                  <caret line="651" column="32" lean-forward="true" selection-start-line="651" selection-start-column="32" selection-end-line="651" selection-end-column="32" />
+                <state relative-caret-position="425">
+                  <caret line="25" lean-forward="true" selection-start-line="25" selection-end-line="25" />
                   <folding>
+                    <element signature="e#0#9#0" expanded="true" />
                     <marker date="1536770850426" expanded="true" signature="9355:9611" ph="..." />
                     <marker date="1536770850426" expanded="true" signature="9392:9397" ph="..." />
                     <marker date="1536770850426" expanded="true" signature="9438:9611" ph="..." />
@@ -149,7 +150,7 @@
             <entry file="file://$PROJECT_DIR$/fixationgui/protocolPane.py">
               <provider selected="true" editor-type-id="text-editor">
                 <state relative-caret-position="2227">
-                  <caret line="134" column="41" lean-forward="true" selection-start-line="134" selection-start-column="41" selection-end-line="134" selection-end-column="41" />
+                  <caret line="134" column="41" selection-start-line="134" selection-start-column="41" selection-end-line="134" selection-end-column="41" />
                   <folding>
                     <element signature="e#47#56#0" expanded="true" />
                     <marker date="1536693461383" expanded="true" signature="3465:3505" ph="..." />
@@ -162,7 +163,7 @@
             <entry file="file://$PROJECT_DIR$/fixationWidgets/LocSpin.py">
               <provider selected="true" editor-type-id="text-editor">
                 <state relative-caret-position="2244">
-                  <caret line="137" column="13" lean-forward="true" selection-start-line="137" selection-start-column="13" selection-end-line="137" selection-end-column="13" />
+                  <caret line="137" column="13" selection-start-line="137" selection-start-column="13" selection-end-line="137" selection-end-column="13" />
                   <folding>
                     <marker date="1536690606140" expanded="true" signature="5056:5089" ph="..." />
                   </folding>
@@ -173,8 +174,8 @@
           <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/fixationgui/wxFixProc.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="697">
-                  <caret line="41" column="16" lean-forward="true" selection-start-line="41" selection-start-column="16" selection-end-line="41" selection-end-column="16" />
+                <state relative-caret-position="612">
+                  <caret line="36" column="18" selection-start-line="36" selection-start-column="18" selection-end-line="36" selection-end-column="18" />
                   <folding>
                     <element signature="e#0#33#0" expanded="true" />
                     <marker date="1536770593523" expanded="true" signature="113:115" ph="..." />
@@ -239,7 +240,7 @@
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="7">
+  <component name="ProjectFrameBounds" extendedState="6">
     <option name="x" value="-8" />
     <option name="y" value="-8" />
     <option name="width" value="1936" />
@@ -249,30 +250,7 @@
     <navigator proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
     </navigator>
-    <panes>
-      <pane id="ProjectPane">
-        <subPane>
-          <expand>
-            <path>
-              <item name="Fixation_GUI" type="b2602c69:ProjectViewProjectNode" />
-              <item name="Fixation_GUI" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="Fixation_GUI" type="b2602c69:ProjectViewProjectNode" />
-              <item name="Fixation_GUI" type="462c0819:PsiDirectoryNode" />
-              <item name="fixationgui" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="Fixation_GUI" type="b2602c69:ProjectViewProjectNode" />
-              <item name="Fixation_GUI" type="462c0819:PsiDirectoryNode" />
-              <item name="fixationWidgets" type="462c0819:PsiDirectoryNode" />
-            </path>
-          </expand>
-          <select />
-        </subPane>
-      </pane>
-      <pane id="Scope" />
-    </panes>
+    <panes />
   </component>
   <component name="PropertiesComponent">
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
@@ -304,7 +282,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.wxFixProc">
+  <component name="RunManager" selected="Python.wxFixGUI">
     <configuration name="LightCrafter" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="Fixation_GUI" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -396,8 +374,8 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.wxFixProc" />
         <item itemvalue="Python.wxFixGUI" />
+        <item itemvalue="Python.wxFixProc" />
         <item itemvalue="Python.LightCrafter" />
       </list>
     </recent_temporary>
@@ -416,15 +394,14 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1936" height="1186" extended-state="7" />
-    <editor active="true" />
+    <frame x="-8" y="-8" width="1936" height="1186" extended-state="6" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" weight="0.1369936" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.3298479" />
-      <window_info active="true" anchor="bottom" x="1921" y="719" width="1127" height="406" id="Run" order="2" type="FLOATING" visible="true" weight="0.3297975" />
+      <window_info anchor="bottom" x="1921" y="719" width="1127" height="406" id="Run" order="2" type="FLOATING" weight="0.3297975" />
       <window_info anchor="bottom" x="1930" y="296" width="1103" height="420" id="Debug" order="3" type="WINDOWED" weight="0.39923954" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -531,7 +508,7 @@
     <entry file="file://$PROJECT_DIR$/fixationgui/protocolPane.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2227">
-          <caret line="134" column="41" lean-forward="true" selection-start-line="134" selection-start-column="41" selection-end-line="134" selection-end-column="41" />
+          <caret line="134" column="41" selection-start-line="134" selection-start-column="41" selection-end-line="134" selection-end-column="41" />
           <folding>
             <element signature="e#47#56#0" expanded="true" />
             <marker date="1536693461383" expanded="true" signature="3465:3505" ph="..." />
@@ -542,36 +519,37 @@
     <entry file="file://$PROJECT_DIR$/fixationWidgets/LocSpin.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2244">
-          <caret line="137" column="13" lean-forward="true" selection-start-line="137" selection-start-column="13" selection-end-line="137" selection-end-column="13" />
+          <caret line="137" column="13" selection-start-line="137" selection-start-column="13" selection-end-line="137" selection-end-column="13" />
           <folding>
             <marker date="1536690606140" expanded="true" signature="5056:5089" ph="..." />
           </folding>
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/fixationgui/wxFixProc.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="612">
+          <caret line="36" column="18" selection-start-line="36" selection-start-column="18" selection-end-line="36" selection-end-column="18" />
+          <folding>
+            <element signature="e#0#33#0" expanded="true" />
+            <marker date="1536770593523" expanded="true" signature="113:115" ph="..." />
+            <marker date="1536770593523" expanded="true" signature="856:1798" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/fixationgui/wxFixGUI.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="786">
-          <caret line="651" column="32" lean-forward="true" selection-start-line="651" selection-start-column="32" selection-end-line="651" selection-end-column="32" />
+        <state relative-caret-position="425">
+          <caret line="25" lean-forward="true" selection-start-line="25" selection-end-line="25" />
           <folding>
+            <element signature="e#0#9#0" expanded="true" />
             <marker date="1536770850426" expanded="true" signature="9355:9611" ph="..." />
             <marker date="1536770850426" expanded="true" signature="9392:9397" ph="..." />
             <marker date="1536770850426" expanded="true" signature="9438:9611" ph="..." />
             <marker date="1536770850426" expanded="true" signature="9660:9679" ph="..." />
             <marker date="1536770850426" expanded="true" signature="9728:9747" ph="..." />
             <marker date="1536770850426" expanded="true" signature="9789:9808" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/fixationgui/wxFixProc.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="697">
-          <caret line="41" column="16" lean-forward="true" selection-start-line="41" selection-start-column="16" selection-end-line="41" selection-end-column="16" />
-          <folding>
-            <element signature="e#0#33#0" expanded="true" />
-            <marker date="1536770593523" expanded="true" signature="113:115" ph="..." />
-            <marker date="1536770593523" expanded="true" signature="856:1798" ph="..." />
           </folding>
         </state>
       </provider>
