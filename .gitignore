@@ -1,21 +1,10 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
-*.py[cod]
+*.py[co]
 *$py.class
 
 # C extensions
 *.so
-
-# Distribution / packaging
-.Python
-env/
-build/
-dist/
-downloads/
-parts/
-sdist/
-var/
-.installed.cfg
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
