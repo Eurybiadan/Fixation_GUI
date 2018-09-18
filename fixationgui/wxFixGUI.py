@@ -78,6 +78,8 @@ class wxFixationFrame(wx.Frame):
         self.LCCanvas = wxLightCrafterFrame()
         self.LCCanvas.Show()
 
+        self.prev_cursor = self.LCCanvas.get_fixation_cursor()
+
         # Spawn the pair of listener threads so we can detect changes in the comm Queues passed by Savior
         self.fovListener = QueueListener(self.handle_message)  # This will recieve a tuple of sizes
         self.fovListener.start()
@@ -164,6 +166,8 @@ class wxFixationFrame(wx.Frame):
         self.id_off_align = 10022
         self.id_on_grid = 10031
         self.id_off_grid = 10032
+        self.id_on_toggle = 10041
+        self.id_off_toggle = 10042
         self.id_save_proto_loc = 10004
         self.id_open_proto = 10005
         self.id_clear_proto = 10006
@@ -172,10 +176,10 @@ class wxFixationFrame(wx.Frame):
         menubar = wx.MenuBar()
         fileMenu = wx.Menu()
         protoMenu = wx.Menu()
-        alignmentMenu = wx.Menu()
+        targetMenu = wx.Menu()
         menubar.Append(fileMenu, 'File')
         menubar.Append(protoMenu, 'Protocol')
-        menubar.Append(alignmentMenu, 'Alignment')
+        menubar.Append(targetMenu, 'Target')
 
         # Open a protocol
         protoMenu.Append(self.id_save_proto_loc, 'Protocol Save Location...\t')
@@ -191,42 +195,35 @@ class wxFixationFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_quit, id=wx.ID_EXIT)
 
         # Open a background image
-        alignmentMenu.Append(wx.ID_OPEN, 'Open Background Image...\tCtrl+B')
+        targetMenu.Append(wx.ID_OPEN, 'Open Background Image...\tCtrl+B')
         self.Bind(wx.EVT_MENU, self.on_open_background_image, id=wx.ID_OPEN)
 
-        # Fill Screen
-        self.fillMenu = wx.Menu()
-        self.off_fill = self.fillMenu.AppendRadioItem(self.id_off_fill, 'Off')
-        self.Bind(wx.EVT_MENU, self.on_fill_press, self.off_fill)
-        self.on_fill = self.fillMenu.AppendRadioItem(self.id_on_fill, 'On')
-        self.Bind(wx.EVT_MENU, self.on_fill_press, self.on_fill)
-        alignmentMenu.Append(wx.ID_ANY, 'Fill Screen', self.fillMenu)
+        # Toggle on/off
+        self.toggleMenu = wx.Menu()
+        self.on_toggle = self.toggleMenu.AppendRadioItem(self.id_on_toggle, 'On')
+        self.Bind(wx.EVT_MENU, self.on_toggle_press, self.on_toggle)
+        self.off_toggle = self.toggleMenu.AppendRadioItem(self.id_off_toggle, 'Off')
+        self.Bind(wx.EVT_MENU, self.on_toggle_press, self.off_toggle)
+        targetMenu.Append(wx.ID_ANY, 'Target', self.toggleMenu)
         # Alignment
         self.alignMenu = wx.Menu()
         self.off_align = self.alignMenu.AppendRadioItem(self.id_off_align, 'Off')
         self.Bind(wx.EVT_MENU, self.on_align_presss, self.off_align)
         self.on_align = self.alignMenu.AppendRadioItem(self.id_on_align, 'On')
         self.Bind(wx.EVT_MENU, self.on_align_presss, self.on_align)
-        alignmentMenu.Append(wx.ID_ANY, 'Alignment', self.alignMenu)
+        targetMenu.Append(wx.ID_ANY, 'Alignment', self.alignMenu)
         # Grid
         self.gridMenu = wx.Menu()
         self.off_grid = self.gridMenu.AppendRadioItem(self.id_off_grid, 'Off')
         self.Bind(wx.EVT_MENU, self.on_grid_press, self.off_grid)
         self.on_grid = self.gridMenu.AppendRadioItem(self.id_on_grid, 'On')
         self.Bind(wx.EVT_MENU, self.on_grid_press, self.on_grid)
-        alignmentMenu.Append(wx.ID_ANY, 'Grid', self.gridMenu)
+        targetMenu.Append(wx.ID_ANY, 'Grid', self.gridMenu)
+
 
         # Compounds the Menu Bar
         self.SetMenuBar(menubar)
 
-        # If serial isn't enabled, disable these options.
-        if self.withSerial is False:
-            self.off_fill.Enable(False)
-            self.on_fill.Enable(False)
-            self.on_align.Enable(False)
-            self.off_align.Enable(False)
-            self.on_grid.Enable(False)
-            self.off_grid.Enable(False)
 
     def get_minor_increment(self):
         return self.MINOR_INCREMENT
@@ -242,9 +239,12 @@ class wxFixationFrame(wx.Frame):
         }
         switchboard.get(datatype)(data)
 
-    # Fill Screen
-    def on_fill_press(self, event):
-        pass
+    # Toggle target on/off
+    def on_toggle_press(self, event):
+        if event.Id == self.id_on_toggle:
+            self.LCCanvas.show_fixation(True)
+        elif event.Id == self.id_off_toggle:
+            self.LCCanvas.show_fixation(False)
 
     # Alignment
     def on_align_presss(self, event):
@@ -252,7 +252,11 @@ class wxFixationFrame(wx.Frame):
 
     # Grid
     def on_grid_press(self, event):
-        pass
+        if event.Id == self.id_on_grid:
+            self.prev_cursor = self.LCCanvas.set_fixation_cursor(4)
+            print(str(self.prev_cursor))
+        elif event.Id == self.id_off_grid:
+            self.LCCanvas.set_fixation_cursor(self.prev_cursor)
 
     # End of Menu Bar
 
