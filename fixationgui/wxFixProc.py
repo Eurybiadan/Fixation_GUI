@@ -10,7 +10,7 @@ class FixGUIServer:
         thispath = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
         py3path = os.path.join(thispath, 'venv', 'Scripts', 'pythonw.exe')
-        print('Launching the Fixation GUI.')
+        #print('Launching the Fixation GUI.')
 
         self.mainGUI = subprocess.Popen([py3path, 'wxFixGUI.py'])
 
