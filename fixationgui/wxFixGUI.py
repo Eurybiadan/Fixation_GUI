@@ -8,6 +8,7 @@ from ViewPane import ViewPane
 from protocolPane import ProtocolPane
 from controlPanel import ControlPanel
 from LightCrafter import wxLightCrafterFrame
+from PreferencesDialog import PreferencesDialog
 import socket
 import threading
 
@@ -151,7 +152,7 @@ class wxFixationFrame(wx.Frame):
         self.control._iminitpane.initalign.Bind(wx.EVT_BUTTON, self.on_button_press)
 
         self.control.anchorbut.Bind(wx.EVT_BUTTON, self.on_button_press)
-        self.control.resetlocs.Bind(wx.EVT_BUTTON, self.on_button_press)
+        #self.control.resetlocs.Bind(wx.EVT_BUTTON, self.on_button_press)
 
     # Menu Bar
     def init_menubar(self):
@@ -182,29 +183,32 @@ class wxFixationFrame(wx.Frame):
         menubar.Append(targetMenu, 'Target')
 
         # Open a protocol
-        protoMenu.Append(self.id_save_proto_loc, 'Protocol Save Location...\t')
+        protoMenu.Append(self.id_save_proto_loc, 'Set Protocol Save Location...\t')
         self.Bind(wx.EVT_MENU, self.on_set_save_protocol_location, id=self.id_save_proto_loc)
         protoMenu.Append(self.id_open_proto, 'Open Protocol...\t')
         self.Bind(wx.EVT_MENU, self.on_open_protocol_file, id=self.id_open_proto)
         protoMenu.Append(self.id_clear_proto, 'Clear Protocol\t')
         self.Bind(wx.EVT_MENU, self.on_clear_protocol, id=self.id_clear_proto)
 
+        # Open a background image
+        fileMenu.Append(wx.ID_OPEN, 'Open Background Image...\tCtrl+B')
+        self.Bind(wx.EVT_MENU, self.on_open_background_image, id=wx.ID_OPEN)
         #         self.Bind(wx.EVT_MENU,sel)
         fileMenu.AppendSeparator()
+        fileMenu.Append(wx.ID_PREFERENCES, 'Preferences')
+        self.Bind(wx.EVT_MENU, self.on_preferences, id=wx.ID_PREFERENCES)
         fileMenu.Append(wx.ID_EXIT, 'Exit\tCtrl+Q')
         self.Bind(wx.EVT_MENU, self.on_quit, id=wx.ID_EXIT)
 
-        # Open a background image
-        targetMenu.Append(wx.ID_OPEN, 'Open Background Image...\tCtrl+B')
-        self.Bind(wx.EVT_MENU, self.on_open_background_image, id=wx.ID_OPEN)
+
 
         # Toggle on/off
         self.toggleMenu = wx.Menu()
-        self.on_toggle = self.toggleMenu.AppendRadioItem(self.id_on_toggle, 'On')
+        self.on_toggle = self.toggleMenu.AppendRadioItem(self.id_on_toggle, 'Yes')
         self.Bind(wx.EVT_MENU, self.on_toggle_press, self.on_toggle)
-        self.off_toggle = self.toggleMenu.AppendRadioItem(self.id_off_toggle, 'Off')
+        self.off_toggle = self.toggleMenu.AppendRadioItem(self.id_off_toggle, 'No')
         self.Bind(wx.EVT_MENU, self.on_toggle_press, self.off_toggle)
-        targetMenu.Append(wx.ID_ANY, 'Target', self.toggleMenu)
+        targetMenu.Append(wx.ID_ANY, 'Visible', self.toggleMenu)
         # Alignment
         self.alignMenu = wx.Menu()
         self.off_align = self.alignMenu.AppendRadioItem(self.id_off_align, 'Off')
@@ -238,6 +242,18 @@ class wxFixationFrame(wx.Frame):
             1: self.set_FOV
         }
         switchboard.get(datatype)(data)
+
+    def on_preferences(self, event):
+        prefs_dialog = PreferencesDialog(self,
+                                         major_increment=self.get_major_increment(),
+                                         minor_increment=self.get_minor_increment())
+        retcon = prefs_dialog.ShowModal()
+
+        if retcon == 1:
+            prefs = prefs_dialog.get_prefs()
+            self.set_major_increment(prefs['major_increment'])
+            self.set_minor_increment(prefs['minor_increment'])
+
 
     # Toggle target on/off
     def on_toggle_press(self, event):
@@ -353,6 +369,12 @@ class wxFixationFrame(wx.Frame):
 
         self.LCCanvas.set_fixation_location(wx.Point2D(x, y))
 
+    def set_major_increment(self, increment):
+        self.MAJOR_INCREMENT = increment
+
+    def set_minor_increment(self, increment):
+        self.MINOR_INCREMENT = increment
+
     def set_vertical_fov(self, degrees):
         self.viewpane.set_v_fov(degrees)
 
@@ -443,10 +465,11 @@ class wxFixationFrame(wx.Frame):
     def on_keyboard_press(self, event):
         # Allows For Arrow Control Of The Cursor
 
-        if event.GetKeyCode() == wx.WXK_NUMPAD_ADD:
-            self.OnZoom(self)
-        elif event.GetKeyCode() == wx.WXK_NUMPAD_SUBTRACT:
-            self.zoom_out(self)
+        # if event.GetKeyCode() == wx.WXK_NUMPAD_ADD:
+        #     self.OnZoom(self)
+        # elif event.GetKeyCode() == wx.WXK_NUMPAD_SUBTRACT:
+        #     self.zoom_out(self)
+
         if self.viewpane.align_on is True:
             self.on_image_alignment(event)
         elif self.viewpane.align_on is False:

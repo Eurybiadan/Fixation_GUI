@@ -56,13 +56,13 @@ class ControlPanel(wx.Panel):
         self.vertcontrol = LocSpin(self, wx.ID_ANY, min_val=-20, max_val=20, increment=parent.get_minor_increment(),
                                    value=0, extrastyle=FS.FS_LEFT, poslabel='S', neglabel='I')
         self.vertcontrol.SetFormat('%f')
-        self.vertcontrol.SetDigits(1)
+        self.vertcontrol.SetDigits(2)
         #
         # Horizontal Floatspin control
         self.horzcontrol = LocSpin(self, wx.ID_ANY, min_val=-20, max_val=20, increment=parent.get_minor_increment(),
                                    value=0, extrastyle=FS.FS_LEFT, poslabel='T', neglabel='N')
         self.horzcontrol.SetFormat('%f')
-        self.horzcontrol.SetDigits(1)
+        self.horzcontrol.SetDigits(2)
 
         """ Cursor tools """
         # Anchor cursor as center
@@ -71,9 +71,9 @@ class ControlPanel(wx.Panel):
         self.anchorbut.SetForegroundColour('white')
 
         # Reset marked locations
-        self.resetlocs = wx.Button(self, label='Reset Locations', size=(-1, 30))
-        self.resetlocs.SetBackgroundColour('medium gray')
-        self.resetlocs.SetForegroundColour('white')
+        #self.resetlocs = wx.Button(self, label='Reset Locations', size=(-1, 30))
+        #self.resetlocs.SetBackgroundColour('medium gray')
+        #self.resetlocs.SetForegroundColour('white')
 
         """ Initialization Buttons """
         # Image initialization pane
@@ -93,7 +93,7 @@ class ControlPanel(wx.Panel):
         sizer.Add(self.vertcontrol, (2, 2), (1, 2), wx.ALIGN_CENTER | wx.ALL, 5)
         """ Initialization Buttons """
         sizer.Add(self.anchorbut, (3, 0), wx.DefaultSpan, wx.ALIGN_CENTER | wx.ALL, 5)
-        sizer.Add(self.resetlocs, (3, 2), wx.DefaultSpan, wx.ALIGN_CENTER | wx.ALL, 5)
+        #sizer.Add(self.resetlocs, (3, 2), wx.DefaultSpan, wx.ALIGN_CENTER | wx.ALL, 5)
 
         sizer.Add(self._cursorpane, (4, 0), (2, 4), wx.EXPAND, wx.ALL, 5)
         sizer.Add(self._iminitpane, (8, 0), (2, 4), wx.EXPAND, wx.ALL, 5)
