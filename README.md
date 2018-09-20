@@ -26,10 +26,10 @@ __These instructions apply to the latest (2016) version of Savior__
 ### Installation:
 1. Run setup.bat (this will create a virtual 3.7 environment)
 2. **IMPORTANT**-Create backup copies of:
-  * Savior.pyw
-  * SaviorClinicalPanel.pyw
-  * wxSaviorBottomPanel.py
-  * wxSaviorTopPanel.py
+    * Savior.pyw
+    * SaviorClinicalPanel.pyw
+    * wxSaviorBottomPanel.py
+    * wxSaviorTopPanel.py
 3. Copy the contents of ..\Fixation_GUI\pre_modified_server_side_scripts\ to your Savior folder.
 4. ???
 5. Profit!
