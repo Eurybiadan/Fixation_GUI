@@ -10,9 +10,10 @@ class FixGUIServer:
         thispath = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
         py3path = os.path.join(thispath, 'venv', 'Scripts', 'pythonw.exe')
-        #print('Launching the Fixation GUI.')
+        guipath = os.path.join(thispath,'fixationgui', 'wxFixGUI.py')
+        print('Launching the Fixation GUI at '+ py3path)
 
-        self.mainGUI = subprocess.Popen([py3path, 'wxFixGUI.py'])
+        self.mainGUI = subprocess.Popen([py3path, guipath])
 
         # Spawn the pair of listener threads so we can detect changes in the comm Queues passed by Savior
         self.whisperer = QueueWhisperer(dataQueue)  # This will recieve a tuple of sizes
@@ -40,7 +41,7 @@ class QueueWhisperer(threading.Thread):
 
         while True:
             try:
-                qData = self.queue.get(timeout=10)  # This is expected to be a tuple, but handle it in case it's not.
+                qData = self.queue.get()  # This is expected to be a tuple, but handle it in case it's not.
 
                 msg = ""
                 for data in qData:

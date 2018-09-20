@@ -54,9 +54,6 @@
 
 # TODO: remind me to talk about an conference in Virginia in June.
 
-# current software version 
-version    = "2.0"
-
 # importing Python libraries
 import os, wx, time, threading, pickle, winsound, string, copy
 import wx.lib.agw.flatnotebook as fnb
@@ -73,8 +70,13 @@ import NystagmusCorrectionWindow
 import SaviorHardwareConfiguration
 
 # Import the fixation GUI.
-from FixGUIProc import FixGUIServer
+from wxFixProc import FixGUIServer
 from multiprocessing import Process, Queue
+
+import SaviorResearchPanel
+import SaviorClinicalPanel
+
+import sys
 
 # changing cwd so that we know where all of the files are.
 os.chdir(SaviorHardwareConfiguration.local_path)
@@ -82,7 +84,7 @@ os.chdir(SaviorHardwareConfiguration.local_path)
 # TODO: implement shutter safety.
 
 # importing home-made user interface modules
-import wxSaviorTopPanel, wxSaviorImageAcquisitionPanel, wxVideoDisplayFrame, \
+import wxSaviorTopPanel, wxSaviorImageAcquisitionPanel, VideoDisplay, \
        wxSaviorOpticalScannersPanel, wxSaviorEyeTrackingPanel, \
        wxSaviorBottomPanel, wxTrackingFrameDisplay, wxSaviorSettingsFileGrid, \
        wxEventGenerator, SaviorCommandInterface,   \
@@ -90,6 +92,8 @@ import wxSaviorTopPanel, wxSaviorImageAcquisitionPanel, wxVideoDisplayFrame, \
        
 # importing hardware control modules
 import MatroxFramegrabber, SignalGenerator
+
+version = 2.0
 
 # Auxiliary function
 def __MultipleBeeps__(n_beeps              = 1,   t_between_beeps_in_s = 0.3,
@@ -107,9 +111,24 @@ def __MultipleBeeps__(n_beeps              = 1,   t_between_beeps_in_s = 0.3,
 
 
 
+import collections
+
+def RecursiveDictionaryUpdate(d, u):
+    for k, v in u.iteritems():
+        if isinstance(v, collections.Mapping):
+            r = RecursiveDictionaryUpdate(d.get(k, {}), v)
+            d[k] = r
+        else:
+            d[k] = u[k]
+    return d
+
+
 ###########################################################################    
 #                         Main application class                          #
 ###########################################################################    
+
+software_configuration_dictionary = {'button_color' : (50, 50, 50),
+                                     'button_height' : 25}
 
 class SaviorApp(wx.App):
     
@@ -132,7 +151,9 @@ class SaviorApp(wx.App):
        
         # creating the application
         wx.App.__init__(self, redirect = False)
-        
+
+
+
         # initialize this to none
         self.sync_loss_thread = None
                                   
@@ -145,15 +166,11 @@ class SaviorApp(wx.App):
                                  'image_resolution_calculation_settings' : initial_settings.image_resolution_calculation_settings,
                                  'image_acquisition_settings'            : initial_settings.image_acquisition_settings,
                                  'eye_tracking_settings'                 : initial_settings.eye_tracking_settings,
-                                 'exposure_settings'                     : initial_settings.exposure_settings,
                                  'secondary_display_settings'            : initial_settings.secondary_display_settings}
 
         # initializing the hardware and GUI
         self.LoadConfiguration(settings)
 
-        # Opening the settings file grid
-        self.savior_panel.OnMenuLoadClick(None)
-        
         # starting the main event loop
         self.MainLoop()      
 
@@ -165,13 +182,24 @@ class SaviorApp(wx.App):
         """
         
         # keeping an internal copy of the new settings
-        self.settings                       = new_settings
+        if self.initialized:
+
+            self.settings['optical_scanners_settings'].update(new_settings['optical_scanners_settings'])
+            self.settings['image_acquisition_settings'].update(new_settings['image_acquisition_settings'])
+            self.settings['image_resolution_calculation_settings'].update(new_settings['image_resolution_calculation_settings'])
+            self.settings['secondary_display_settings'].update(new_settings['secondary_display_settings'])
+
+            if 'eye_tracking_settings' in self.settings.keys() and\
+                    'eye_tracking_settings' in new_settings.keys():
+                self.settings['eye_tracking_settings'].update(new_settings['eye_tracking_settings'])
+
+        else:
+            self.settings                       = new_settings
 
         # The settings passed here will never contain the hardware information
         # Grabbing the stuff from the hardware configuration file
         self.settings['optical_scanners_settings'].update(  SaviorHardwareConfiguration.optical_scanners_settings  )
         self.settings['image_acquisition_settings'].update( SaviorHardwareConfiguration.image_acquisition_settings )
-        self.settings['eye_tracking_settings'].update(      SaviorHardwareConfiguration.eye_tracking_settings)
 
         # make sure we are in the right directory
         os.chdir(SaviorHardwareConfiguration.local_path)
@@ -186,16 +214,25 @@ class SaviorApp(wx.App):
         self.n_lines_between_strip_starts             = self.settings['image_acquisition_settings']['n_lines_between_strip_starts']
 
         if self.initialized:
-		
+
             # Tell MIL to not acquire any more frames
             self.matrox_frame_grabber.StopCapture()
 
-            # wait for any previous frames to be processed
-            self.matrox_frame_grabber.StopEventDispatchPython()
+            for index in range(len(self._display_windows)):
+                # unbind this first so the callback is not called while we destroy them
+                self._display_windows[index].Unbind(wx.EVT_CLOSE)
+                self._display_windows[index].Close()
+                self._display_windows[index].Destroy()
 
+            self._display_windows = []
+
+
+            # # wait for any previous frames to be processed
+            # self.matrox_frame_grabber.StopEventDispatchPython()
             # set the new DCF file
             self.matrox_frame_grabber.SetDCF(self.DCF_file_name)
-			
+
+
         else:
             self.matrox_frame_grabber                 = MatroxFramegrabber.MatroxFramegrabber(self.DCF_file_name)
 
@@ -209,6 +246,7 @@ class SaviorApp(wx.App):
             self.matrox_frame_grabber_event_generator.BindWXEvent("grab_finished", self.OnGrabFinished)
             self.matrox_frame_grabber_event_generator.BindWXEvent("grab_error", self.OnMatroxGrabError)
 
+
         # get a list of channels that are not availabe for imaging based on
         # the DCF file and disable them from the acquisition panel
         self.dig_num                                  = self.matrox_frame_grabber.GetDigitizerNumber()
@@ -216,11 +254,11 @@ class SaviorApp(wx.App):
 
         # Tell the mil_control to flip if the settings ask for it
         for cur_channel_index in range(self.n_channels):
-            self.matrox_frame_grabber.FlipVertical(  new_settings['image_acquisition_settings']['flip_displays_up_down'],    cur_channel_index)
-            self.matrox_frame_grabber.FlipHorizontal(new_settings['image_acquisition_settings']['flip_displays_left_right'], cur_channel_index)
+            self.matrox_frame_grabber.FlipVertical(  self.settings['image_acquisition_settings']['flip_displays_up_down'],    cur_channel_index)
+            self.matrox_frame_grabber.FlipHorizontal(self.settings['image_acquisition_settings']['flip_displays_left_right'], cur_channel_index)
 
         # determining how fast we should update statistics on the display panel
-        self.stats_update_rate_in_updates_per_second   = new_settings['image_acquisition_settings']['stats_update_rate_in_Hz']
+        self.stats_update_rate_in_updates_per_second   = self.settings['image_acquisition_settings']['stats_update_rate_in_Hz']
         update_every_n_frames                          = np.ceil(np.float(self.matrox_frame_grabber.GetFrameRate()) /\
                                                                  np.float(self.stats_update_rate_in_updates_per_second))
         self.matrox_frame_grabber.SetStatisticsUpdateRate(long(self.stats_update_rate_in_updates_per_second))
@@ -265,7 +303,7 @@ class SaviorApp(wx.App):
         
         # Create the NI signal generator
         if self.initialized:
-            self.signal_generator.SetVoltages(self.settings ['optical_scanners_settings'])
+            # self.signal_generator.SetVoltages(self.settings ['optical_scanners_settings'])
             self.signal_generator.SetDefaultExposureTiming([start_line, stop_line, T0, T1])
         else:
             self.signal_generator                     = SignalGenerator.SignalGenerator(
@@ -293,7 +331,6 @@ class SaviorApp(wx.App):
                 illumination_mode = 2
                 
             self.signal_generator.SetIlluminationMode(current_channel, illumination_mode)
-            self.matrox_frame_grabber.SetIlluminationMode(current_channel, illumination_mode)
 
         #############################
         # Setting up user interface
@@ -334,14 +371,11 @@ class SaviorApp(wx.App):
                 self.savior_panel.top_panel.SetBackgroundColour('default')
 
             # update the savior GUI
-            self.savior_panel.SetCurrentSettings(new_settings)
+            self.savior_panel.SetCurrentSettings(self.settings)
 
-            # update the video display
-            self.display_frame.SetSettings(video_display_settings)
-            
             # start the matrox frame grabber
             self.matrox_frame_grabber.StartCapture()
-            
+
         else:
             # If synchronization is lost then we launch a thread to beep
             # to inform the user
@@ -357,26 +391,30 @@ class SaviorApp(wx.App):
             # the fixation GUI
             self.fixQ = Queue(1)
             
-            # creating application main frame 
-            self.savior_panel  = SaviorMainPanel(new_settings,
-                                                 self.LoadConfiguration,
-                                                 self.savior_icon,   
-                                                 self.matrox_frame_grabber_event_generator,
-                                                 self.signal_generator,
-                                                 self.fixQ)
+            # creating application main frame
+            if self.settings['clinical_version']:
+                self.savior_panel  = SaviorClinicalPanel.SaviorMainPanel(self.settings,
+                                                                    self.LoadConfiguration,
+                                                                    self.savior_icon,
+                                                                    self.matrox_frame_grabber_event_generator,
+                                                                    self.signal_generator,
+                                                                    self.fixQ,
+                                                                    software_configuration_dictionary)
+
+            else:
+                self.savior_panel  = SaviorResearchPanel.SaviorMainPanel(self.settings,
+                                                                    self.LoadConfiguration,
+                                                                    self.savior_icon,
+                                                                    self.matrox_frame_grabber_event_generator,
+                                                                    self.signal_generator,
+                                                                    self.fixQ,
+                                                                    self.fixQ,
+                                                                    software_configuration_dictionary)
 
             # update the savior GUI
-            self.savior_panel.SetCurrentSettings(new_settings)
+            self.savior_panel.SetCurrentSettings(self.settings)
 
-            # Create the video display
-            self.display_frame = wxVideoDisplayFrame.VideoDisplayFrame(self.savior_panel, 
-                                                                       'Savior Video Display', 
-                                                                       video_display_settings, 
-                                                                       (0, 0), 
-                                                                       self.savior_icon,
-                                                                       self.matrox_frame_grabber_event_generator)
-            
-        
+
             # bringing the application window to the front
             self.SetTopWindow(self.savior_panel)
 
@@ -392,21 +430,101 @@ class SaviorApp(wx.App):
             #########################################################
             ## wxFixation GUI addition by Robert Cooper 09-19-2018 ##
             #########################################################
-            self.wxFixFrameProc = FixGUIServer(fixQ)
+            self.wxFixFrameProc = FixGUIServer(self.fixQ)
 			
             # create the dispatcher object to handle messages
             self.command_interface = SaviorCommandInterface.SaviorCommandInterface(self)
 
-        # update the top panel to reflect the new FOV
-        self.savior_panel.top_panel.UpdateOpticalScannersAndImageSamplingDisplay(self.matrox_frame_grabber.GetVideoWidth(),
-                                                                                 self.matrox_frame_grabber.GetVideoHeight(),
-                                                                                 self.settings['optical_scanners_settings']['resonant_scanner_amplitude_in_deg'],
-                                                                                 self.settings['optical_scanners_settings']['raster_scanner_amplitude_in_deg'])                                                                  
+        self._display_windows = []
+        # Create the video display
+        for current_channel_index in range(self.n_channels):
+
+            if self.matrox_frame_grabber.IsChannelEnabled(current_channel_index):
+
+
+                channel_video_settings = {'channel_number' : current_channel_index,
+                                          'channel_label'  : self.settings['image_acquisition_settings']['channel_labels'][current_channel_index]}
+
+                channel_video_frame = VideoDisplay.VideoDisplayWindow(self.savior_panel,
+                                                                      channel_video_settings,
+                                                                      self.matrox_frame_grabber_event_generator,
+                                                                      icon = self.savior_icon)
+                self._display_windows.append(channel_video_frame)
+                channel_video_frame.Bind(wx.EVT_CLOSE, self._OnVideoFrameClose)
+
+##        # assume the videos are the same size
+##        if len(self._display_windows) > 0:
+##
+##            video_window_width, video_window_height = self._display_windows[0].GetSize()
+##            savior_width, savior_height = self.savior_panel.GetSize()
+##
+##            screen_width, screen_height = wx.GetDisplaySize()
+##
+##            screen_width -= savior_width
+##
+##            n_video_columns = screen_width / video_window_width
+##            if n_video_columns < 1:
+##                n_video_columns = 1
+##
+##            n_video_rows    = self.n_channels / n_video_columns
+##            if n_video_rows < 1:
+##                n_video_rows = 1
+##
+##            cur_x = 0
+##            cur_y = 0
+##            col_count = 0
+##            for current_video_panel in range(len(self._display_windows)):
+##                self._display_windows[current_video_panel].SetPosition((cur_x, cur_y))
+##
+##                if col_count >= n_video_columns - 1:
+##                    col_count = 0
+##                    cur_y += video_window_height
+##                    cur_x = 0
+##                else:
+##                    col_count += 1
+##                    cur_x += video_window_width
 
         # we have created the GUI
         self.initialized = True
 
+        if SaviorHardwareConfiguration.gui_settings['launch_secondary_display']:
 
+            self.savior_panel.OnNewSecondaryOpen(None)
+
+
+    def GetVersion(sel):
+        return version
+
+    def _OnVideoFrameClose(self, event):
+
+        obj = event.GetEventObject()
+        for index in range(len(self._display_windows)):
+
+            if obj == self._display_windows[index]:
+                self._display_windows.pop(index)
+                break
+
+        event.Skip()
+
+    def LaunchVideoDisplayWindw(self, channel_index):
+
+        # see if the window is already opened
+        for current_video_display in self._display_windows:
+            if current_video_display.GetChannelIndex() == channel_index:
+                current_video_display.SetFocus()
+                return
+
+        # build the frame if it doesn't exist
+        if self.matrox_frame_grabber.IsChannelEnabled(channel_index):
+
+            channel_video_settings = {'channel_number' : channel_index,
+                                      'channel_label'  : self.settings['image_acquisition_settings']['channel_labels'][channel_index]}
+
+            channel_video_frame = VideoDisplay.VideoDisplayWindow(self.savior_panel,
+                                                                  channel_video_settings,
+                                                                  self.matrox_frame_grabber_event_generator)
+            self._display_windows.append(channel_video_frame)
+            channel_video_frame.Bind(wx.EVT_CLOSE, self._OnVideoFrameClose)
 
     def OnKeyUp(self, event):
         
@@ -423,27 +541,31 @@ class SaviorApp(wx.App):
         # Note the arrow keys are bound in the optical scanners panel
 
         # function hot keys
-    
-        if event.GetKeyCode() == wx.WXK_F1:
-        
-            wx.MessageBox('This will be a help dialog')
-            
-        elif event.GetKeyCode() == wx.WXK_F2:
-        
-            self.savior_panel.bottom_panel.OnStopButton(event = None)
-        
-        elif event.GetKeyCode() == wx.WXK_F3:
 
-            self.savior_panel.bottom_panel.OnLiveButton(event = None)
-            
-        elif event.GetKeyCode() == wx.WXK_F4:
+        if not event.AltDown() and not event.ControlDown() and not event.ShiftDown():
 
-            self.savior_panel.bottom_panel.OnRecordButton(event = None)
-            
-        elif event.GetKeyCode() == wx.WXK_F5:
-            self.savior_panel.optical_scanners_control_panel.ResetOffsets()
-            pass
-        
+            if event.GetKeyCode() == wx.WXK_F1:
+
+                hot_key_text = 'Hot keys:\nF2 - Pause\nF3 - Play\nF4 - Record'
+
+                wx.MessageBox(hot_key_text)
+
+            elif event.GetKeyCode() == wx.WXK_F2:
+
+                self.savior_panel.bottom_panel.OnStopButton(event = None)
+
+            elif event.GetKeyCode() == wx.WXK_F3:
+
+                self.savior_panel.bottom_panel.OnLiveButton(event = None)
+
+            elif event.GetKeyCode() == wx.WXK_F4:
+
+                self.savior_panel.bottom_panel.OnRecordButton(event = None)
+
+            elif event.GetKeyCode() == wx.WXK_F5:
+                self.savior_panel.optical_scanners_control_panel.ResetOffsets()
+                pass
+
         event.Skip()
         
     def OnClose(self, event):
@@ -457,13 +579,15 @@ class SaviorApp(wx.App):
         if self.sync_loss_thread != None:
             self.warning_user_of_sync_loss = False
 
-        self.matrox_frame_grabber.StopEventDispatchPython()
+        #self.matrox_frame_grabber.StopEventDispatchPython()
         
         # clean up resources, we do the matrox
         # first so that we wont get a grab
         # error when we stop the signals
         self.matrox_frame_grabber.StopCapture()
-        
+
+        self._display_windows = []
+
         #self.matrox_frame_grabber.ReleasePythonCallbacks()
         self.matrox_frame_grabber.CloseMIL()
 
@@ -497,6 +621,10 @@ class SaviorApp(wx.App):
                 # just entered the recording state, beep to indicate the start of a movie
                 self.OnGrabStart()
 
+                current_movie_number = self.savior_panel.bottom_panel.GetCurrentMovieNumber()
+                for current_display  in self._display_windows:
+                    current_display.SetCurrentMovieNumber(current_movie_number)
+
         self.PauseExposureSignals()
 
         if event != None:
@@ -517,13 +645,19 @@ class SaviorApp(wx.App):
 
                 # go through the exposure signals, find
                 # the signals that are selected as off when
-                # paused and disable those
+                # paused and disable those channels,
+                # note we must also invert the active high setting
+                # this is because when the exposure is disabled it keeps the signals
+                # in the "on" position. I use this hack to invert what the signal generator thinks
+                # is the "On" position so it actually turns the laser off when paused
+                # TODO: make the changes to the video signal generator to make this cleaner
+                #       probably include a new signal for turning laser on and off manually....
                 for exp_key in temp_eposure_settings.keys():
                     if temp_eposure_settings[exp_key]['off_when_paused']:
+                        temp_eposure_settings[exp_key]['active_high'] = not temp_eposure_settings[exp_key]['active_high']
                         temp_eposure_settings[exp_key]['enabled'] = False
 
 
-            
             self.signal_generator.SetExposureSettings(temp_eposure_settings)    
         
 
@@ -617,642 +751,6 @@ class SaviorApp(wx.App):
 
 
 
-###########################################################################    
-#                         GUI / application class                         #
-###########################################################################
-
-class SaviorMainPanel(wx.Frame):
-    
-    """This class implements an application for acquiring and recording
-       images with a scanning laser ophthalmoscope.
-    """
-
-    def __init__(self, initial_settings,
-                       load_new_configuration_function      = None,
-                       savior_icon                          = None,
-                       matrox_frame_grabber_event_generator = None,
-                       signal_generator                     = None,
-                       fixQ                                 = None):        
-        """
-        """
-
-        # grab a reference to the hardware control
-        self.matrox_frame_grabber_event_generator = matrox_frame_grabber_event_generator
-        
-        if matrox_frame_grabber_event_generator != None:
-            self.matrox_frame_grabber            = matrox_frame_grabber_event_generator.GetEventGenerator()
-        else:
-            self.matrox_frame_grabber            = None
-
-        self.signal_generator                    = signal_generator
-
-        # Grab a reference to the initial settings
-        self.settings                            = initial_settings
-        
-        # We only want one of these open at a time so keep track of it
-        self.file_grid                           = None
-        
-        # The icon thata will go on the top left of the frame
-        self.savior_icon                         = savior_icon
-        
-        self.load_new_configuration_function     = load_new_configuration_function
-
-        bottom_panel_initial_settings            =  {'n_frames_to_record' : initial_settings['image_acquisition_settings']['n_frames_to_record']}
-        
-        # creating main window (in Python jargon: frame)
-        wx.Frame.__init__(self, None, -1,
-                          "Savior (v " + version + ")",
-                          style = wx.DEFAULT_FRAME_STYLE ^(wx.RESIZE_BORDER | wx.MAXIMIZE_BOX))
-
-        # setting the panel size
-        main_panel_width                        = 760
-        main_panel_height                       = 850
-        self.SetClientSize((main_panel_width, main_panel_height))
-
-        # setting the panel background and foreground colors
-        self.SetBackgroundColour((50, 50, 50))
-        self.SetForegroundColour('white')
-
-        # Create the queues we'll post to in order to pass messages to
-        # the fixation GUI
-        self.fovQ = fixQ
-        self.captQ = fixQ     
-
-        # creating top panel
-        self.top_panel                            = wxSaviorTopPanel.wxSaviorTopPanel(self,
-                                                        local_savior_path                    = SaviorHardwareConfiguration.local_path)
-                                                              
-        # show/discard the discard blink panel as required
-        self.top_panel.ShowDiscardBlinkIcon(initial_settings['image_acquisition_settings']['discard_blinks_boolean']) 
-
-        # creating middle panel, setting its size and colours
-        self.middle_panel                         = wx.Panel(self, -1)
-        self.middle_panel.SetClientSize((self.GetClientSize()[0], 950))
-        self.middle_panel.SetBackgroundColour(self.GetBackgroundColour())
-        self.middle_panel.SetForegroundColour(self.GetForegroundColour())
-
-        # creating the image acquisition panel
-        self.image_acquisition_control_panel      = wxSaviorImageAcquisitionPanel.\
-                                                    wxSaviorImageAcquisitionPanel(
-                                                    self.middle_panel,
-                                                    initial_settings['image_acquisition_settings'],
-                                                    self.matrox_frame_grabber_event_generator,
-                                                    self.top_panel)
-        
-        
-                                      
-        # creating the optical scanners acquisition panel
-        self.optical_scanners_control_panel       = wxSaviorOpticalScannersPanel.\
-                                                    wxSaviorOpticalScannersPanel(
-                                                    parent                                  = self.middle_panel,
-                                                    initial_optical_scanners_settings       = initial_settings['optical_scanners_settings'],
-                                                    initial_resolution_calculation_settings = initial_settings['image_resolution_calculation_settings'],
-                                                    clinical_version_boolean                = initial_settings['clinical_version'],
-                                                    signal_generator                        = self.signal_generator,
-                                                    top_panel                               = self.top_panel)
-                                          
-        self.eye_tracking_control_panel           = wxSaviorEyeTrackingPanel.\
-                                                    wxSaviorEyeTrackingPanel(
-                                                    self.middle_panel,
-                                                    initial_settings['eye_tracking_settings'])
-                                       
-        # This should not be required, but for whatever reason adding the
-        # panels to the book changes their size to (0, 0)!!!!!
-        temp_image_acquisition_control_panel_size = self.image_acquisition_control_panel.GetClientSize()
-
-        # creating book with tabs
-        self.book                                 = fnb.FlatNotebook(self.middle_panel, -1,         \
-                                                                     agwStyle = fnb.FNB_NO_X_BUTTON \
-                                                                           | fnb.FNB_NODRAG         \
-                                                                           | fnb.FNB_SMART_TABS     \
-                                                                           | fnb.FNB_NO_NAV_BUTTONS)
-        # adding panels to the book
-        self.book.AddPage(self.image_acquisition_control_panel, ' Image acquisition')
-        self.book.AddPage(self.optical_scanners_control_panel,  ' Optical scanners')
-        self.book.AddPage(self.eye_tracking_control_panel,      ' Eye tracking')
-
-        # getting background and foreground colours from the parent panel,
-        # note that FlatNotebook requires that all colours are passed as
-        # wx.Colour, NOT tuples
-        bg_colour = wx.Colour(self.GetBackgroundColour()[0], self.GetBackgroundColour()[1], self.GetBackgroundColour()[2], 255)
-        fg_colour = wx.Colour(self.GetForegroundColour()[0], self.GetForegroundColour()[1], self.GetForegroundColour()[2], 255)
-
-        self.book.SetTabAreaColour(         bg_colour)
-        self.book.SetActiveTabColour(       bg_colour)
-        self.book.SetBackgroundColour(      bg_colour)
-
-        self.book.SetActiveTabTextColour(   fg_colour)
-        self.book.SetForegroundColour(      fg_colour)
-        self.book.SetNonActiveTabTextColour(fg_colour)
-
-
-        # This should not be required, but for whatever reason adding the
-        # panels to the book changes their size to (0, 0)!!!!!
-        self.image_acquisition_control_panel.SetClientSize(temp_image_acquisition_control_panel_size)
-
-        # estimating the book size AFTER adding the panels
-        max_width          = 0
-        max_height         = 0
-
-        for page_index in range(self.book.GetPageCount()):
-            max_width      = max(max_width,  self.book.GetPage(page_index).GetClientSize()[0])
-            max_height     = max(max_height, self.book.GetPage(page_index).GetClientSize()[1])
-
-        # setting the book size to fit the largest panel
-        desired_book_size  = (max(self.book.GetClientSize()[0],  max_width),
-                              max(self.book.GetClientSize()[1], max_height))
-
-
-        #self.book.Fit()
-        self.book.SetClientSize(        desired_book_size)
-        self.middle_panel.SetClientSize(desired_book_size)
-        
-        # creating bottom panel
-        self.bottom_panel  = wxSaviorBottomPanel.wxSaviorBottomPanel(self,
-                                                    bottom_panel_initial_settings,
-                                                    local_savior_path = SaviorHardwareConfiguration.local_path,
-                                                    matrox_frame_grabber_event_generator = self.matrox_frame_grabber_event_generator,
-                                                    top_panel = self.top_panel)
-
-        # This should not be required, but for whatever reason adding the
-        # panels to the book changes their size to (0, 0)!!!!!
-        temp_bottom_panel_size = self.bottom_panel.GetClientSize()
-
-        # creating vertical sizer to split the frame vertically in three
-        main_sizer             = wx.BoxSizer(wx.VERTICAL)
-
-        main_sizer.Add(self.top_panel,      0, wx.EXPAND)
-        main_sizer.Add(wx.StaticLine(self), 0, wx.EXPAND)
-        main_sizer.Add(self.middle_panel,   1, wx.EXPAND)
-        main_sizer.Add(wx.StaticLine(self), 0, wx.EXPAND)
-        main_sizer.Add(self.bottom_panel,   0, wx.EXPAND)
-
-        # This should not be required, but for whatever reason adding the
-        # panels to the book changes their size to (0, 0)!!!!!
-        self.bottom_panel.SetClientSize(temp_bottom_panel_size)
-
-        # resizing the frame
-        self.SetSizer(main_sizer)
-        main_sizer.SetDimension(0, 0, self.GetClientSize()[0], self.GetClientSize()[1])
-        #self.Fit()
-
-        self.SetIcon(self.savior_icon)
-        
-        
-##        self.CreateMenuBar()
-##        self.CreateRightClickMenu()
-##        self.LayoutItems()
-##
-##        self.Bind(fnb.EVT_FLATNOTEBOOK_PAGE_CHANGING, self.OnPageChanging)
-##        self.Bind(fnb.EVT_FLATNOTEBOOK_PAGE_CHANGED, self.OnPageChanged)
-##
-##        self.Bind(wx.EVT_UPDATE_UI, self.OnDropDownArrowUI, id=MENU_USE_DROP_ARROW_BUTTON)
-##        self.Bind(wx.EVT_UPDATE_UI, self.OnHideNavigatisUI, id=MENU_HIDE_NAV_BUTTONS)
-##        self.Bind(wx.EVT_UPDATE_UI, self.OnAllowForeignDndUI, id=MENU_ALLOW_FOREIGN_DND)
-
-
-        ###################################################################
-        ##                        Creating menus                         ##
-        ###################################################################
-        
-        file_menu           = wx.Menu()
-        file_menu.AppendSeparator()
-        save_option         = file_menu.Append(-1, "&Save Current Configuration")
-        load_option         = file_menu.Append(-1, "&Load Configuration")
-        exit_option         = file_menu.Append(-1, "&Exit")
-
-        # menu for selecting windows to be displayed
-        view_menu             = wx.Menu()
-        tracking_option       = view_menu.Append(-1, "Display &tracking frame")
-        exposure_option       = view_menu.Append(-1, "Display &exposure settings")
-        illumination_window   = view_menu.Append(-1, "Display &illumination options")
-        secondary_display     = view_menu.Append(-1, "Open &secondary display window")
-        nystagmus_control     = view_menu.Append(-1, "Open &nystagmus compensation display window")
-
-        # keep track of the auxiliary frames
-        self.exposure_frame               = None
-        self.illumination_window          = None
-        self.remote_control_frame         = None
-        self._nystagmus_correction_window = None
-        self._nystagmus_settings          = {}
-        
-        self.secondary_display_windows = []
-        
-        help_menu           = wx.Menu()
-        help_menu.AppendSeparator()
-
-        about_option        = help_menu.Append(-1, "&About")
-
-        menu_bar            = wx.MenuBar()
-        menu_bar.Append(file_menu, "File")
-        menu_bar.Append(view_menu, "View")
-        menu_bar.Append(help_menu, "Help")
-        self.SetMenuBar(menu_bar)
-        
-        self.Bind(wx.EVT_MENU, self.OnMenuExitClick,             exit_option)
-        self.Bind(wx.EVT_MENU, self.OnMenuSaveClick,             save_option)
-        self.Bind(wx.EVT_MENU, self.OnMenuLoadClick,             load_option)
-        self.Bind(wx.EVT_MENU, self.OnMenuAboutClick,            about_option)
-        self.Bind(wx.EVT_MENU, self.OnExposureSettingsClick,     exposure_option)
-        self.Bind(wx.EVT_MENU, self.OnIlluminationSettingsClick, illumination_window)
-        self.Bind(wx.EVT_MENU, self.OnNewSecondaryOpen,          secondary_display)
-        self.Bind(wx.EVT_MENU, self.OnNystagmusControl,          nystagmus_control)
-        # Get the display size and put this window in the top right side
-        screen_resolution   = wx.GetDisplaySize()
-        current_size        = self.GetSize()
-        
-        top_left_corner     = (screen_resolution[0] - current_size[0], 0)
-       
-        # placing the window on the top left corner of the monitor
-        self.SetPosition(top_left_corner)
-
-        # eye tracking is always disabled by default
-        self.top_panel.ShowEyeTrackingIcon(False)
-
-
-        # positioning the window almost on the top right corner of the screen
-        screen_width, screen_height = wx.GetDisplaySize()
-        window_width, window_height = self.GetSize()
-
-        # the 5 pixel shift is because of the window border
-        self.SetPosition(wx.Point(screen_width - window_width - 5, 5))
-
-        # making the window visible
-        self.Show()
-        
-        self.Bind(wx.EVT_CLOSE, self.OnClose)
-        
-    def OnNystagmusControl(self, event):
-    
-        if self._nystagmus_correction_window == None:
-        
-            scanner_scaling_value = self.settings['optical_scanners_settings']['slow_scanner_calibration_scaling_factor']
-        
-            self._nystagmus_correction_window = NystagmusCorrectionWindow.NystagmusCorrectionWindow(self, 
-                                                                                                    scanner_scaling_value, 
-                                                                                                    self.signal_generator ,
-                                                                                                    self._nystagmus_settings )
-            self._nystagmus_correction_window.Bind(wx.EVT_CLOSE, self.OnNystagmusWindowClose)
-    
-        event.Skip()
-        
-    def OnNystagmusWindowClose(self, event):
-    
-        self._nystagmus_settings = self._nystagmus_correction_window.GetNystagmusSettings()
-    
-        self._nystagmus_correction_window = None
-    
-        event.Skip()
-        
-    def OnClose(self, event):
-        
-        if SaviorHardwareConfiguration.enable_fixation_gui:
-            self.captQ.put(-1)
-            
-        # close the secondary displays
-        for current_display in self.secondary_display_windows:
-            current_display.Close()
-        self.secondary_display_windows = []
-    
-        event.Skip()
-        
-    def OnNewSecondaryOpen(self, event):
-    
-        secondary_display = LiveStreamMathDisplay.LiveStreamMathDisplayFrame(self, 
-                                                                             default_expression = "display_buffer = channel_0", 
-                                                                             frame_grabber      = self.matrox_frame_grabber,
-                                                                             common_expressions = self.secondary_display_settings['common_expressions'])
-                                                                             
-        secondary_display.Bind(wx.EVT_CLOSE, self.OnSecondaryWindowClose)
-    
-        self.secondary_display_windows.append(secondary_display)
-    
-        # dont skip the event? it fires twice for some reason?
-        #event.Skip()
-        
-    def OnSecondaryWindowClose(self, event):
-    
-        window = event.GetEventObject()
-        
-        if self.secondary_display_windows.count(window) > 0:
-            self.secondary_display_windows.pop(self.secondary_display_windows.index(window))
-    
-        event.Skip()
-        
-    def OnIlluminationSettingsClick(self, event):
-
-        if self.illumination_window == None:
-            self.illumination_window = IlluminationControlFrame.IlluminationControlFrame(self,
-                                                 self.settings['optical_scanners_settings']['illumination_settings'],
-                                                 self.matrox_frame_grabber,
-                                                 self.signal_generator)
-            self.illumination_window.Bind(wx.EVT_CLOSE, self.OnIlluminationWindowClose)
-
-        else:
-            self.illumination_window.SetFocus()
-
-        event.Skip()
-
-    def OnIlluminationWindowClose(self, event):
-
-        self.illumination_window = None
-        event.Skip()
-        
-    def OnExposureSettingsClick(self, event):
-
-        if self.exposure_frame == None:
-            self.exposure_frame = wxSaviorExposureSignalsDialog.wxSaviorExposureSignalsDialog(self,
-                        self.settings['optical_scanners_settings']['exposure_settings'],
-                        self.signal_generator,
-                        self.matrox_frame_grabber_event_generator,
-                        wx.GetApp().GetVideoFrame())
-
-            self.exposure_frame.Bind(wx.EVT_CLOSE, self.OnExposureFrameClose)
-        
-        event.Skip()
-
-    def OnExposureFrameClose(self, event):
-
-        self.exposure_frame = None
-
-        event.Skip()
-        
-     
-    def OnMenuSaveClick(self, event):
-
-        configuration_settings = self.GetCurrentSettings()
-    
-        # Get a file name from the user
-        file_dialog   = wx.FileDialog(self,
-                                      message       = "Choose a savior settings file",
-                                      defaultDir    = os.getcwd(), 
-                                      defaultFile   = "",
-                                      wildcard      = "Savior setings file (*_savior_settings.py)|*_savior_settings.py",
-                                      style         = wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
-
-        # Show dialog and retrieve user response
-        if file_dialog.ShowModal() == wx.ID_OK:            
-
-            destination_file = file_dialog.GetPath()
-            
-            file_dialog.Destroy()
-            
-            # loading Savior settings template file
-            settings_template_file_name = 'SaviorSettingsFileTemplate.py'
-            file_object                 = open(settings_template_file_name, 'r')
-            settings_template_text      = file_object.readlines()
-            file_object.close()
-
-            n_lines                     = len(settings_template_text)
-
-            # Consolidating the settings into one dictionary
-            data_dictionary = {}
-            data_dictionary.update(configuration_settings['optical_scanners_settings'])
-            data_dictionary.update(configuration_settings['image_acquisition_settings'])
-            data_dictionary.update(configuration_settings['image_resolution_calculation_settings'])
-            data_dictionary.update(configuration_settings['eye_tracking_settings'])
-
-            # adding a few things that are not stored by any page
-            data_dictionary['exposure_settings']            = self.settings['optical_scanners_settings']['exposure_settings']
-            data_dictionary['n_lines_per_strip']            = self.settings['image_acquisition_settings']['n_lines_per_strip']
-            data_dictionary['n_lines_between_strip_starts'] = self.settings['image_acquisition_settings']['n_lines_between_strip_starts']
-
-            # iterating through every line
-            for line_index in range(n_lines):
-
-                # going through all of the items in the configuration
-                # and seeing if any of them belong in the template file
-                for field, value in data_dictionary.items():
-
-                    # formatting the key so that it matches what is in the template file
-                    formatted_field_name = '{' + field + '}' 
-                    
-                    if string.find(settings_template_text[line_index], formatted_field_name)> -1:
-                        
-                        # putting the data in the text
-                        if type(value) == str:
-                            settings_template_text[line_index] = string.replace (settings_template_text[line_index],
-                                                                                 formatted_field_name,
-                                                                                 '\'' + str(value) + '\'')
-                        else:                                                     
-                            settings_template_text[line_index] = string.replace (settings_template_text[line_index],
-                                                                                 formatted_field_name,
-                                                                                 str(value))
-                        
-            # saving settings file
-
-            if destination_file[(len(destination_file)-3):len(destination_file)].lower() == '.py':
-                destination_file = destination_file[0:len(destination_file)-3]
-                
-            destination_file            = destination_file + '_savior_settings.py'
-            
-            file_object                 = open(destination_file, 'w')
-            file_object.writelines(settings_template_text)
-            file_object.close()
-
-    def FormatSettings(self, settings_module):
-    
-        settings       = {'clinical_version'                      : self.settings['clinical_version'],
-                          'optical_scanners_settings'             : settings_module.optical_scanners_settings,    
-                          'image_resolution_calculation_settings' : settings_module.image_resolution_calculation_settings,
-                          'image_acquisition_settings'            : settings_module.image_acquisition_settings,
-                          'eye_tracking_settings'                 : settings_module.eye_tracking_settings,
-                          'secondary_display_settings'            : settings_module.secondary_display_settings}
-
-
-        # We would like the destination folders to stay the same so we will just add the original
-        # ones to this structure
-        current_settings = self.GetCurrentSettings()
-        
-        formatted_file_list = []
-        for cur_file_index in range(len(current_settings['image_acquisition_settings']['destination_folders'])):
-
-            if len(current_settings['image_acquisition_settings']['current_file_names'][cur_file_index]) > 0:
-                formatted_file_list.append(current_settings['image_acquisition_settings']['destination_folders'][cur_file_index]\
-                                           + '\\' + current_settings['image_acquisition_settings']['current_file_names'][cur_file_index])
-            else:
-                formatted_file_list.append(current_settings['image_acquisition_settings']['destination_folders'][cur_file_index])
-
-        settings['image_acquisition_settings']['destination_folders'] = formatted_file_list
-        
-        if self.load_new_configuration_function != None:
-            self.load_new_configuration_function(settings)
-
-
-            
-    def OnMenuLoadClick(self, event):
-    
-        # We only want one file grid open at a time so
-        # if it is already open just give it focus
-        if self.file_grid == None:
-            # Launch the settings grid to select an input file
-            self.file_grid = wxSaviorSettingsFileGrid.wxSaviorSettingsFileGrid(self,
-                                        SaviorHardwareConfiguration.local_path + '\settings files',
-                                        self.FormatSettings,
-                                        self.OnFileGridClose,
-                                        savior_icon = self.savior_icon)
-            
-            self.file_grid.Bind(wx.EVT_CLOSE, self.OnFileGridClose, self.file_grid)
-            
-            # setting the position to the bottom left of the screen
-            monitor_resolution   = wx.GetDisplaySize()
-            grid_size            = self.file_grid.GetSize()
-            
-            # the extra hard coded value is the height of the start menue
-            pos = (0, monitor_resolution[1] - grid_size[1] - 30)
-            self.file_grid.SetPosition(pos)
-            
-            self.file_grid.Show(True)            
-        else:
-            self.file_grid.SetFocus()
-
-    def OnFileGridClose(self, event = None):
-        self.file_grid = None
-        
-        if event != None:
-            event.Skip()
-            
-    def OnMenuAboutClick(self, event):
-
-        """This function shows an about window with copyrights, license and
-           developers info.
-        """
-        
-        # First we create and fill the info object
-        info             = wx.AboutDialogInfo()
-        info.Name        = "Savior"
-        info.Version     = version
-        info.Copyright   = "(C) 2010-2011 The University of Rochester, " +\
-                           "all rights reserved.\n\n" +\
-                           "(C) 2012 Medical College of Wisconsin, " +\
-                           "all rights reserved.\n"
-        info.Description = "Developed with the support of the Research to " +\
-                           "Prevent Blindness Career Development Award to " +\
-                           "Alfredo Dubra and the Catalyst for a Cure II "  +\
-                           "from the Glaucoma Research Foundation"
-        info.Developers  = ["Zachary Harvey (zgh7555@gmail.com)",
-                            "Alfredo Dubra  (adubra@mcw.edu)"]
-
-        info.License     = ""
-
-        # Then we call wx.AboutBox giving it that info object
-        wx.AboutBox(info)
-        
-        
-    def OnMenuExitClick(self, event):
-        
-        self.Close()
-
-    
-##    def OnMenuHelpKnownBugsClick(self, event):
-##        
-##        """This function shows a list of the bugs known to date.
-##        """
-##
-##        # I do not like this implementation because it a MS-DOS-type shell
-##        #import os
-##        #os.system('notepad.exe ' + './TsunamiWave Known Bugs.txt')
-##
-##        # reading file
-##        f   = open('./documentation/TsunamiWave Known Bugs.txt', 'r')
-##        msg = f.read()
-##        f.close()
-##
-##        # creating and displaying modal dialog 
-##        import wx.lib.dialogs
-##        dlg = wx.lib.dialogs.ScrolledMessageDialog(self, msg, "TsunamiWave Known Bugs")
-##        dlg.ShowModal()
-##        
-##
-##
-##    def OnMenuHelpManualClick(self, event):
-##        
-##        """This function should link to the corresponding manual.
-##        """
-##
-##        import os
-##        os.startfile ('./documentation/TsunamiWaveManual.doc')
-##
-##
-
-    def GetCurrentSettings(self):
-        
-        settings =  (self.image_acquisition_control_panel.GetCurrentSettings(),  \
-                     self.bottom_panel.GetCurrentSettings(),                     \
-                     self.optical_scanners_control_panel.GetCurrentSettings(),   \
-                     self.eye_tracking_control_panel.GetCurrentSettings())
-        
-        # add the bottom panel settings to the image_acquistion_settings dictionary
-        settings[0].update(settings[1])
-        
-        # the dewarping matrix would be to much to save to file
-        settings[3].pop('desinusoiding_matrix', None)
-        
-        configuration_settings = {'clinical_version'                      : self.settings['clinical_version'],
-                                  'image_acquisition_settings'            : settings[0], 
-                                  'optical_scanners_settings'             : settings[2]['optical_scanners_settings'],
-                                  'image_resolution_calculation_settings' : settings[2]['image_resolution_calculation_settings'],
-                                  'eye_tracking_settings'                 : settings[3]}
-                                  
-        
-        # Removing the desinusoiding matrix as this is stored in the dewarping file
-        configuration_settings['eye_tracking_settings'].pop('horizontal_warping', None)
-        
-        configuration_settings['image_acquisition_settings']['channel_labels']                    = self.settings['image_acquisition_settings']['channel_labels']
-        configuration_settings['image_acquisition_settings']['DCF_file']                          = self.settings['image_acquisition_settings']['DCF_file']
-
-        return configuration_settings
-        
-    def SetCurrentSettings(self, settings):
-
-        # Section added by Robert Cooper 09/23/2013
-        # Whenever the new settings are set, update the FOV size on the fixation GUI.
-        # If the frame isn't spawned yet, don't attempt to set the FOV.
-        if self.fovQ is not None:
-            try:
-                self.fovQ.put((1, settings['optical_scanners_settings']['resonant_scanner_amplitude_in_deg'], 
-                              settings['optical_scanners_settings']['raster_scanner_amplitude_in_deg']), block=False, timeout=.5  )
-            except:
-                pass
-    
-        self.image_acquisition_control_panel.SetCurrentSettings(settings['image_acquisition_settings'])
-        
-        bottom_panel_initial_settings        =  {'n_frames_to_record'                        : settings['image_acquisition_settings']['n_frames_to_record']}
-        
-        self.secondary_display_settings = copy.deepcopy(settings['secondary_display_settings'])
-        self.bottom_panel.SetCurrentSettings(bottom_panel_initial_settings)
-        self.optical_scanners_control_panel.SetCurrentSettings(settings['optical_scanners_settings'], settings['image_resolution_calculation_settings'])
-        self.eye_tracking_control_panel.SetCurrentSettings(settings['eye_tracking_settings'])
-
-        # close the exposure panel if it is open
-        if self.exposure_frame != None:
-            self.exposure_frame.Close()
-
-        # close the illumination dialog if it is open
-        if self.illumination_window != None:
-            self.illumination_window.Close()
-            self.illumination_window = None
-            
-        # # close the secondary displays
-        # for current_display in self.secondary_display_windows:
-            # current_display.Close()
-  
-        # self.secondary_display_windows = []
-            
-        # # Open new secondary displays with the default expressions from configuration file
-        # for current_expression in settings['secondary_display_settings']['default_expressions']:
-        
-            # secondary_display = LiveStreamMathDisplay.LiveStreamMathDisplayFrame(self, 
-                                                                                 # default_expression = current_expression, 
-                                                                                 # frame_grabber      = self.matrox_frame_grabber,
-                                                                                 # common_expressions = \
-                                                                                    # settings['secondary_display_settings']['common_expressions'])
-                                                                                 
-            # secondary_display.Bind(wx.EVT_CLOSE, self.OnSecondaryWindowClose)
-            # self.secondary_display_windows.append(secondary_display) 
-            
-
-          
 if __name__ == '__main__':                          
 
     import DefaultSaviorSettings
@@ -1262,5 +760,5 @@ if __name__ == '__main__':
 
         
     # starting the applicatioin
-    my_savior = SaviorApp(clinical_version = False, initial_settings = DefaultSaviorSettings)
+    my_savior = SaviorApp(clinical_version = True, initial_settings = DefaultSaviorSettings)
     

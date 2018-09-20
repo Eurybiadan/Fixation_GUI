@@ -506,7 +506,7 @@ class wxFixationFrame(wx.Frame):
                 self.vert_loc = self.vert_loc + self.MAJOR_INCREMENT
                 self.update_fixation_location()
             else:
-                self.vert_loc = self.vert_loc - self.MINOR_INCREMENT
+                self.vert_loc = self.vert_loc + self.MINOR_INCREMENT
                 self.update_fixation_location()
         elif event.GetKeyCode() == wx.WXK_LEFT:
             if event.ShiftDown():

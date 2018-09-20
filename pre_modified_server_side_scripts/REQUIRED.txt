@@ -1,0 +1,8 @@
+Visual C++ Redistributable for Visual Studio 2015
+Must NOT include python3.7 on the path.
+Make sure that the default program to run py files is python 2.7
+Bug in updating protocol panel
+Allow clicking on protocol list to jump to location be able to read TRC, etc
+Jump between lines in list, autopilot- jump off autopilot if manually entered stuff
+Add filter by FOV size
+

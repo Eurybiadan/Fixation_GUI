@@ -28,6 +28,7 @@ import wx, wx.lib.intctrl, wx.lib.buttons, threading, time
 import scipy.io as sio
 import os
 import copy
+import socket
 
 #importing this for some constants
 import MatroxFramegrabber 
@@ -48,8 +49,8 @@ class wxSaviorBottomPanel(wx.Panel):
         self.SetBackgroundColour(parent.GetBackgroundColour())
         self.SetForegroundColour(parent.GetForegroundColour())
 
-        if parent.captQ is not None:
-            self.captQ = parent.captQ
+        if parent.fixQ is not None:
+            self.fixQ = parent.fixQ
 
         # keeping track of the hardware control
         self.matrox_frame_grabber_event_generator = matrox_frame_grabber_event_generator
@@ -73,6 +74,7 @@ class wxSaviorBottomPanel(wx.Panel):
         self.SetClientSize(parent.GetClientSize())
 
         self.n_frames_to_record   = -1
+        self.current_movie_number = 0
 
         # creating the sizer and defining control dimensions
         main_sizer                = wx.GridBagSizer(vgap = 0, hgap = 0)
@@ -274,6 +276,10 @@ class wxSaviorBottomPanel(wx.Panel):
 
         # end of constructor ##############################################
 
+    def GetCurrentMovieNumber(self):
+
+        return self.current_movie_number
+
     def OnClose(self, evt):
 
         """
@@ -345,6 +351,7 @@ class wxSaviorBottomPanel(wx.Panel):
                     self.top_panel.SetCurrentModeIcon('live')
                 
             elif current_state == MatroxFramegrabber.RECORDING:
+
                 self.record_button.SetValue(True)
                 self.live_button.SetValue(False)
                 self.n_frames_ctrl.Enable(False)
@@ -433,6 +440,16 @@ class wxSaviorBottomPanel(wx.Panel):
         if self.matrox_frame_grabber != None:
             current_state = self.matrox_frame_grabber.GetCurrentState()
 
+
+            ## 2015/12/08 - RFC addition:
+            ## Added code to optionally trigger the onelight when a record button is pressed.
+##            sock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
+##
+##            MAC_IP   = "170.166.249.171"
+##            MAC_PORT = 2007
+##
+##            sock.sendto("Testing one two three", (MAC_IP,MAC_PORT)) 
+
             # Get the avi files that we want to write to
             acq_settings = self.GetParent().GetCurrentSettings()['image_acquisition_settings']
 
@@ -455,14 +472,13 @@ class wxSaviorBottomPanel(wx.Panel):
 
                     # format the avi files for the matrox framegrabber
                     self._formatted_files_dictionary = self.GetFormattedAVIFileNames(acq_settings)
-                
                     self.matrox_frame_grabber.StartRecording(MatroxFramegrabber.IntStringMap(self._formatted_files_dictionary), n_frames)
-
                     # After starting recording, mark the location on the fixation GUI by sending a 1 to the capture Queue.
-                    if self.captQ is not None:
+                    if self.fixQ is not None:
                         try:
-							bottom_pannel_settings = self.GetCurrentSettings()
-                            self.captQ.put((0,bottom_pannel_settings['current_movie_number']),block=False,timeout=0)
+                            # 0 is for acquisition changes
+                            bottom_pannel_settings = self.GetCurrentSettings()
+                            self.fixQ.put((0,bottom_pannel_settings['current_movie_number']),block=False,timeout=0)
                         except:
                             pass
                 else:
@@ -586,6 +602,8 @@ class wxSaviorBottomPanel(wx.Panel):
         # update the control with the movie number that will not conflict with other
         # files in any of the directories chosen
         self.movie_number_ctrl.SetValue(movie_number+1)
+
+        self.current_movie_number = movie_number
 
         return return_dictionary
 
