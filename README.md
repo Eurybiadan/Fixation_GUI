@@ -26,12 +26,20 @@ __These instructions apply to the latest (2016) version of Savior__
 ### Installation:
 1. Run setup.bat (this will create a virtual 3.7 environment)
 2. **IMPORTANT**-Create backup copies of:
-    * Savior.pyw
-    * SaviorClinicalPanel.pyw
-    * wxSaviorBottomPanel.py
-    * wxSaviorTopPanel.py
-3. Copy the contents of ..\Fixation_GUI\pre_modified_server_side_scripts\ to your Savior folder.
-4. ???
-5. Profit!
+    * ..\DubraLab\Applications\DeMotion\Savior.pyw (or py)
+    * ..\DubraLab\Applications\DeMotion\SaviorClinicalPanel.pyw (or py)
+    * ..\DubraLab\Applications\DeMotion\wxSaviorBottomPanel.pyw (or py)
+    * ..\DubraLab\Applications\DeMotion\wxSaviorTopPanel.pyw (or py)
+    * ..\DubraLab\Modules\Projects\Fixation_GUI folder
+3. Then delete:
+    * ..\DubraLab\Applications\DeMotion\Savior.pyw (or py)
+    * ..\DubraLab\Applications\DeMotion\SaviorClinicalPanel.pyw (or py)
+    * ..\DubraLab\Applications\DeMotion\wxSaviorBottomPanel.pyw (or py)
+    * ..\DubraLab\Applications\DeMotion\wxSaviorTopPanel.pyw (or py)
+    * ..\DubraLab\Modules\Projects\Fixation_GUI folder
+4. Copy the contents of ..\Fixation_GUI\pre_modified_server_side_scripts\ to your Savior folder.
+5. Copy the Fixation_GUI folder from the repository to your ..\DubraLab\Modules\Projects\ folder.
+6. ???
+7. Profit!
 
 # Enjoy! And please, acknowledge me if you use this software!
