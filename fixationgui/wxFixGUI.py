@@ -492,31 +492,31 @@ class wxFixationFrame(wx.Frame):
     def on_move_fixation(self, event):
         if event.GetKeyCode() == wx.WXK_DOWN:
             if event.ShiftDown():
-                self.vert_loc = self.vert_loc - self.MAJOR_INCREMENT
+                self.vert_loc = self.vert_loc - self.MINOR_INCREMENT
                 self.update_fixation_location()
             else:
-                self.vert_loc = self.vert_loc - self.MINOR_INCREMENT
+                self.vert_loc = self.vert_loc - self.MAJOR_INCREMENT
                 self.update_fixation_location()
         elif event.GetKeyCode() == wx.WXK_UP:
             if event.ShiftDown():
-                self.vert_loc = self.vert_loc + self.MAJOR_INCREMENT
+                self.vert_loc = self.vert_loc + self.MINOR_INCREMENT
                 self.update_fixation_location()
             else:
-                self.vert_loc = self.vert_loc + self.MINOR_INCREMENT
+                self.vert_loc = self.vert_loc + self.MAJOR_INCREMENT
                 self.update_fixation_location()
         elif event.GetKeyCode() == wx.WXK_LEFT:
             if event.ShiftDown():
-                self.horz_loc = self.horz_loc - self.MAJOR_INCREMENT
+                self.horz_loc = self.horz_loc - self.MINOR_INCREMENT
                 self.update_fixation_location()
             else:
-                self.horz_loc = self.horz_loc - self.MINOR_INCREMENT
+                self.horz_loc = self.horz_loc - self.MAJOR_INCREMENT
                 self.update_fixation_location()
         elif event.GetKeyCode() == wx.WXK_RIGHT:
             if event.ShiftDown():
-                self.horz_loc = self.horz_loc + self.MAJOR_INCREMENT
+                self.horz_loc = self.horz_loc + self.MINOR_INCREMENT
                 self.update_fixation_location()
             else:
-                self.horz_loc = self.horz_loc + self.MINOR_INCREMENT
+                self.horz_loc = self.horz_loc + self.MAJOR_INCREMENT
                 self.update_fixation_location()
         else:
             event.Skip()
