@@ -13,6 +13,9 @@ import socket
 import threading
 
 
+myEVT_MESSAGE = wx.NewEventType()
+EVT_MESSAGE = wx.PyEventBinder(myEVT_MESSAGE, 1)
+
 # Sets Up The Class For The Program And Creates The Window
 class wxFixationFrame(wx.Frame):
     # The number of ppd of the screen we'll be projecting to (e.g. Lightcrafter, Projector, etc).
@@ -81,8 +84,10 @@ class wxFixationFrame(wx.Frame):
 
         self.prev_cursor = self.LCCanvas.get_fixation_cursor()
 
+        self.Bind(EVT_MESSAGE, self.handle_message)
+
         # Spawn the pair of listener threads so we can detect changes in the comm Queues passed by Savior
-        self.fovListener = QueueListener(self.handle_message)  # This will recieve a tuple of sizes
+        self.fovListener = QueueListener(self)  # This will recieve a tuple of sizes
         self.fovListener.start()
 
     def initViewPane(self, parent):
@@ -235,13 +240,6 @@ class wxFixationFrame(wx.Frame):
     def get_major_increment(self):
         return self.MAJOR_INCREMENT
 
-    def handle_message(self, datatype, data):
-        switchboard = {
-            -1: self.on_quit,
-            0: self.mark_location,
-            1: self.set_FOV
-        }
-        switchboard.get(datatype)(data)
 
     def on_preferences(self, event):
         prefs_dialog = PreferencesDialog(self,
@@ -254,6 +252,14 @@ class wxFixationFrame(wx.Frame):
             self.set_major_increment(prefs['major_increment'])
             self.set_minor_increment(prefs['minor_increment'])
 
+
+    def handle_message(self, evt):
+        switchboard = {
+            -1: self.on_quit,
+            0: self.mark_location,
+            1: self.set_FOV
+        }
+        switchboard.get(evt.get_datatype())(evt.get_data())
 
     # Toggle target on/off
     def on_toggle_press(self, event):
@@ -640,15 +646,31 @@ class wxFixationFrame(wx.Frame):
         self.LCCanvas.Destroy()
         self.Destroy()
 
+class MessageEvent(wx.PyCommandEvent):
+    """Event to signal that a count value is ready"""
+
+    def __init__(self, etype, eid, datatype=-1, data=-1):
+        """Creates the event object"""
+        wx.PyCommandEvent.__init__(self, etype, eid)
+        self._datatype = datatype
+        self._data = data
+
+    def get_datatype(self):
+        return self._datatype
+
+    def get_data(self):
+        return self._data
+
 
 # This thread class generically listens to a queue, and passes what it receives to a specified function.
 class QueueListener(threading.Thread):
 
-    def __init__(self, func):
+    def __init__(self, parent):
 
         threading.Thread.__init__(self)
         self.setDaemon(True)
-        self.callback = func
+        self.thisparent = parent
+        #self.callback = func
         self.HOST = 'localhost'
         self.PORT = 1222
 
@@ -662,13 +684,15 @@ class QueueListener(threading.Thread):
         while True:
             try:
                 recvmsg = conn.recv(32).decode("utf-8")
-
+                print("Recieved: "+recvmsg)
                 splitmsg = recvmsg.split(";")
 
                 if len(splitmsg) == 2:
-                    self.callback(int(splitmsg[0]), splitmsg[1])
+                    evt = MessageEvent( myEVT_MESSAGE, -1, int(splitmsg[0]), splitmsg[1])
                 else:
-                    self.callback(int(splitmsg[0]), splitmsg[1:])
+                    evt = MessageEvent( myEVT_MESSAGE, -1, int(splitmsg[0]), splitmsg[1:])
+
+                wx.PostEvent(self.thisparent, evt)
 
                 if int(splitmsg[0]) == -1:
                     conn.shutdown(socket.SHUT_RD)

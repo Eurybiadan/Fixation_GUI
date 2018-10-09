@@ -1,7 +1,8 @@
 from multiprocessing import Queue
 import subprocess
-import sys, os, socket
+import sys, os, socket, platform
 import threading
+import time
 
 
 class FixGUIServer:
@@ -9,12 +10,15 @@ class FixGUIServer:
     def __init__(self, dataQueue=None):
         thispath = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
-        py3path = os.path.join(thispath, 'venv', 'Scripts', 'pythonw.exe')
+        if platform.system() is 'Windows':
+            py3path = os.path.join(thispath, 'venv', 'Scripts', 'pythonw.exe')
+        else:
+            py3path = os.path.join(thispath, 'venv', 'bin', 'python3')
         guipath = os.path.join(thispath,'fixationgui', 'wxFixGUI.py')
         print('Launching the Fixation GUI at '+ py3path)
 
         self.mainGUI = subprocess.Popen([py3path, guipath])
-
+        time.sleep(2)
         # Spawn the pair of listener threads so we can detect changes in the comm Queues passed by Savior
         self.whisperer = QueueWhisperer(dataQueue)  # This will recieve a tuple of sizes
         self.whisperer.start()
@@ -61,7 +65,7 @@ class QueueWhisperer(threading.Thread):
 
 
 if __name__ == '__main__':
-    import time
+
     testQ = Queue()
 
     CYANIDE = -1
@@ -73,15 +77,18 @@ if __name__ == '__main__':
     testQ.put((FOV, 1, 1))
     testQ.put((VIDNUM, '0000'))
     time.sleep(1)
+    testQ.put((FOV, 1, 1))
+    testQ.put((VIDNUM, '0001'))
+    time.sleep(6)
     testQ.put((FOV, 1.25, 1.25))
     testQ.put((VIDNUM, '0010'))
-    time.sleep(1)
+    time.sleep(6)
     testQ.put((FOV, 1.5, 1.5))
     testQ.put((VIDNUM, '0050'))
-    time.sleep(1)
+    time.sleep(6)
     testQ.put((FOV, 1.75, 1.75))
     testQ.put((VIDNUM, '0100'))
-    time.sleep(1)
+    time.sleep(10)
 
     testQ.put((CYANIDE, "I'm never gonna dance again"))
 

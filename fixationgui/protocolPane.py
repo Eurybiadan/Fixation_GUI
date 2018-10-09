@@ -130,14 +130,19 @@ class ProtocolPane(wx.Panel):
         # Condition the location a little bit
         location = (location[0].replace(" ", ""), location[1].replace(" ", ""))
 
+        ind = 0
         for item in self._protocol:
             if item['fov'] == curfov and item['eye'] == seleye and item['loc'] == location:
                 item['num_obtained'] += 1
+                itemtext = self.list.GetItemText(ind, 0)
+                self.list.SetItem(ind, 0, str(int(itemtext) + 1))
                 exist = True
                 break
+            else:
+                ind += 1
 
         if not exist:
-            newentry = dict(num=1, num_obtained=int(0),
+            newentry = dict(num=1, num_obtained=int(1),
                             fov=(curfov[0], curfov[1]), eye=seleye, loc=location)
             self._protocol.append(newentry)
 
@@ -147,4 +152,4 @@ class ProtocolPane(wx.Panel):
             self.list.SetItem(ind, 1, newentry['loc'][0] + ', ' + newentry['loc'][1])
             self.list.SetItem(ind, 2, str(newentry['fov'][0]) + degree_sign + 'x ' + str(newentry['fov'][1]) + degree_sign)
             self.list.SetItem(ind, 3, newentry['eye'])
-            self.list.SetItemBackgroundColour(ind, (255, 79, 0))
+            self.list.SetItemBackgroundColour(ind, (0, 0, 0))
