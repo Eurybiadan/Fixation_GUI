@@ -156,9 +156,6 @@ class wxFixationFrame(wx.Frame):
         self.control._iminitpane.selectim.Bind(wx.EVT_BUTTON, self.on_button_press)
         self.control._iminitpane.initalign.Bind(wx.EVT_BUTTON, self.on_button_press)
 
-        self.control.anchorbut.Bind(wx.EVT_BUTTON, self.on_button_press)
-        #self.control.resetlocs.Bind(wx.EVT_BUTTON, self.on_button_press)
-
     # Menu Bar
     def init_menubar(self):
 
@@ -240,6 +237,11 @@ class wxFixationFrame(wx.Frame):
     def get_major_increment(self):
         return self.MAJOR_INCREMENT
 
+    def get_vertical_fov(self):
+        return self.viewpane.get_v_fov()
+
+    def get_horizontal_fov(self):
+        return self.viewpane.get_h_fov()
 
     def on_preferences(self, event):
         prefs_dialog = PreferencesDialog(self,

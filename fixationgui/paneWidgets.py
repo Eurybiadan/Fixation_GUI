@@ -385,3 +385,147 @@ class ImInitPanel(wx.Panel):
 
     def BindTo(self, callback):
         self._sliderObservers.append(callback)
+
+class RefButtonsPanel(wx.Panel):
+    '''
+    classdocs
+    '''
+
+    def __init__(self, parent, rootparent,id=wx.ID_ANY, pos=wx.DefaultPosition, size=(-1, -1), style=wx.SIMPLE_BORDER,
+                 name='Reference Buttons Panel', port=None):
+        super(RefButtonsPanel, self).__init__(parent, id, pos, size, style, name)
+
+        self._rootparent = rootparent
+        self.SetBackgroundColour('black')
+
+        self.__deg_symbol = u'\N{DEGREE SIGN}'
+
+        labelFont = wx.Font(11, wx.SWISS, wx.NORMAL, wx.BOLD, False)
+
+        # Anchor cursor as center
+        self.anchorbut = wx.Button(self, label='Set Reference Point', size=(-1, 30))
+        self.anchorbut.SetBackgroundColour('medium gray')
+        self.anchorbut.SetForegroundColour('white')
+        self.anchorbut.Bind(wx.EVT_BUTTON, self.OnButton)
+
+        box = wx.BoxSizer(wx.VERTICAL)  # To make sure it stays centered in the area it is given
+        box.Add(self.anchorbut, 0, wx.ALIGN_CENTER)
+
+        self.SetSizerAndFit(box)
+
+    def OnButton(self, evt):
+        pressed = evt.GetEventObject()
+
+        if pressed is self.anchorbut:
+            tmp = self._rootparent.degrees_to_screenpix(self._rootparent.horz_loc, self._rootparent.vert_loc)
+            offset = wx.Point2D(tmp[0], tmp[1])
+            self._rootparent.LCCanvas.set_fixation_centerpoint(offset)
+            self._rootparent.update_fixation_location(wx.Point2D(0, 0))
+
+class QuickLocationsPanel(wx.Panel):
+    '''
+    classdocs
+    '''
+
+    def __init__(self, parent, rootparent, id=wx.ID_ANY, pos=wx.DefaultPosition, size=(-1, -1), style=wx.SIMPLE_BORDER,
+                 name='Quick Locations Panel', port=None):
+        super(QuickLocationsPanel, self).__init__(parent, id, pos, size, style, name)
+        self.SetBackgroundColour('black')
+        self._rootparent = rootparent
+
+        self.__deg_symbol = u'\N{DEGREE SIGN}'
+
+        labelFont = wx.Font(11, wx.SWISS, wx.NORMAL, wx.BOLD, False)
+
+        self.quicklabel = wx.StaticText(self, wx.ID_ANY, 'Quick Locs:', style=wx.ALIGN_CENTER)
+        self.quicklabel.SetForegroundColour('white')
+        self.quicklabel.SetFont(labelFont)
+
+        self.buttonList = []
+
+        buttonsize = (35, 35)
+        buttonalignment = wx.ALIGN_CENTER
+        self.TLC = wx.Button(self, label='TLC', size=buttonsize)
+        self.TLC.SetBackgroundColour('medium gray')
+        self.TLC.SetForegroundColour('white')
+        self.buttonList.append(self.TLC)
+        self.MTE = wx.Button(self, label='MTE', size=buttonsize)
+        self.MTE.SetBackgroundColour('medium gray')
+        self.MTE.SetForegroundColour('white')
+        self.buttonList.append(self.MTE)
+        self.TRC = wx.Button(self, label='TRC', size=buttonsize)
+        self.TRC.SetBackgroundColour('medium gray')
+        self.TRC.SetForegroundColour('white')
+        self.buttonList.append(self.TRC)
+        self.MRE = wx.Button(self, label='MRE', size=buttonsize)
+        self.MRE.SetBackgroundColour('medium gray')
+        self.MRE.SetForegroundColour('white')
+        self.buttonList.append(self.MRE)
+        self.BRC = wx.Button(self, label='BRC', size=buttonsize)
+        self.BRC.SetBackgroundColour('medium gray')
+        self.BRC.SetForegroundColour('white')
+        self.buttonList.append(self.BRC)
+        self.MBE = wx.Button(self, label='MBE', size=buttonsize)
+        self.MBE.SetBackgroundColour('medium gray')
+        self.MBE.SetForegroundColour('white')
+        self.buttonList.append(self.MBE)
+        self.BLC = wx.Button(self, label='BLC', size=buttonsize)
+        self.BLC.SetBackgroundColour('medium gray')
+        self.BLC.SetForegroundColour('white')
+        self.buttonList.append(self.BLC)
+        self.MLE = wx.Button(self, label='MLE', size=buttonsize)
+        self.MLE.SetBackgroundColour('medium gray')
+        self.MLE.SetForegroundColour('white')
+        self.buttonList.append(self.MLE)
+        self.MID = wx.Button(self, label='MID', size=buttonsize)
+        self.MID.SetBackgroundColour('medium gray')
+        self.MID.SetForegroundColour('white')
+        self.buttonList.append(self.MID)
+
+        # Bind each button to a listener
+        for button in self.buttonList:
+            button.Bind(wx.EVT_BUTTON, self.OnButton)
+
+        sizer = wx.GridBagSizer()
+        sizer.Add(self.quicklabel, (0, 0), (1, 3), buttonalignment)
+        sizer.Add(self.TLC, (1, 0), (1, 1), buttonalignment)
+        sizer.Add(self.MTE, (1, 1), (1, 1), buttonalignment)
+        sizer.Add(self.TRC, (1, 2), (1, 1), buttonalignment)
+        sizer.Add(self.MLE, (2, 0), (1, 1), buttonalignment)
+        sizer.Add(self.MID, (2, 1), (1, 1), buttonalignment)
+        sizer.Add(self.MRE, (2, 2), (1, 1), buttonalignment)
+        sizer.Add(self.BLC, (3, 0), (1, 1), buttonalignment)
+        sizer.Add(self.MBE, (3, 1), (1, 1), buttonalignment)
+        sizer.Add(self.BRC, (3, 2), (1, 1), buttonalignment)
+
+        box = wx.BoxSizer(wx.VERTICAL) # To make sure it stays centered in the area it is given
+        box.Add(sizer, 0, wx.ALIGN_CENTER)
+
+        self.SetSizerAndFit(box)
+
+    def OnButton(self, evt):
+        pressed = evt.GetEventObject()
+
+        v_fov = self._rootparent.get_vertical_fov()
+        h_fov = self._rootparent.get_horizontal_fov()
+
+        for button in self.buttonList:
+            if pressed is button:
+                if button.GetLabelText() == 'TLC':
+                    self._rootparent.update_fixation_location(wx.Point2D(-h_fov/2, v_fov/2))
+                elif button.GetLabelText() == 'MTE':
+                    self._rootparent.update_fixation_location(wx.Point2D(0, v_fov / 2))
+                elif button.GetLabelText() == 'TRC':
+                    self._rootparent.update_fixation_location(wx.Point2D(h_fov/2, v_fov/2))
+                elif button.GetLabelText() == 'MRE':
+                    self._rootparent.update_fixation_location(wx.Point2D(h_fov / 2, 0))
+                elif button.GetLabelText() == 'BRC':
+                    self._rootparent.update_fixation_location(wx.Point2D(h_fov/2, -v_fov/2))
+                elif button.GetLabelText() == 'MBE':
+                    self._rootparent.update_fixation_location(wx.Point2D(0, -v_fov/2))
+                elif button.GetLabelText() == 'BLC':
+                    self._rootparent.update_fixation_location(wx.Point2D(-h_fov/2, -v_fov/2))
+                elif button.GetLabelText() == 'MLE':
+                    self._rootparent.update_fixation_location(wx.Point2D(-h_fov/2, 0))
+                elif button.GetLabelText() == 'MID':
+                    self._rootparent.update_fixation_location(wx.Point2D(0, 0))

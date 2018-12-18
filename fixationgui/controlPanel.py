@@ -26,6 +26,7 @@ class ControlPanel(wx.Panel):
 
         labelFont = wx.Font(11, wx.SWISS, wx.NORMAL, wx.BOLD, False)
 
+
         """ Eye Selection Buttons """
         # Eye Label
         eye_label = wx.StaticText(self, wx.ID_ANY, 'EYE', style=wx.ALIGN_CENTER)
@@ -52,51 +53,58 @@ class ControlPanel(wx.Panel):
         odeyesizer.Add(od_label, 0, wx.ALIGN_LEFT | wx.BOTTOM | wx.RIGHT, 10)
 
         """ FloatSpin Controls """
+        controlFont = wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD, False)
         # Vertical Floatspin control
         self.vertcontrol = LocSpin(self, wx.ID_ANY, min_val=-20, max_val=20, increment=parent.get_minor_increment(),
                                    value=0, extrastyle=FS.FS_LEFT, poslabel='S', neglabel='I')
         self.vertcontrol.SetFormat('%f')
         self.vertcontrol.SetDigits(2)
+        self.vertcontrol.SetFont(controlFont)
+        vert_label = wx.StaticText(self, wx.ID_ANY, 'Vert:', style=wx.ALIGN_RIGHT)  # Label
+        vert_label.SetForegroundColour('white')
+        vert_label.SetFont(labelFont)
         #
         # Horizontal Floatspin control
         self.horzcontrol = LocSpin(self, wx.ID_ANY, min_val=-20, max_val=20, increment=parent.get_minor_increment(),
                                    value=0, extrastyle=FS.FS_LEFT, poslabel='T', neglabel='N')
         self.horzcontrol.SetFormat('%f')
         self.horzcontrol.SetDigits(2)
+        self.horzcontrol.SetFont(controlFont)
+        horz_label = wx.StaticText(self, wx.ID_ANY, 'Horz:', style=wx.ALIGN_RIGHT)  # Label
+        horz_label.SetForegroundColour('white')
+        horz_label.SetFont(labelFont)
 
-        """ Cursor tools """
-        # Anchor cursor as center
-        self.anchorbut = wx.Button(self, label='Center to Cursor', size=(-1, 30))
-        self.anchorbut.SetBackgroundColour('medium gray')
-        self.anchorbut.SetForegroundColour('white')
-
-        # Reset marked locations
-        #self.resetlocs = wx.Button(self, label='Reset Locations', size=(-1, 30))
-        #self.resetlocs.SetBackgroundColour('medium gray')
-        #self.resetlocs.SetForegroundColour('white')
 
         """ Initialization Buttons """
+        # Quick Buttons panel
+        self._quickpane = paneWidgets.QuickLocationsPanel(self, parent)
+
         # Image initialization pane
         self._iminitpane = paneWidgets.ImInitPanel(self)
 
         # Cursor control panel
         self._cursorpane = paneWidgets.CursorPanel(self, parent)
 
+        # QoL Buttons panel
+        self._qolpane = paneWidgets.RefButtonsPanel(self, parent)
+
         sizer = wx.GridBagSizer()
         sizer.AddGrowableCol(0, 4)
         """ Eye Selection Buttons """
         sizer.Add(eye_label, (0, 0), (1, 4), wx.EXPAND | wx.TOP, 10)
-        sizer.Add(oseyesizer, (1, 0), (1, 1), wx.ALIGN_CENTER)
-        sizer.Add(odeyesizer, (1, 2), (1, 1), wx.ALIGN_CENTER)
+        sizer.Add(oseyesizer, (1, 0), (1, 2), wx.ALIGN_CENTER)
+        sizer.Add(odeyesizer, (1, 2), (1, 2), wx.ALIGN_CENTER)
         """ FloatSpin Controls """
-        sizer.Add(self.horzcontrol, (2, 0), (1, 2), wx.ALIGN_CENTER | wx.ALL, 5)
-        sizer.Add(self.vertcontrol, (2, 2), (1, 2), wx.ALIGN_CENTER | wx.ALL, 5)
-        """ Initialization Buttons """
-        sizer.Add(self.anchorbut, (3, 0), wx.DefaultSpan, wx.ALIGN_CENTER | wx.ALL, 5)
-        #sizer.Add(self.resetlocs, (3, 2), wx.DefaultSpan, wx.ALIGN_CENTER | wx.ALL, 5)
+        sizer.Add(horz_label, (2, 0), (1, 1), wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL)
+        sizer.Add(self.horzcontrol, (2, 1), (1, 1), wx.ALIGN_CENTER | wx.ALL, 5)
+        sizer.Add(vert_label, (2, 2), (1, 1), wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL)
+        sizer.Add(self.vertcontrol, (2, 3), (1, 1), wx.ALIGN_CENTER | wx.ALL, 5)
 
-        sizer.Add(self._cursorpane, (4, 0), (2, 4), wx.EXPAND, wx.ALL, 5)
-        sizer.Add(self._iminitpane, (8, 0), (2, 4), wx.EXPAND, wx.ALL, 5)
+        sizer.Add(self._quickpane, (3, 0), (1, 4), wx.ALIGN_CENTER | wx.EXPAND)
+        sizer.Add(self._cursorpane, (4, 0), (1, 4), wx.ALIGN_CENTER | wx.EXPAND)
+        sizer.Add(self._iminitpane, (5, 0), (1, 4), wx.ALIGN_CENTER | wx.EXPAND)
+        sizer.Add(self._qolpane, (6, 0), (1, 4), wx.ALIGN_CENTER | wx.EXPAND)
+
 
         self.SetSizerAndFit(sizer)
 
