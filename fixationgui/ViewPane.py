@@ -117,12 +117,12 @@ class ViewPane(wx.Window):
         self._mouseLoc = "("
         
         if degreehorz > 0:
-            if eyesign > 0: #If its 1, then Nasal is to the right
+            if eyesign < 0: #If its 1, then Nasal is to the right
                 self._mouseLoc = self._mouseLoc + str(degreehorz)+ " T, "
             else:
                 self._mouseLoc = self._mouseLoc + str(degreehorz)+ " N, "
         elif degreehorz < 0:
-            if eyesign > 0: #If its 1, then Nasal is to the right
+            if eyesign < 0: #If its 1, then Nasal is to the right
                 self._mouseLoc = self._mouseLoc + str(fabs(degreehorz))+ " N, "
             else:
                 self._mouseLoc = self._mouseLoc + str(fabs(degreehorz))+ " T, "
