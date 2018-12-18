@@ -59,7 +59,7 @@ class ControlPanel(wx.Panel):
                                    value=0, extrastyle=FS.FS_LEFT, poslabel='S', neglabel='I')
         self.vertcontrol.SetFormat('%f')
         self.vertcontrol.SetDigits(2)
-        self.vertcontrol.SetFont(controlFont)
+        #self.vertcontrol.SetFont(controlFont)
         vert_label = wx.StaticText(self, wx.ID_ANY, 'Vert:', style=wx.ALIGN_RIGHT)  # Label
         vert_label.SetForegroundColour('white')
         vert_label.SetFont(labelFont)
@@ -69,7 +69,7 @@ class ControlPanel(wx.Panel):
                                    value=0, extrastyle=FS.FS_LEFT, poslabel='T', neglabel='N')
         self.horzcontrol.SetFormat('%f')
         self.horzcontrol.SetDigits(2)
-        self.horzcontrol.SetFont(controlFont)
+        #self.horzcontrol.SetFont(controlFont)
         horz_label = wx.StaticText(self, wx.ID_ANY, 'Horz:', style=wx.ALIGN_RIGHT)  # Label
         horz_label.SetForegroundColour('white')
         horz_label.SetFont(labelFont)

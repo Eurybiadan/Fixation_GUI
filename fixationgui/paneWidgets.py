@@ -417,10 +417,14 @@ class RefButtonsPanel(wx.Panel):
         pressed = evt.GetEventObject()
 
         if pressed is self.anchorbut:
-            tmp = self._rootparent.degrees_to_screenpix(self._rootparent.horz_loc, self._rootparent.vert_loc)
-            offset = wx.Point2D(tmp[0], tmp[1])
-            self._rootparent.LCCanvas.set_fixation_centerpoint(offset)
-            self._rootparent.update_fixation_location(wx.Point2D(0, 0))
+            dlg = wx.MessageDialog(self._rootparent, "Are you sure you want to set a new reference point? This process is irreversable.", "Are you sure?", wx.YES_NO | wx.ICON_QUESTION)
+
+            res = dlg.ShowModal()
+            if res == wx.ID_YES:
+                tmp = self._rootparent.degrees_to_screenpix(self._rootparent.horz_loc, self._rootparent.vert_loc)
+                offset = wx.Point2D(tmp[0], tmp[1])
+                self._rootparent.LCCanvas.set_fixation_centerpoint(offset)
+                self._rootparent.update_fixation_location(wx.Point2D(0, 0))
 
 class QuickLocationsPanel(wx.Panel):
     '''

@@ -337,18 +337,6 @@ class wxFixationFrame(wx.Frame):
             # Update the states in the two panels
             self.control.SetState(state)
             self.viewpane.set_state(state)
-        elif button is self.control.anchorbut:
-            ##            print "Was: "+str(self._intercept)
-            tmp = self.degrees_to_screenpix(self.horz_loc, self.vert_loc)
-            offset = wx.Point2D(tmp[0], tmp[1])
-            ##            print "Offset: "+ str(offset)
-            #print("New: "+str(self._intercept+offset))
-            # Update new center location
-            # self._intercept = self._intercept+offset
-
-            # self._intercept = wx.Point(round(self._intercept.x), round(self._intercept.y))
-            self.LCCanvas.set_fixation_centerpoint(offset)
-            self.update_fixation_location(wx.Point2D(0, 0))  # With the new intercept chosen, snap to that center
 
 
         else:

@@ -2141,23 +2141,23 @@
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
           <entry key="dummy" value="1270" />
-          <entry key="py" value="5630" />
+          <entry key="py" value="5809" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="PLAIN_TEXT" value="1270" />
-          <entry key="Python" value="5630" />
+          <entry key="Python" value="5809" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
-          <entry key="py" value="19" />
+          <entry key="py" value="20" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
-          <entry key="Python" value="19" />
+          <entry key="Python" value="20" />
         </counts>
       </usages-collector>
     </session>
@@ -2173,14 +2173,14 @@
     </session>
   </component>
   <component name="FileEditorManager">
-    <splitter split-orientation="horizontal" split-proportion="0.42643923">
+    <splitter split-orientation="horizontal" split-proportion="0.47121534">
       <split-first>
         <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
           <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/fixationgui/wxFixGUI.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="324">
-                  <caret line="563" column="58" selection-start-line="563" selection-start-column="54" selection-end-line="563" selection-end-column="58" />
+                <state relative-caret-position="-9507">
+                  <caret line="90" column="32" lean-forward="true" selection-start-line="90" selection-start-column="32" selection-end-line="90" selection-end-column="32" />
                   <folding>
                     <element signature="e#0#9#0" expanded="true" />
                   </folding>
@@ -2191,8 +2191,8 @@
           <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/fixationgui/ViewPane.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="493">
-                  <caret line="110" column="10" lean-forward="true" selection-start-line="110" selection-start-column="10" selection-end-line="110" selection-end-column="10" />
+                <state relative-caret-position="17">
+                  <caret line="316" lean-forward="true" selection-start-line="316" selection-end-line="316" />
                   <folding>
                     <element signature="e#2#11#0" expanded="true" />
                   </folding>
@@ -2225,11 +2225,11 @@
               </provider>
             </entry>
           </file>
-          <file pinned="false" current-in-tab="false">
+          <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/fixationgui/wxFixProc.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="239">
-                  <caret line="22" column="52" selection-start-line="22" selection-start-column="52" selection-end-line="22" selection-end-column="52" />
+                <state relative-caret-position="681">
+                  <caret line="60" column="34" lean-forward="true" selection-start-line="60" selection-start-column="34" selection-end-line="60" selection-end-column="34" />
                 </state>
               </provider>
             </entry>
@@ -2237,8 +2237,8 @@
           <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/fixationgui/controlPanel.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="579">
-                  <caret line="71" column="45" lean-forward="true" selection-start-line="71" selection-start-column="45" selection-end-line="71" selection-end-column="45" />
+                <state relative-caret-position="494">
+                  <caret line="69" column="40" lean-forward="true" selection-start-line="69" selection-start-column="40" selection-end-line="69" selection-end-column="40" />
                   <folding>
                     <element signature="e#60#69#0" expanded="true" />
                   </folding>
@@ -2246,11 +2246,11 @@
               </provider>
             </entry>
           </file>
-          <file pinned="false" current-in-tab="true">
+          <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/fixationgui/paneWidgets.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="545">
-                  <caret line="441" column="42" lean-forward="true" selection-start-line="441" selection-start-column="42" selection-end-line="441" selection-end-column="42" />
+                <state relative-caret-position="392">
+                  <caret line="405" column="84" lean-forward="true" selection-start-line="405" selection-start-column="84" selection-end-line="405" selection-end-column="84" />
                 </state>
               </provider>
             </entry>
@@ -2306,11 +2306,11 @@
         <option value="$PROJECT_DIR$/fixationgui/LightCrafter.py" />
         <option value="$PROJECT_DIR$/fixationWidgets/LocSpin.py" />
         <option value="$PROJECT_DIR$/fixationgui/protocolPane.py" />
-        <option value="$PROJECT_DIR$/fixationgui/wxFixProc.py" />
         <option value="$PROJECT_DIR$/fixationgui/ViewPane.py" />
-        <option value="$PROJECT_DIR$/fixationgui/wxFixGUI.py" />
         <option value="$PROJECT_DIR$/fixationgui/controlPanel.py" />
+        <option value="$PROJECT_DIR$/fixationgui/wxFixGUI.py" />
         <option value="$PROJECT_DIR$/fixationgui/paneWidgets.py" />
+        <option value="$PROJECT_DIR$/fixationgui/wxFixProc.py" />
       </list>
     </option>
   </component>
@@ -2551,16 +2551,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/fixationgui/ViewPane.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="493">
-          <caret line="110" column="10" lean-forward="true" selection-start-line="110" selection-start-column="10" selection-end-line="110" selection-end-column="10" />
-          <folding>
-            <element signature="e#2#11#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/fixationgui/protocolPane.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2041">
@@ -2585,37 +2575,54 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/fixationgui/wxFixGUI.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="324">
-          <caret line="563" column="58" selection-start-line="563" selection-start-column="54" selection-end-line="563" selection-end-column="58" />
-          <folding>
-            <element signature="e#0#9#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/fixationgui/controlPanel.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="579">
-          <caret line="71" column="45" lean-forward="true" selection-start-line="71" selection-start-column="45" selection-end-line="71" selection-end-column="45" />
+        <state relative-caret-position="494">
+          <caret line="69" column="40" lean-forward="true" selection-start-line="69" selection-start-column="40" selection-end-line="69" selection-end-column="40" />
           <folding>
             <element signature="e#60#69#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/fixationgui/wxFixProc.py">
+    <entry file="file://$USER_HOME$/.PyCharmCE2018.2/system/python_stubs/-748207329/wx/_core/MessageDialog.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="239">
-          <caret line="22" column="52" selection-start-line="22" selection-start-column="52" selection-end-line="22" selection-end-column="52" />
+        <state relative-caret-position="4862">
+          <caret line="289" column="8" selection-start-line="289" selection-start-column="8" selection-end-line="289" selection-end-column="8" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/fixationgui/paneWidgets.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="545">
-          <caret line="441" column="42" lean-forward="true" selection-start-line="441" selection-start-column="42" selection-end-line="441" selection-end-column="42" />
+        <state relative-caret-position="392">
+          <caret line="405" column="84" lean-forward="true" selection-start-line="405" selection-start-column="84" selection-end-line="405" selection-end-column="84" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/fixationgui/ViewPane.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="17">
+          <caret line="316" lean-forward="true" selection-start-line="316" selection-end-line="316" />
+          <folding>
+            <element signature="e#2#11#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/fixationgui/wxFixGUI.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-9507">
+          <caret line="90" column="32" lean-forward="true" selection-start-line="90" selection-start-column="32" selection-end-line="90" selection-end-column="32" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/fixationgui/wxFixProc.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="681">
+          <caret line="60" column="34" lean-forward="true" selection-start-line="60" selection-start-column="34" selection-end-line="60" selection-end-column="34" />
         </state>
       </provider>
     </entry>
