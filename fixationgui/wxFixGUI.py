@@ -1,3 +1,4 @@
+import asyncore
 import os
 import wx
 import math
@@ -15,6 +16,9 @@ import threading
 
 myEVT_MESSAGE = wx.NewEventType()
 EVT_MESSAGE = wx.PyEventBinder(myEVT_MESSAGE, 1)
+
+myEVT_RETURN_MESSAGE = wx.NewEventType()
+EVT_RETURN_MESSAGE = wx.PyEventBinder(myEVT_RETURN_MESSAGE, 2)
 
 # Sets Up The Class For The Program And Creates The Window
 class wxFixationFrame(wx.Frame):
@@ -87,8 +91,11 @@ class wxFixationFrame(wx.Frame):
         self.Bind(EVT_MESSAGE, self.handle_message)
 
         # Spawn the pair of listener threads so we can detect changes in the comm Queues passed by Savior
-        self.fovListener = QueueListener(self)  # This will recieve a tuple of sizes
-        self.fovListener.start()
+        self.fovListener = ConnListener(self)  # This will recieve a tuple of sizes
+        self.fovListenerThread = threading.Thread(target=asyncore.loop, kwargs={'timeout': 1})
+        self.fovListenerThread.setDaemon(True)
+        self.fovListenerThread.start()
+
 
     def initViewPane(self, parent):
         # Setting up the ViewPane
@@ -261,7 +268,8 @@ class wxFixationFrame(wx.Frame):
             0: self.mark_location,
             1: self.set_FOV
         }
-        switchboard.get(evt.get_datatype())(evt.get_data())
+        if evt.get_datatype() in switchboard:
+            switchboard.get(evt.get_datatype())(evt.get_data())
 
     # Toggle target on/off
     def on_toggle_press(self, event):
@@ -457,8 +465,10 @@ class wxFixationFrame(wx.Frame):
     def on_keyboard_press(self, event):
         # Allows For Arrow Control Of The Cursor
 
-        # if event.GetKeyCode() == wx.WXK_NUMPAD_ADD:
-        #     self.OnZoom(self)
+        if event.GetKeyCode() == wx.WXK_F4:
+            evt = MessageEvent(myEVT_RETURN_MESSAGE, -1, 4, "F4")
+            wx.PostEvent(self, evt)
+
         # elif event.GetKeyCode() == wx.WXK_NUMPAD_SUBTRACT:
         #     self.zoom_out(self)
 
@@ -653,48 +663,63 @@ class MessageEvent(wx.PyCommandEvent):
 
 
 # This thread class generically listens to a queue, and passes what it receives to a specified function.
-class QueueListener(threading.Thread):
+class ConnListener(asyncore.dispatcher):
 
     def __init__(self, parent):
-
-        threading.Thread.__init__(self)
-        self.setDaemon(True)
+        asyncore.dispatcher.__init__(self)
         self.thisparent = parent
-        #self.callback = func
+
         self.HOST = 'localhost'
         self.PORT = 1222
+        self.buffer = []
 
-    def run(self):
-        self.serversock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.serversock.bind((self.HOST, self.PORT))
+        self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.bind((self.HOST, self.PORT))
         print("Listening for a careless whisper from a queue thread...")
-        self.serversock.listen(1)
-        conn, addr = self.serversock.accept()
+        self.listen(1)
 
-        while True:
-            try:
-                recvmsg = conn.recv(32).decode("utf-8")
-                print("Recieved: "+recvmsg)
-                splitmsg = recvmsg.split(";")
+    def handle_accept(self):
+        pair = self.accept()
+        if pair is not None:
+            sock, addr = pair
+            QueueListener(self.thisparent, sock=sock)
+            print("Incoming connection from "+repr(addr))
 
-                if len(splitmsg) == 2:
-                    evt = MessageEvent( myEVT_MESSAGE, -1, int(splitmsg[0]), splitmsg[1])
-                else:
-                    evt = MessageEvent( myEVT_MESSAGE, -1, int(splitmsg[0]), splitmsg[1:])
 
-                wx.PostEvent(self.thisparent, evt)
+class QueueListener(asyncore.dispatcher_with_send):
 
-                if int(splitmsg[0]) == -1:
-                    conn.shutdown(socket.SHUT_RD)
-                    conn.close()
-                    return
-            except ConnectionResetError:
-                print("Lost connection to the image whisperer!")
-                md = wx.MessageDialog(None, "Lost connection to the image whisperer! Protocol list will no longer update.",
-                                      "Lost connection to the image whisperer!", wx.ICON_ERROR | wx.OK)
-                md.ShowModal()
+    def __init__(self, parent=None, sock=None, map=None):
+        asyncore.dispatcher.__init__(self, sock, map)
+        self.thisparent = parent
+        self.out_buffer = b''
+        self.thisparent.Bind(EVT_RETURN_MESSAGE, self.handle_return_message)
+
+    def handle_return_message(self, evt):
+        print("Sending!")
+        self.send(str("Well hello there, you're a bold one.").encode("utf-8"))
+
+    def handle_read(self):
+        try:
+            recvmsg = self.recv(32).decode("utf-8")
+            print("Recieved: "+recvmsg)
+            splitmsg = recvmsg.split(";")
+
+            if len(splitmsg) == 2:
+                evt = MessageEvent( myEVT_MESSAGE, -1, int(splitmsg[0]), splitmsg[1])
+            else:
+                evt = MessageEvent( myEVT_MESSAGE, -1, int(splitmsg[0]), splitmsg[1:])
+
+            wx.PostEvent(self.thisparent, evt)
+
+            if int(splitmsg[0]) == -1:
+                self.close()
                 return
-
+        except ConnectionResetError:
+            print("Lost connection to the image whisperer!")
+            md = wx.MessageDialog(None, "Lost connection to the image whisperer! Protocol list will no longer update.",
+                                  "Lost connection to the image whisperer!", wx.ICON_ERROR | wx.OK)
+            md.ShowModal()
+            return
 
 # Shows The Window
 if __name__ == '__main__':

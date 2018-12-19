@@ -1,7 +1,8 @@
+import asyncore
+import threading
 from multiprocessing import Queue
 import subprocess
 import sys, os, socket, platform
-import threading
 import time
 
 
@@ -21,7 +22,9 @@ class FixGUIServer:
         time.sleep(2)
         # Spawn the pair of listener threads so we can detect changes in the comm Queues passed by Savior
         self.whisperer = QueueWhisperer(dataQueue)  # This will recieve a tuple of sizes
-        self.whisperer.start()
+        #asyncore.loop()
+        self.whispererThread = threading.Thread(target=asyncore.loop, kwargs={'timeout': 1})
+        self.whispererThread.start()
 
 
     def run_fixation_app_server(self, name):
@@ -29,39 +32,46 @@ class FixGUIServer:
 
 
 # This thread class generically listens to a queue, and passes what it receives to a specified socket.
-class QueueWhisperer(threading.Thread):
+class QueueWhisperer(asyncore.dispatcher):
     def __init__(self, queue):
 
-        threading.Thread.__init__(self)
+        asyncore.dispatcher.__init__(self)
 
         self.queue = queue
 
         self.HOST = 'localhost'
         self.PORT = 1222
 
-    def run(self):
-        self.serversock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.serversock.connect((self.HOST, self.PORT))
+        self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.set_reuse_addr()
+        self.connect((self.HOST, self.PORT))
 
-        while True:
-            try:
-                qData = self.queue.get()  # This is expected to be a tuple, but handle it in case it's not.
 
-                msg = ""
-                for data in qData:
-                    msg += str(data) + ";"
+    def writable(self):
+        return self.queue.qsize() > 0
 
-                msg = msg[:-1]
+    def handle_read(self):
+        recvmsg = self.recv(32).decode("utf-8")
+        print("Recieved: " + recvmsg)
 
-                self.serversock.sendall(msg)
+    def handle_write(self):
+        try:
+            qData = self.queue.get()  # This is expected to be a tuple, but handle it in case it's not.
 
-            except RuntimeError:
-                print("Lost connection to the image listener!")
-                self.serversock.shutdown(socket.SHUT_WR)
-                self.serversock.close()
-                if self.mainGUI:
-                    self.mainGUI.kill()
-                return
+            msg = ""
+            for data in qData:
+                msg += str(data) + ";"
+
+            msg = msg[:-1]
+            print("Sending "+msg)
+            print( self.send(msg) )
+
+        except RuntimeError:
+            print("Lost connection to the image listener!")
+            self.close()
+            if self.mainGUI:
+                self.mainGUI.kill()
+            return
 
 
 if __name__ == '__main__':
@@ -74,23 +84,24 @@ if __name__ == '__main__':
 
     server = FixGUIServer(testQ)
     time.sleep(6)
+    print("Starting test packets...")
     testQ.put((FOV, 1, 1))
     testQ.put((VIDNUM, '0000'))
-    time.sleep(1)
+    time.sleep(2)
     testQ.put((FOV, 1, 1))
     testQ.put((VIDNUM, '0001'))
-    time.sleep(6)
+    time.sleep(2)
     testQ.put((FOV, 1.25, 1.25))
     testQ.put((VIDNUM, '0010'))
-    time.sleep(6)
+    time.sleep(2)
     testQ.put((FOV, 1.5, 1.5))
     testQ.put((VIDNUM, '0050'))
-    time.sleep(6)
+    time.sleep(2)
     testQ.put((FOV, 1.75, 1.75))
     testQ.put((VIDNUM, '0100'))
-    time.sleep(10)
+    time.sleep(2)
 
-    testQ.put((CYANIDE, "I'm never gonna dance again"))
+    #testQ.put((CYANIDE, "I'm never gonna dance again"))
 
 
 
