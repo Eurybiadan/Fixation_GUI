@@ -695,13 +695,13 @@ class QueueListener(asyncore.dispatcher_with_send):
         self.thisparent.Bind(EVT_RETURN_MESSAGE, self.handle_return_message)
 
     def handle_return_message(self, evt):
-        print("Sending!")
-        self.send(str("Well hello there, you're a bold one.").encode("utf-8"))
+        #("Sending!")
+        self.send(evt.get_data().encode("utf-8"))
 
     def handle_read(self):
         try:
             recvmsg = self.recv(32).decode("utf-8")
-            print("Recieved: "+recvmsg)
+            #print("Recieved: "+recvmsg)
             splitmsg = recvmsg.split(";")
 
             if len(splitmsg) == 2:

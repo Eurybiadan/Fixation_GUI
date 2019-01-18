@@ -8,7 +8,7 @@ import time
 
 class FixGUIServer:
 
-    def __init__(self, dataQueue=None):
+    def __init__(self, sendQueue=None, recvQueue=None):
         thispath = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
         if platform.system() is 'Windows':
@@ -21,7 +21,7 @@ class FixGUIServer:
         self.mainGUI = subprocess.Popen([py3path, guipath])
         time.sleep(2)
         # Spawn the pair of listener threads so we can detect changes in the comm Queues passed by Savior
-        self.whisperer = QueueWhisperer(dataQueue)  # This will recieve a tuple of sizes
+        self.whisperer = QueueWhisperer(sendQueue, recvQueue)  # This will recieve a tuple of sizes
         #asyncore.loop()
         self.whispererThread = threading.Thread(target=asyncore.loop, kwargs={'timeout': 1})
         self.whispererThread.start()
@@ -33,11 +33,12 @@ class FixGUIServer:
 
 # This thread class generically listens to a queue, and passes what it receives to a specified socket.
 class QueueWhisperer(asyncore.dispatcher):
-    def __init__(self, queue):
+    def __init__(self, sendQueue=None, recvQueue=None):
 
         asyncore.dispatcher.__init__(self)
 
-        self.queue = queue
+        self._sendQueue = sendQueue
+        self._recvQueue = recvQueue
 
         self.HOST = 'localhost'
         self.PORT = 1222
@@ -48,23 +49,24 @@ class QueueWhisperer(asyncore.dispatcher):
 
 
     def writable(self):
-        return self.queue.qsize() > 0
+        return self._sendQueue.qsize() > 0
 
     def handle_read(self):
         recvmsg = self.recv(32).decode("utf-8")
-        print("Recieved: " + recvmsg)
+        #print("Recieved: " + recvmsg)
+        self._recvQueue.put(recvmsg)
 
     def handle_write(self):
         try:
-            qData = self.queue.get()  # This is expected to be a tuple, but handle it in case it's not.
+            qData = self._sendQueue.get()  # This is expected to be a tuple, but handle it in case it's not.
 
             msg = ""
             for data in qData:
                 msg += str(data) + ";"
 
             msg = msg[:-1]
-            print("Sending "+msg)
-            print( self.send(msg) )
+            #print("Sending "+msg)
+            #print( self.send(msg) )
 
         except RuntimeError:
             print("Lost connection to the image listener!")

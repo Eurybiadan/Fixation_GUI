@@ -71,7 +71,8 @@ import SaviorHardwareConfiguration
 
 # Import the fixation GUI.
 from wxFixProc import FixGUIServer
-from multiprocessing import Process, Queue
+from multiprocessing import Queue
+from threading import Thread
 
 import SaviorResearchPanel
 import SaviorClinicalPanel
@@ -387,9 +388,10 @@ class SaviorApp(wx.App):
             # Load the icon
             self.savior_icon   = wx.Icon('icons/Record-Pressed-icon 16.ico', wx.BITMAP_TYPE_ICO)
             
-            # Create the two queues we'll post to in order to pass messages to
+            # Create the two queues we'll post to in order to pass and recv messages from
             # the fixation GUI
             self.fixQ = Queue(1)
+            self.recvQ = Queue(1)
             
             # creating application main frame
             if self.settings['clinical_version']:
@@ -430,8 +432,11 @@ class SaviorApp(wx.App):
             #########################################################
             ## wxFixation GUI addition by Robert Cooper 09-19-2018 ##
             #########################################################
-            self.wxFixFrameProc = FixGUIServer(self.fixQ)
-			
+            self.wxFixFrameProc = FixGUIServer(self.fixQ, self.recvQ)
+            self.recvThread = Thread(target=self.OnRecvQueue)
+            self.recvThread.daemon = True
+            self.recvThread.start()
+            
             # create the dispatcher object to handle messages
             self.command_interface = SaviorCommandInterface.SaviorCommandInterface(self)
 
@@ -533,7 +538,15 @@ class SaviorApp(wx.App):
 
         event.Skip()
 
-        
+    def OnRecvQueue(self):
+        while True:
+            recvVal = self.recvQ.get() # Block until we get something.
+            # In this setup with our FixationGUI, we should only get key commands.
+            if recvVal == "F4":
+                keypress = wx.KeyEvent(wx.wxEVT_CHAR)
+                keypress.m_keyCode = wx.WXK_F4
+                self.OnKeyDown(keypress)
+
     def OnKeyDown(self, event):
         """
         """
