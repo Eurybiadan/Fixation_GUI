@@ -17,8 +17,10 @@ class ProtocolPane(wx.Panel):
 
         super(ProtocolPane, self).__init__(parent, id, pos, size, style, name)
         self.SetBackgroundColour('black')
-
+        self._parent = parent
         self.pattern = re.compile("[ntsiNTIS]")
+
+        self._degree_sign = u'\N{DEGREE SIGN}'
 
         self.list = wx.ListCtrl(self, style=wx.LC_REPORT, size=(285, -1))
         self.list.SetBackgroundColour('black')
@@ -28,6 +30,8 @@ class ProtocolPane(wx.Panel):
         self.list.InsertColumn(2, 'FOV', format=wx.LIST_FORMAT_CENTER, width=75)
         self.list.InsertColumn(3, 'Eye', format=wx.LIST_FORMAT_CENTER, width=30)
 
+        self.list.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_listitem_selected)
+        print("Bound dat list.")
         vbox2 = wx.BoxSizer(wx.VERTICAL)
 
         vbox2.Add(self.list, 1)
@@ -37,6 +41,61 @@ class ProtocolPane(wx.Panel):
 
         # Initialize the data structure which will hold the protocol
         self._protocol = list()
+
+    def on_listitem_selected(self, listevt):
+        ind = listevt.GetIndex()
+        #print(self.list.GetItemText(ind, 1))
+        #print(self.list.GetItemText(ind, 2))
+        #print(self.list.GetItemText(ind, 3))
+        # Unwrap the items:
+
+        # Update the eye first- other values are relative to the eye.
+        self._parent.control.OS.SetValue(self.list.GetItemText(ind, 3) == "OS")
+        self._parent.control.OD.SetValue(self.list.GetItemText(ind, 3) == "OD")
+        self._parent.on_eye_select(self.list.GetItemText(ind, 3) == "OS")
+
+        # Update the FOV - For simplicity I'm just directly manipulating the string. This should be changed if we change
+        # details of how the strings are displayed.
+        # This is disabled for the moment, until I update the talkback to the host application.
+        # fovtokens = self.list.GetItemText(ind, 2).split(self._degree_sign)
+        # width = float(fovtokens[0])
+        # height = fovtokens[1]
+        # height = float(height[2:])
+        # self._parent.set_horizontal_fov(width)
+        # self._parent.set_vertical_fov(height)
+
+        # Update the Location.
+        locsplit = self.list.GetItemText(ind, 1).split(',')
+        horzsign = 1
+        vertsign = 1
+        if self.list.GetItemText(ind, 3) == "OS": # For OS, Temporal is postive and Nasal is negative.
+            horz = locsplit[0]
+            if horz[-1] == "N":
+                horzsign = -1
+            horzval = float(horz[:-1].strip())*horzsign
+
+            vert = locsplit[1]
+            if vert[-1] == "I":
+                vertsign = -1
+            vertval = float(vert[:-1].strip())*vertsign
+
+            self._parent.update_fixation_location(wx.Point2D(horzval, vertval))
+
+        elif self.list.GetItemText(ind, 3) == "OD": # For OD, Temporal is negative and Nasal is positive.
+            horz = locsplit[0]
+            if horz[-1] == "T":
+                horzsign = -1
+            horzval = float(horz[:-1].strip())*horzsign
+
+            vert = locsplit[1]
+            if vert[-1] == "I":
+                vertsign = -1
+            vertval = float(vert[:-1].strip())*vertsign
+
+            self._parent.update_fixation_location(wx.Point2D(horzval, vertval))
+
+
+
 
     def load_protocol(self, path):
         with open(path, 'r') as csvfile:
@@ -104,7 +163,7 @@ class ProtocolPane(wx.Panel):
         self.list.DeleteAllItems()
 
     def update_protocol_list(self):
-        degree_sign = u'\N{DEGREE SIGN}'
+
 
         for item in self._protocol:
 
@@ -112,14 +171,13 @@ class ProtocolPane(wx.Panel):
 
             self.list.InsertItem(ind, str(item['num_obtained']))
             self.list.SetItem(ind, 1, item['loc'][0] + ', ' + item['loc'][1])
-            self.list.SetItem(ind, 2, str(item['fov'][0]) + degree_sign + 'x ' + str(item['fov'][1]) + degree_sign)
+            self.list.SetItem(ind, 2, str(item['fov'][0]) + self._degree_sign + 'x ' + str(item['fov'][1]) + self._degree_sign)
             self.list.SetItem(ind, 3, item['eye'])
             self.list.SetItemBackgroundColour(ind, (255, 79, 0))
 
     # This method updates the protocol based on an input set. If the input doesn't match any
     # of the currently loaded protocol, add the new location/settings to the list.
     def update_protocol(self, location, eyesign, curfov):
-        degree_sign = u'\N{DEGREE SIGN}'
         exist = False
 
         if eyesign == -1:
@@ -150,6 +208,6 @@ class ProtocolPane(wx.Panel):
 
             self.list.InsertItem(ind, str(newentry['num_obtained']))
             self.list.SetItem(ind, 1, newentry['loc'][0] + ', ' + newentry['loc'][1])
-            self.list.SetItem(ind, 2, str(newentry['fov'][0]) + degree_sign + 'x ' + str(newentry['fov'][1]) + degree_sign)
+            self.list.SetItem(ind, 2, str(newentry['fov'][0]) + self._degree_sign + 'x ' + str(newentry['fov'][1]) + self._degree_sign)
             self.list.SetItem(ind, 3, newentry['eye'])
             self.list.SetItemBackgroundColour(ind, (0, 0, 0))

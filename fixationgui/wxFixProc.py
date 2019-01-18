@@ -65,8 +65,8 @@ class QueueWhisperer(asyncore.dispatcher):
                 msg += str(data) + ";"
 
             msg = msg[:-1]
-            #print("Sending "+msg)
-            #print( self.send(msg) )
+
+            self.send(msg)
 
         except RuntimeError:
             print("Lost connection to the image listener!")

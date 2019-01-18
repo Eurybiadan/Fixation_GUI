@@ -173,14 +173,14 @@ class ViewPane(wx.Window):
 
         relativepos = wx.Point2D(np.subtract(pos.Get(), self._center.Get()))
 
-        degreehorz = round(relativepos.x/self._pixperdeg,1)
+        degreehorz = round(relativepos.x/self._pixperdeg, 2)
 
         if (Decimal(str(degreehorz)) % Decimal('0.2')) == Decimal('0.1'):
             degreehorz += .1
         elif (Decimal(str(degreehorz)) % Decimal('0.2')) == Decimal('-0.1'):
             degreehorz -= .1
             
-        degreevert = round(-relativepos.y/self._pixperdeg,1) # Flip the sign because positive is superior
+        degreevert = round(-relativepos.y/self._pixperdeg, 2) # Flip the sign because positive is superior
 
         if (Decimal(str(degreevert)) % Decimal('0.2')) == Decimal('0.1'):
             degreevert += .1

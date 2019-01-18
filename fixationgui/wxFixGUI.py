@@ -695,7 +695,7 @@ class QueueListener(asyncore.dispatcher_with_send):
         self.thisparent.Bind(EVT_RETURN_MESSAGE, self.handle_return_message)
 
     def handle_return_message(self, evt):
-        #("Sending!")
+        #print("Sending!")
         self.send(evt.get_data().encode("utf-8"))
 
     def handle_read(self):

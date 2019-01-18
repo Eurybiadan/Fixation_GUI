@@ -138,8 +138,7 @@ class LocSpin(wx.lib.agw.floatspin.FloatSpin):
             value = 0.0  # Don't add any label if it is 0.
 
         # Ended addition by Robert F Cooper
-        print("New value: "+str(value))
-        print("Old value: "+str(self._value))
+
         if value is not self._value or strs != self._textctrl.GetValue():
             self._textctrl.SetValue(strs)
             self._textctrl.DiscardEdits()
@@ -149,7 +148,7 @@ class LocSpin(wx.lib.agw.floatspin.FloatSpin):
         return self._textctrl.GetValue()
 
     def get_value(self):
-        return Decimal(self._value)
+        return Decimal(round(self._value, 2))
 
     def set_positive_label(self, label):
         self._poslabel = label

@@ -3,9 +3,11 @@
   <component name="ChangeListManager">
     <list default="true" id="10265a4d-0c1d-4a65-8747-ae54663009dc" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fixationgui/LocSpin.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/LocSpin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fixationgui/ViewPane.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/ViewPane.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fixationgui/protocolPane.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/protocolPane.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fixationgui/wxFixGUI.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/wxFixGUI.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fixationgui/wxFixProc.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/wxFixProc.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pre_modified_server_side_scripts/Savior.pyw" beforeDir="false" afterPath="$PROJECT_DIR$/pre_modified_server_side_scripts/Savior.pyw" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -18,8 +20,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/fixationgui/wxFixGUI.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="647">
-              <caret line="713" column="28" lean-forward="true" selection-start-line="713" selection-start-column="28" selection-end-line="713" selection-end-column="28" />
+            <state relative-caret-position="494">
+              <caret line="612" column="22" lean-forward="true" selection-start-line="612" selection-start-column="22" selection-end-line="612" selection-end-column="22" />
             </state>
           </provider>
         </entry>
@@ -27,8 +29,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/fixationgui/controlPanel.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1037">
-              <caret line="64" column="21" selection-start-line="64" selection-start-column="21" selection-end-line="64" selection-end-column="21" />
+            <state relative-caret-position="238">
+              <caret line="17" lean-forward="true" selection-start-line="17" selection-end-line="17" />
             </state>
           </provider>
         </entry>
@@ -36,8 +38,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/fixationgui/ViewPane.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1615">
-              <caret line="99" column="20" selection-start-line="99" selection-start-column="20" selection-end-line="99" selection-end-column="20" />
+            <state relative-caret-position="238">
+              <caret line="158" column="24" lean-forward="true" selection-start-line="158" selection-start-column="24" selection-end-line="158" selection-end-column="24" />
               <folding>
                 <element signature="e#2#11#0" expanded="true" />
               </folding>
@@ -48,17 +50,17 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/fixationgui/LightCrafter.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="136">
+            <state relative-caret-position="120">
               <caret line="9" selection-start-line="9" selection-end-line="9" />
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/fixationgui/protocolPane.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-15">
-              <caret line="110" column="42" selection-start-line="110" selection-start-column="42" selection-end-line="110" selection-end-column="42" />
+            <state relative-caret-position="231">
+              <caret line="46" column="9" selection-start-line="46" selection-start-column="9" selection-end-line="46" selection-end-column="9" />
               <folding>
                 <element signature="e#47#56#0" expanded="true" />
               </folding>
@@ -66,11 +68,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/fixationgui/wxFixProc.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="680">
-              <caret line="66" column="26" lean-forward="true" selection-start-line="66" selection-start-column="26" selection-end-line="66" selection-end-column="26" />
+            <state relative-caret-position="-272">
+              <caret line="55" column="9" selection-start-line="55" selection-start-column="9" selection-end-line="55" selection-end-column="9" />
             </state>
           </provider>
         </entry>
@@ -78,8 +80,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/fixationgui/LocSpin.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="129">
-              <caret line="115" column="53" lean-forward="true" selection-start-line="115" selection-start-column="53" selection-end-line="115" selection-end-column="53" />
+            <state relative-caret-position="435">
+              <caret line="150" column="42" selection-start-line="150" selection-start-column="42" selection-end-line="150" selection-end-column="42" />
               <folding>
                 <element signature="e#296#305#0" expanded="true" />
               </folding>
@@ -91,14 +93,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>self.id_rec_ser</find>
-      <find>OnSaveProtocolLoc</find>
-      <find>pickle</find>
-      <find>print</find>
-      <find>Colour</find>
-      <find>wx.NORMAL</find>
-      <find>NORMAL</find>
-      <find>BOLD</find>
       <find>EmptyBitmapRGBA</find>
       <find>EmptyBitmap</find>
       <find>Point2DDouble</find>
@@ -119,6 +113,16 @@
       <find>FixedPoint</find>
       <find>decimal</find>
       <find>MessageEvent</find>
+      <find>F4</find>
+      <find>ProtocolPane</find>
+      <find>protocolPane</find>
+      <find>save_location</find>
+      <find>self.protocolpane</find>
+      <find>OS</find>
+      <find>self.OS</find>
+      <find>on_eye_select</find>
+      <find>degree_sign</find>
+      <find>pattern</find>
     </findStrings>
     <replaceStrings>
       <replace>wx.PENSTYLE_SOLID</replace>
@@ -143,19 +147,20 @@
         <option value="$PROJECT_DIR$/virtenv/lib/python3.6/site-packages/wx/core.pyi" />
         <option value="$PROJECT_DIR$/fixationgui/LightCrafter.py" />
         <option value="$PROJECT_DIR$/fixationWidgets/LocSpin.py" />
+        <option value="$PROJECT_DIR$/fixationgui/wxFixProc.py" />
+        <option value="$PROJECT_DIR$/fixationgui/controlPanel.py" />
         <option value="$PROJECT_DIR$/fixationgui/protocolPane.py" />
         <option value="$PROJECT_DIR$/fixationgui/ViewPane.py" />
-        <option value="$PROJECT_DIR$/fixationgui/protocolPane.py" />
-        <option value="$PROJECT_DIR$/fixationgui/LocSpin.py" />
         <option value="$PROJECT_DIR$/fixationgui/wxFixGUI.py" />
-        <option value="$PROJECT_DIR$/fixationgui/wxFixProc.py" />
+        <option value="$PROJECT_DIR$/fixationgui/LocSpin.py" />
+        <option value="$PROJECT_DIR$/fixationgui/protocolPane.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="531" />
+    <option name="x" value="719" />
     <option name="y" value="4" />
-    <option name="width" value="1380" />
+    <option name="width" value="1141" />
     <option name="height" value="1040" />
   </component>
   <component name="ProjectView">
@@ -194,7 +199,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.wxFixProc">
+  <component name="RunManager" selected="Python.wxFixGUI">
     <configuration name="LightCrafter" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="Fixation_GUI" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -244,7 +249,7 @@
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
-      <option name="SDK_HOME" value="/usr/bin/python3.7" />
+      <option name="SDK_HOME" value="C:\DubraLab\Modules\Projects\Fixation_GUI\venv\Scripts\python.exe" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/fixationgui" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
@@ -286,8 +291,8 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.wxFixProc" />
         <item itemvalue="Python.wxFixGUI" />
+        <item itemvalue="Python.wxFixProc" />
         <item itemvalue="Python.LightCrafter" />
       </list>
     </recent_temporary>
@@ -310,11 +315,18 @@
       <option name="project" value="LOCAL" />
       <updated>1547824825963</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="-Added the ability to press F4 on the fixation target and have it start a record on the host application.">
+      <created>1547828086323</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1547828086323</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="531" y="4" width="1380" height="1040" extended-state="0" />
+    <frame x="719" y="4" width="1141" height="1040" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" weight="0.1368421" />
@@ -322,7 +334,7 @@
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.3298479" />
-      <window_info anchor="bottom" x="923" y="118" width="983" height="423" id="Run" order="2" type="FLOATING" weight="0.3297975" />
+      <window_info active="true" anchor="bottom" x="204" y="43" width="678" height="423" id="Run" order="2" type="FLOATING" visible="true" weight="0.3297975" />
       <window_info anchor="bottom" x="701" y="717" width="1123" height="406" id="Debug" order="3" type="WINDOWED" weight="0.39923954" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -340,7 +352,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="-Fixed issue where if a user typed in a location it would not be recorded properly in the fixation location file." />
-    <option name="LAST_COMMIT_MESSAGE" value="-Fixed issue where if a user typed in a location it would not be recorded properly in the fixation location file." />
+    <MESSAGE value="-Added the ability to press F4 on the fixation target and have it start a record on the host application." />
+    <option name="LAST_COMMIT_MESSAGE" value="-Added the ability to press F4 on the fixation target and have it start a record on the host application." />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/virtenv/lib/python3.6/site-packages/wx/core.pyi" />
@@ -365,51 +378,48 @@
     <entry file="file://C:/Python27/Lib/multiprocessing/queues.py" />
     <entry file="file://$PROJECT_DIR$/fixationWidgets/LocSpin.py" />
     <entry file="file://$USER_HOME$/.PyCharmCE2018.2/system/python_stubs/-1247971762/wx/_core/ListCtrl.py" />
+    <entry file="file://$USER_HOME$/.PyCharmCE2018.3/system/python_stubs/1403617999/wx/_core/Panel.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="699">
+          <caret line="227" column="26" selection-start-line="227" selection-start-column="26" selection-end-line="227" selection-end-column="26" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/fixationgui/controlPanel.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1037">
-          <caret line="64" column="21" selection-start-line="64" selection-start-column="21" selection-end-line="64" selection-end-column="21" />
+        <state relative-caret-position="238">
+          <caret line="17" lean-forward="true" selection-start-line="17" selection-end-line="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/venv/Lib/site-packages/wx/lib/agw/floatspin.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="294">
+          <caret line="771" column="8" selection-start-line="771" selection-start-column="8" selection-end-line="771" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/fixationgui/LightCrafter.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="120">
+          <caret line="9" selection-start-line="9" selection-end-line="9" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/fixationgui/ViewPane.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1615">
-          <caret line="99" column="20" selection-start-line="99" selection-start-column="20" selection-end-line="99" selection-end-column="20" />
+        <state relative-caret-position="238">
+          <caret line="158" column="24" lean-forward="true" selection-start-line="158" selection-start-column="24" selection-end-line="158" selection-end-column="24" />
           <folding>
             <element signature="e#2#11#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/fixationgui/LightCrafter.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="136">
-          <caret line="9" selection-start-line="9" selection-end-line="9" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/fixationgui/protocolPane.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-15">
-          <caret line="110" column="42" selection-start-line="110" selection-start-column="42" selection-end-line="110" selection-end-column="42" />
-          <folding>
-            <element signature="e#47#56#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/venv/Lib/site-packages/wx/lib/agw/floatspin.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="379">
-          <caret line="553" column="32" selection-start-line="553" selection-start-column="32" selection-end-line="553" selection-end-column="32" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/fixationgui/LocSpin.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="129">
-          <caret line="115" column="53" lean-forward="true" selection-start-line="115" selection-start-column="53" selection-end-line="115" selection-end-column="53" />
+        <state relative-caret-position="435">
+          <caret line="150" column="42" selection-start-line="150" selection-start-column="42" selection-end-line="150" selection-end-column="42" />
           <folding>
             <element signature="e#296#305#0" expanded="true" />
           </folding>
@@ -418,15 +428,25 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/fixationgui/wxFixGUI.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="647">
-          <caret line="713" column="28" lean-forward="true" selection-start-line="713" selection-start-column="28" selection-end-line="713" selection-end-column="28" />
+        <state relative-caret-position="494">
+          <caret line="612" column="22" lean-forward="true" selection-start-line="612" selection-start-column="22" selection-end-line="612" selection-end-column="22" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/fixationgui/wxFixProc.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="680">
-          <caret line="66" column="26" lean-forward="true" selection-start-line="66" selection-start-column="26" selection-end-line="66" selection-end-column="26" />
+        <state relative-caret-position="-272">
+          <caret line="55" column="9" selection-start-line="55" selection-start-column="9" selection-end-line="55" selection-end-column="9" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/fixationgui/protocolPane.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="231">
+          <caret line="46" column="9" selection-start-line="46" selection-start-column="9" selection-end-line="46" selection-end-column="9" />
+          <folding>
+            <element signature="e#47#56#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
