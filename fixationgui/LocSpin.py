@@ -12,6 +12,7 @@ import re
 import locale
 from math import fabs, ceil, floor
 from wx.lib.agw.floatspin import FixedPoint
+from decimal import *
 
 
 class LocSpin(wx.lib.agw.floatspin.FloatSpin):
@@ -33,6 +34,7 @@ class LocSpin(wx.lib.agw.floatspin.FloatSpin):
         self._validkeycode.extend(range(65, 90))  # Expand the acceptable characters for upper case letters
 
         self._validkeycode.extend(range(97, 122))  # Expand the acceptable characters for lower case letters
+        getcontext().prec = 2
 
     # Override
     def SyncSpinToText(self, send_event=True, force_valid=True):
@@ -63,13 +65,12 @@ class LocSpin(wx.lib.agw.floatspin.FloatSpin):
         # End addition by Robert Cooper
 
         curr = curr.strip()
-        decimal = locale.localeconv()["decimal_point"]
-        curr = curr.replace(decimal, ".")
+        decimalpt = locale.localeconv()["decimal_point"]
+        curr = curr.replace(decimalpt, ".")
 
         if curr:
             try:
-                curro = float(curr)
-                curr = FixedPoint(curr, 2)
+                curr = float(curr)
             except:
                 self.SetValue(self._value)
                 return
@@ -86,7 +87,7 @@ class LocSpin(wx.lib.agw.floatspin.FloatSpin):
                         self.DoSendEvent()
 
         elif force_valid:
-
+            print("Forcing")
             # textctrl is out of sync, discard and reset
             self.SetValue(self.GetValue())
 
@@ -121,9 +122,9 @@ class LocSpin(wx.lib.agw.floatspin.FloatSpin):
                 else:
                     value = self._defaultvalue + ceil(snap_value) * self._increment
 
-        decimal = locale.localeconv()["decimal_point"]
+        decimalpt = locale.localeconv()["decimal_point"]
         strs = ("%100." + str(self._digits) + self._textformat[1]) % value
-        strs = strs.replace(".", decimal)
+        strs = strs.replace(".", decimalpt)
         strs = strs.strip()
         strs = self.ReplaceDoubleZero(strs)
 
@@ -134,11 +135,12 @@ class LocSpin(wx.lib.agw.floatspin.FloatSpin):
             strs = strs + ' ' + self._neglabel
             value = -value
         else:
-            pass  # Don't add any label if it is 0.
+            value = 0.0  # Don't add any label if it is 0.
 
         # Ended addition by Robert F Cooper
-
-        if value != self._value or strs != self._textctrl.GetValue():
+        print("New value: "+str(value))
+        print("Old value: "+str(self._value))
+        if value is not self._value or strs != self._textctrl.GetValue():
             self._textctrl.SetValue(strs)
             self._textctrl.DiscardEdits()
             self._value = value
@@ -147,7 +149,7 @@ class LocSpin(wx.lib.agw.floatspin.FloatSpin):
         return self._textctrl.GetValue()
 
     def get_value(self):
-        return self._value
+        return Decimal(self._value)
 
     def set_positive_label(self, label):
         self._poslabel = label
