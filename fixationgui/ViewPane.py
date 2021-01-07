@@ -12,7 +12,7 @@ class ViewPane(wx.Window):
         wx.Window.__init__(self,parent,id,pos,size,style,name)
         # Number of Grid Lines
         self._numgridlines=30
-        self._pixperdeg=1 
+        self._pixperdeg=1
         # Initial Values
         self.w = 1
         self.h = 1
@@ -61,9 +61,9 @@ class ViewPane(wx.Window):
         self._hasbkgrd = False
 
         # Initialize Backgrounds and the buffer for double buffering
-        self._Bkgrd=wx.Bitmap(1,1)
-        self._CurrentBkgrd=wx.Bitmap(1,1)
-        self._Buffer=wx.Bitmap(1,1)
+        self._Bkgrd=wx.Bitmap(1, 1)
+        self._CurrentBkgrd=wx.Bitmap(1, 1)
+        self._Buffer=wx.Bitmap(1, 1)
 
         # Performs an onSize to initialize all the size-dependent variables
         self.on_size(None)
@@ -135,7 +135,7 @@ class ViewPane(wx.Window):
             self._mouseLoc = self._mouseLoc + str(fabs(degreevert))+ " I)"
         else:
             self._mouseLoc = self._mouseLoc + str(degreevert)+ ")"
-        
+
         #print self._mouseLoc
         self.Repaint()
 
@@ -187,7 +187,7 @@ class ViewPane(wx.Window):
         elif (Decimal(str(degreevert)) % Decimal('0.2')) == Decimal('-0.1'):
             degreevert -= .1
         
-        return degreehorz,degreevert 
+        return degreehorz,degreevert
 
     def on_size(self, event):
         # Is used whenever the window is resized
@@ -221,7 +221,7 @@ class ViewPane(wx.Window):
         
     def on_paint(self, event):
         # Allow For Auto-Refresh
-        wx.BufferedPaintDC(self,self._Buffer)
+        wx.BufferedPaintDC(self, self._Buffer)
 
     def degrees_to_pixels(self, sizepixels, degperregion):
         # This method takes in a tuple containing the size to determine the degrees to pix
@@ -249,35 +249,35 @@ class ViewPane(wx.Window):
             return True
         else:
             return False
-    
+
     def IsMOffsetSet(self):
         if self._mouseOffset is not None:
             return True
         else:
             return False
-        
+
     def SetMouseOffset(self,pos): # This allows the user to click and drag on any part of the image to move it.
         if pos is not None and self.contains(pos):
             self._mouseOffset = pos - self._bkgrd_origin
         else:
             self._mouseOffset = None
-    
+
     def SetPanAnchor(self):
         # Take the current positon of the fixation target, and make it the anchor moving forward with initialization.
         self._pananchor = wx.Point2DCopy(self._fixLoc)
-        
+
     def SetBkgrdRotate(self, degrees):
-        self._rotation = math.pi*degrees/180 # Convert to radians 
+        self._rotation = math.pi*degrees/180 # Convert to radians
         self.UpdateBkgrd()
-        
+
     def SetBkgrdScale(self, deltascale):
         self._deltascale = deltascale
         self._scale = self._scale+deltascale
         self.UpdateBkgrd()
-    
+
     def UpdateBkgrd(self):
         # This method handles the various incarnations that the background image goes through 
-        
+
         # Convert it to an image to work on it
         im = self._Bkgrd.ConvertToImage()
 
@@ -285,7 +285,7 @@ class ViewPane(wx.Window):
             # Scale
             im.Rescale(self._Bkgrd.GetWidth()*self._scale, self._Bkgrd.GetHeight()*self._scale, quality=wx.IMAGE_QUALITY_NORMAL)
             # Panning is done upon drawing it into the viewpane.
-        
+
         if self._state > 1: # State 2+ has the background rotated
             # Rotate it about its center
             oldloc = self._pananchor-self._bkgrd_origin
@@ -296,12 +296,16 @@ class ViewPane(wx.Window):
             #print self._bkgrd_origin
 
             self._bkgrd_origin = self._bkgrd_origin-(newloc-oldloc)
-            pass        
+            pass
         if self._state > 2:
             pass
-        
+
         self._CurrentBkgrd = wx.BitmapFromImage(im)
         self.Repaint()
+
+    def pane_to_file(self, filename):
+        self._Buffer.SaveFile(filename, wx.BITMAP_TYPE_BMP)
+
 
     def Repaint(self):
         # Create a drawing context, and aim what we do with it at the buffer
@@ -312,25 +316,26 @@ class ViewPane(wx.Window):
         # Finalize. We have to remove the drawing context from the buffer
         # *before* we move the newly drawn stuff to the bitmap!
         del dc
+
         self.Refresh(eraseBackground=False)
         self.Update()
 
     def Paint(self, dc=None):
-        
+
         if dc is None:
             dc = wx.MemoryDC()
             dc.SelectObject(self._Buffer)
-        
+
         # Create a GraphicsContext for the floating point drawing we'll do
         gc = wx.GraphicsContext.Create(dc)
         # Determine the current size of the drawing context
         width,height = dc.GetSize()
-        
+
 
         # Draw the background first, regardless of any image.
         dc.SetBrush(self.GRYBRSH)
         dc.DrawRectangle(0,0,width,height)
-        
+
         if self._hasbkgrd:
             if self._state > 1:
                 gc.Translate(self._pananchor.x,self._pananchor.y)
@@ -341,17 +346,17 @@ class ViewPane(wx.Window):
             del gc
             gc = wx.GraphicsContext.Create(dc)
 
-        
+
         #Grid
         width,height=dc.GetSize()
         numRows,numCols=self._numgridlines,self._numgridlines
         cellWid=float(width-1)/numRows
         cellHgt=float(height-1)/numCols
-        
+
         dc.SetBrush(self.WHTBRSH_TRANS)
         dc.SetPen(self.WHTPEN)
         dc.SetPen(self.BLKPEN)
-        
+
         # Draw Row lines
         for rowNum in range(numRows + 1):
             if rowNum==5 or rowNum==10 or rowNum==20 or rowNum==25:
@@ -359,7 +364,7 @@ class ViewPane(wx.Window):
             else:
                 dc.SetPen(self.BLKPEN)
             dc.DrawLine(0,rowNum*cellHgt,width,rowNum*cellHgt)
-            
+
         # Draw Column lines
         for colNum in range(numCols+1):
             if colNum==5 or colNum==10 or colNum==20 or colNum==25:
@@ -367,42 +372,42 @@ class ViewPane(wx.Window):
             else:
                 dc.SetPen(self.BLKPEN)
             dc.DrawLine(colNum*cellWid,0,colNum*cellWid,height)
-        
+
         # Draws Center Lines
         dc.SetPen(self.MEDORANGEPEN)
         dc.DrawLine(0,self._numgridlines/2*cellHgt,width,self._numgridlines/2*cellHgt)
         dc.DrawLine(self._numgridlines/2*cellWid,0,self._numgridlines/2*cellWid,height)
-        
+
         # Draws Viewable Region Circle - use the graphics context because its actually
         # Got a bit of AA in it (can do floating point drawing)
-        brush = gc.CreateBrush( self.WHTBRSH_TRANS ) 
+        brush = gc.CreateBrush( self.WHTBRSH_TRANS )
         pen   = gc.CreatePen(self.MEDCYANPEN)
-        
+
         gc.SetBrush(brush)
         gc.SetPen(pen)
         gc.DrawEllipse(1,1,width-2,height-2)
-        
+
         # Marks Past Locations
         dc.SetBrush(self.WHTBRSH_TRANS)
         dc.SetPen(wx.Pen(wx.WHITE,5,wx.SOLID))
-                                 
+
         for mark in self.marked_loc:
             mwidth, mheight, mloc = mark # Unpack the tuple, draw it.
             gc.DrawRectangle( mloc.x-(self._pixperdeg*mwidth/2.0)-.5, mloc.y-(self._pixperdeg*mheight/2.0)-.5, self._pixperdeg*mwidth, self._pixperdeg*mheight)
-        
+
         fovwidth  = self._pixperdeg*self.hfov
         fovheight = self._pixperdeg*self.vfov
-        
+
         gc.SetBrush(wx.Brush(wx.WHITE,wx.TRANSPARENT))
-        
+
         if self._state > 1 and self._state < 3:
             gc.SetPen(wx.Pen(wx.BLUE,2,wx.SOLID))
             gc.DrawRectangle( self._pananchor.x-(fovwidth/2.0)-.5, self._pananchor.y-(fovheight/2.0)-.5, fovwidth, fovheight )
-                
+
         # Draws Current fixation box
         gc.SetBrush(wx.Brush(wx.WHITE,wx.TRANSPARENT))
         gc.SetPen(wx.Pen(wx.WHITE,2,wx.SOLID))
-        
+
 
         # Since the Window is fixed at 513x513, the "_center is the _center row/column of pixels at 256.5,256.5
         # This means there are 256 pixels to the left of the _center, and 256 pixels to the right. This can change if overriden by the user.
@@ -410,6 +415,7 @@ class ViewPane(wx.Window):
         dc.SetFont(self.MSEFONT)
         dc.SetTextForeground('white')
         dc.DrawText(self._mouseLoc,0,0)
+        del gc
         
 
         

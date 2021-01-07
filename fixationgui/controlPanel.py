@@ -7,6 +7,7 @@ Created on Aug 28, 2013
 
 import wx
 import wx.lib.agw.floatspin as FS
+
 from LocSpin import LocSpin
 import paneWidgets
 
@@ -47,10 +48,10 @@ class ControlPanel(wx.Panel):
         oseyesizer = wx.BoxSizer(wx.HORIZONTAL)
         odeyesizer = wx.BoxSizer(wx.HORIZONTAL)
 
-        oseyesizer.Add(self.OS, 0, wx.ALIGN_RIGHT | wx.BOTTOM | wx.LEFT, 10)
-        oseyesizer.Add(os_label, 0, wx.ALIGN_RIGHT | wx.BOTTOM | wx.RIGHT, 10)
-        odeyesizer.Add(self.OD, 0, wx.ALIGN_LEFT | wx.BOTTOM | wx.LEFT, 10)
-        odeyesizer.Add(od_label, 0, wx.ALIGN_LEFT | wx.BOTTOM | wx.RIGHT, 10)
+        oseyesizer.Add(self.OS, 0,wx.BOTTOM, 10)
+        oseyesizer.Add(os_label, 0, wx.BOTTOM, 10)
+        odeyesizer.Add(self.OD, 0, wx.BOTTOM, 10)
+        odeyesizer.Add(od_label, 0, wx.BOTTOM, 10)
 
         """ FloatSpin Controls """
         controlFont = wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD, False)
@@ -73,6 +74,24 @@ class ControlPanel(wx.Panel):
         horz_label = wx.StaticText(self, wx.ID_ANY, 'Horz:', style=wx.ALIGN_RIGHT)  # Label
         horz_label.SetForegroundColour('white')
         horz_label.SetFont(labelFont)
+
+        self.minorStep = wx.lib.agw.floatspin.FloatSpin(self, wx.ID_ANY, min_val=0, max_val=10, increment=0.1, value=parent.get_minor_increment(),
+                                                        size=(48,-1), style=FS.FS_LEFT)
+        self.minorStep.SetFormat('%f')
+        self.minorStep.SetDigits(2)
+        minorLabel = wx.StaticText(self, wx.ID_ANY, 'Minor \u0394:', style=wx.ALIGN_RIGHT)  # Label
+        minorLabel.SetForegroundColour('white')
+        minorLabel.SetFont(labelFont)
+        #
+        # Horizontal Floatspin control
+        self.majorStep = wx.lib.agw.floatspin.FloatSpin(self, wx.ID_ANY, min_val=0, max_val=10, increment=0.1, value=parent.get_major_increment(),
+                                                        size=(48,-1), style=FS.FS_LEFT)
+        self.majorStep.SetFormat('%f')
+        self.majorStep.SetDigits(2)
+        # self.horzcontrol.SetFont(controlFont)
+        majorLabel = wx.StaticText(self, wx.ID_ANY, 'Major \u0394:', style=wx.ALIGN_RIGHT)  # Label
+        majorLabel.SetForegroundColour('white')
+        majorLabel.SetFont(labelFont)
 
 
         """ Initialization Buttons """
@@ -100,10 +119,16 @@ class ControlPanel(wx.Panel):
         sizer.Add(vert_label, (2, 2), (1, 1), wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL)
         sizer.Add(self.vertcontrol, (2, 3), (1, 1), wx.ALIGN_CENTER | wx.ALL, 5)
 
-        sizer.Add(self._quickpane, (3, 0), (1, 4), wx.ALIGN_CENTER | wx.EXPAND)
-        sizer.Add(self._cursorpane, (4, 0), (1, 4), wx.ALIGN_CENTER | wx.EXPAND)
-        sizer.Add(self._iminitpane, (5, 0), (1, 4), wx.ALIGN_CENTER | wx.EXPAND)
-        sizer.Add(self._qolpane, (6, 0), (1, 4), wx.ALIGN_CENTER | wx.EXPAND)
+        sizer.Add(minorLabel, (3, 0), (1, 1), wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL)
+        sizer.Add(self.minorStep, (3, 1), (1, 1), wx.ALIGN_CENTER | wx.ALL, 5)
+        sizer.Add(majorLabel, (3, 2), (1, 1), wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL)
+        sizer.Add(self.majorStep, (3, 3), (1, 1), wx.ALIGN_CENTER | wx.ALL, 5)
+
+
+        sizer.Add(self._quickpane, (4, 0), (1, 4), wx.ALIGN_CENTER | wx.EXPAND)
+        sizer.Add(self._cursorpane, (5, 0), (1, 4), wx.ALIGN_CENTER | wx.EXPAND)
+        sizer.Add(self._iminitpane, (6, 0), (1, 4), wx.ALIGN_CENTER | wx.EXPAND)
+        sizer.Add(self._qolpane, (7, 0), (1, 4), wx.ALIGN_CENTER | wx.EXPAND)
 
 
         self.SetSizerAndFit(sizer)

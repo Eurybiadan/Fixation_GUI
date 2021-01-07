@@ -65,6 +65,7 @@ class QueueWhisperer(asyncore.dispatcher):
                 msg += str(data) + ";"
 
             msg = msg[:-1]
+            msg += "!" # Terminate our message with an exclaimation.
 
             self.send(msg)
 

@@ -13,12 +13,12 @@ from PreferencesDialog import PreferencesDialog
 import socket
 import threading
 
-
 myEVT_MESSAGE = wx.NewEventType()
 EVT_MESSAGE = wx.PyEventBinder(myEVT_MESSAGE, 1)
 
 myEVT_RETURN_MESSAGE = wx.NewEventType()
 EVT_RETURN_MESSAGE = wx.PyEventBinder(myEVT_RETURN_MESSAGE, 2)
+
 
 # Sets Up The Class For The Program And Creates The Window
 class wxFixationFrame(wx.Frame):
@@ -26,8 +26,8 @@ class wxFixationFrame(wx.Frame):
     SCREEN_PPD = 20
 
     # The increment steps we'll use.
-    MINOR_INCREMENT = 0.1
-    MAJOR_INCREMENT = 0.75
+    MINOR_INCREMENT = 0.5
+    MAJOR_INCREMENT = 1
 
     def __init__(self, parent=None, id=wx.ID_ANY):
         wx.Frame.__init__(self, parent, id, 'Automated Fixation Graphical User Interface')
@@ -71,9 +71,9 @@ class wxFixationFrame(wx.Frame):
 
         horzsizer = wx.BoxSizer(wx.HORIZONTAL)
 
-        horzsizer.Add(self.protocolpane, proportion=0, flag=wx.ALIGN_LEFT | wx.EXPAND)
-        horzsizer.Add(self.imagespace, proportion=0, flag=wx.ALIGN_CENTER | wx.EXPAND)
-        horzsizer.Add(self.control, proportion=0, flag=wx.ALIGN_RIGHT | wx.EXPAND)
+        horzsizer.Add(self.protocolpane, proportion=0, flag=wx.EXPAND)
+        horzsizer.Add(self.imagespace, proportion=0, flag=wx.EXPAND)
+        horzsizer.Add(self.control, proportion=0, flag=wx.EXPAND)
 
         self.init_menubar()
 
@@ -95,7 +95,6 @@ class wxFixationFrame(wx.Frame):
         self.fovListenerThread = threading.Thread(target=asyncore.loop, kwargs={'timeout': 1})
         self.fovListenerThread.setDaemon(True)
         self.fovListenerThread.start()
-
 
     def initViewPane(self, parent):
         # Setting up the ViewPane
@@ -132,17 +131,17 @@ class wxFixationFrame(wx.Frame):
         horzsizer = wx.BoxSizer(wx.HORIZONTAL)
         vertsizer = wx.BoxSizer(wx.VERTICAL)
         # Insert left label
-        horzsizer.Add(self.l_text, proportion=0, flag=wx.ALIGN_LEFT | wx.CENTER)
+        horzsizer.Add(self.l_text, proportion=0, flag=wx.CENTER)
 
         # The "center panel" is now a vertcontrol sizer- insert top, viewpane, and bottom pieces
-        vertsizer.Add(superior, proportion=0, flag=wx.ALIGN_TOP | wx.CENTER)
+        vertsizer.Add(superior, proportion=0, flag=wx.CENTER)
         vertsizer.Add(self.viewpane, 0, wx.ALIGN_CENTER | wx.ALL)
-        vertsizer.Add(inferior, proportion=0, flag=wx.ALIGN_BOTTOM | wx.CENTER)
+        vertsizer.Add(inferior, proportion=0, flag=wx.CENTER)
 
         # Insert the vertcontrol sizer
         horzsizer.Add(vertsizer, 0, wx.ALIGN_CENTER | wx.ALL)
         # Insert right label
-        horzsizer.Add(self.r_text, proportion=0, flag=wx.ALIGN_RIGHT | wx.CENTER)
+        horzsizer.Add(self.r_text, proportion=0, flag=wx.CENTER)
 
         self.imagespace.SetSizer(horzsizer)
 
@@ -156,6 +155,9 @@ class wxFixationFrame(wx.Frame):
         # Bind all the events to the control panel
         self.control.vertcontrol.Bind(FS.EVT_FLOATSPIN, self.on_vert_spin)
         self.control.horzcontrol.Bind(FS.EVT_FLOATSPIN, self.on_horz_spin)
+
+        self.control.minorStep.Bind(FS.EVT_FLOATSPIN, self.on_minor_step)
+        self.control.majorStep.Bind(FS.EVT_FLOATSPIN, self.on_major_step)
 
         self.control.OS.Bind(wx.EVT_RADIOBUTTON, self.on_eye_select)
         self.control.OD.Bind(wx.EVT_RADIOBUTTON, self.on_eye_select)
@@ -203,13 +205,13 @@ class wxFixationFrame(wx.Frame):
         fileMenu.Append(wx.ID_OPEN, 'Open Background Image...\tCtrl+B')
         self.Bind(wx.EVT_MENU, self.on_open_background_image, id=wx.ID_OPEN)
         #         self.Bind(wx.EVT_MENU,sel)
+        fileMenu.Append(wx.ID_SAVE, 'Save Fixation Image...\tCtrl+I')
+        self.Bind(wx.EVT_MENU, self.on_save_fixation_image, id=wx.ID_SAVE)
         fileMenu.AppendSeparator()
         fileMenu.Append(wx.ID_PREFERENCES, 'Preferences')
         self.Bind(wx.EVT_MENU, self.on_preferences, id=wx.ID_PREFERENCES)
         fileMenu.Append(wx.ID_EXIT, 'Exit\tCtrl+Q')
         self.Bind(wx.EVT_MENU, self.on_quit, id=wx.ID_EXIT)
-
-
 
         # Toggle on/off
         self.toggleMenu = wx.Menu()
@@ -217,32 +219,32 @@ class wxFixationFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_toggle_press, self.on_toggle)
         self.off_toggle = self.toggleMenu.AppendRadioItem(self.id_off_toggle, 'No')
         self.Bind(wx.EVT_MENU, self.on_toggle_press, self.off_toggle)
-        targetMenu.Append(wx.ID_ANY, 'Visible', self.toggleMenu)
+        targetMenu.AppendSubMenu(self.toggleMenu,'Visible')
         # Alignment
         self.alignMenu = wx.Menu()
         self.off_align = self.alignMenu.AppendRadioItem(self.id_off_align, 'Off')
         self.Bind(wx.EVT_MENU, self.on_align_presss, self.off_align)
         self.on_align = self.alignMenu.AppendRadioItem(self.id_on_align, 'On')
         self.Bind(wx.EVT_MENU, self.on_align_presss, self.on_align)
-        targetMenu.Append(wx.ID_ANY, 'Alignment', self.alignMenu)
+        targetMenu.AppendSubMenu(self.alignMenu, 'Alignment')
         # Grid
         self.gridMenu = wx.Menu()
         self.off_grid = self.gridMenu.AppendRadioItem(self.id_off_grid, 'Off')
         self.Bind(wx.EVT_MENU, self.on_grid_press, self.off_grid)
         self.on_grid = self.gridMenu.AppendRadioItem(self.id_on_grid, 'On')
         self.Bind(wx.EVT_MENU, self.on_grid_press, self.on_grid)
-        targetMenu.Append(wx.ID_ANY, 'Grid', self.gridMenu)
-
+        targetMenu.AppendSubMenu(self.gridMenu, 'Grid')
 
         # Compounds the Menu Bar
         self.SetMenuBar(menubar)
-
 
     def get_minor_increment(self):
         return self.MINOR_INCREMENT
 
     def get_major_increment(self):
         return self.MAJOR_INCREMENT
+
+
 
     def get_vertical_fov(self):
         return self.viewpane.get_v_fov()
@@ -260,7 +262,6 @@ class wxFixationFrame(wx.Frame):
             prefs = prefs_dialog.get_prefs()
             self.set_major_increment(prefs['major_increment'])
             self.set_minor_increment(prefs['minor_increment'])
-
 
     def handle_message(self, evt):
         switchboard = {
@@ -380,6 +381,15 @@ class wxFixationFrame(wx.Frame):
 
     def set_horizontal_fov(self, degrees):
         self.viewpane.set_h_fov(degrees)
+
+    def on_save_fixation_image(self, evt=None):
+        dialog = wx.FileDialog(self, 'Save Fixation Display as:', "", "", 'PNG Image (*.png)|*.png', wx.FD_SAVE)
+        if dialog.ShowModal() == wx.ID_OK:
+            locationpath = dialog.GetDirectory()
+            locationfname = dialog.GetFilename()
+            dialog.Destroy()
+
+            self.viewpane.pane_to_file(locationpath + os.sep + locationfname)
 
     def on_set_save_protocol_location(self, evt=None):
 
@@ -543,6 +553,16 @@ class wxFixationFrame(wx.Frame):
             self.control.horzcontrol.flip_labels()
             self.update_fixation_location()
 
+    def on_minor_step(self, event):
+        self.MINOR_INCREMENT = self.control.minorStep.GetValue()
+        self.control.horzcontrol.SetIncrement(self.MINOR_INCREMENT)
+        self.control.vertcontrol.SetIncrement(self.MINOR_INCREMENT)
+
+    def on_major_step(self, event):
+        self.MAJOR_INCREMENT = self.control.majorStep.GetValue()
+
+
+
     def on_vert_spin(self, event):
         # Entering a vertical location value using the subclass
         y_ent = self.control.vertcontrol.GetValue()
@@ -646,6 +666,7 @@ class wxFixationFrame(wx.Frame):
         self.LCCanvas.Destroy()
         self.Destroy()
 
+
 class MessageEvent(wx.PyCommandEvent):
     """Event to signal that a count value is ready"""
 
@@ -683,7 +704,7 @@ class ConnListener(asyncore.dispatcher):
         if pair is not None:
             sock, addr = pair
             QueueListener(self.thisparent, sock=sock)
-            print("Incoming connection from "+repr(addr))
+            print("Incoming connection from " + repr(addr))
 
 
 class QueueListener(asyncore.dispatcher_with_send):
@@ -695,31 +716,38 @@ class QueueListener(asyncore.dispatcher_with_send):
         self.thisparent.Bind(EVT_RETURN_MESSAGE, self.handle_return_message)
 
     def handle_return_message(self, evt):
-        #print("Sending!")
+        # print("Sending!")
         self.send(evt.get_data().encode("utf-8"))
 
     def handle_read(self):
         try:
             recvmsg = self.recv(32).decode("utf-8")
-            #print("Recieved: "+recvmsg)
-            splitmsg = recvmsg.split(";")
+            # print("Recieved: "+recvmsg)
 
-            if len(splitmsg) == 2:
-                evt = MessageEvent( myEVT_MESSAGE, -1, int(splitmsg[0]), splitmsg[1])
-            else:
-                evt = MessageEvent( myEVT_MESSAGE, -1, int(splitmsg[0]), splitmsg[1:])
+            list_o_msg = recvmsg.split("!")
 
-            wx.PostEvent(self.thisparent, evt)
+            for msg in list_o_msg:
+                if msg:
+                    # print("Parsing: " + msg)
+                    splitmsg = msg.split(";")
 
-            if int(splitmsg[0]) == -1:
-                self.close()
-                return
+                    if len(splitmsg) == 2:
+                        evt = MessageEvent(myEVT_MESSAGE, -1, int(splitmsg[0]), splitmsg[1])
+                    else:
+                        evt = MessageEvent(myEVT_MESSAGE, -1, int(splitmsg[0]), splitmsg[1:])
+
+                    wx.PostEvent(self.thisparent, evt)
+
+                    if int(splitmsg[0]) == -1:
+                        self.close()
+                        return
         except ConnectionResetError:
             print("Lost connection to the image whisperer!")
             md = wx.MessageDialog(None, "Lost connection to the image whisperer! Protocol list will no longer update.",
                                   "Lost connection to the image whisperer!", wx.ICON_ERROR | wx.OK)
             md.ShowModal()
             return
+
 
 # Shows The Window
 if __name__ == '__main__':

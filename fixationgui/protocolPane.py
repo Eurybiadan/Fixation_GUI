@@ -44,9 +44,9 @@ class ProtocolPane(wx.Panel):
 
     def on_listitem_selected(self, listevt):
         ind = listevt.GetIndex()
-        #print(self.list.GetItemText(ind, 1))
-        #print(self.list.GetItemText(ind, 2))
-        #print(self.list.GetItemText(ind, 3))
+        # print(self.list.GetItemText(ind, 1))
+        # print(self.list.GetItemText(ind, 2))
+        # print(self.list.GetItemText(ind, 3))
         # Unwrap the items:
 
         # Update the eye first- other values are relative to the eye.
@@ -68,34 +68,31 @@ class ProtocolPane(wx.Panel):
         locsplit = self.list.GetItemText(ind, 1).split(',')
         horzsign = 1
         vertsign = 1
-        if self.list.GetItemText(ind, 3) == "OS": # For OS, Temporal is postive and Nasal is negative.
+        if self.list.GetItemText(ind, 3) == "OS":  # For OS, Temporal is postive and Nasal is negative.
             horz = locsplit[0]
             if horz[-1] == "N":
                 horzsign = -1
-            horzval = float(horz[:-1].strip())*horzsign
+            horzval = float(horz[:-1].strip()) * horzsign
 
             vert = locsplit[1]
             if vert[-1] == "I":
                 vertsign = -1
-            vertval = float(vert[:-1].strip())*vertsign
+            vertval = float(vert[:-1].strip()) * vertsign
 
             self._parent.update_fixation_location(wx.Point2D(horzval, vertval))
 
-        elif self.list.GetItemText(ind, 3) == "OD": # For OD, Temporal is negative and Nasal is positive.
+        elif self.list.GetItemText(ind, 3) == "OD":  # For OD, Temporal is negative and Nasal is positive.
             horz = locsplit[0]
             if horz[-1] == "T":
                 horzsign = -1
-            horzval = float(horz[:-1].strip())*horzsign
+            horzval = float(horz[:-1].strip()) * horzsign
 
             vert = locsplit[1]
             if vert[-1] == "I":
                 vertsign = -1
-            vertval = float(vert[:-1].strip())*vertsign
+            vertval = float(vert[:-1].strip()) * vertsign
 
             self._parent.update_fixation_location(wx.Point2D(horzval, vertval))
-
-
-
 
     def load_protocol(self, path):
         with open(path, 'r') as csvfile:
@@ -108,7 +105,7 @@ class ProtocolPane(wx.Panel):
                 for row in protoreader:
                     exists = False
                     num_aq = 0
-                    try: # Attempt the conversion to direction- if this fails, there are incorrect characters here!
+                    try:  # Attempt the conversion to direction- if this fails, there are incorrect characters here!
                         if float(row[1]) > 0:
                             if row[5] == "OD":
                                 horzloc = str(float(row[1])) + " T"
@@ -139,9 +136,8 @@ class ProtocolPane(wx.Panel):
 
                     for entry in self._protocol:
                         if entry['fov'] == newentry['fov'] and \
-                           entry['eye'] == newentry['eye'] and \
-                           entry['loc'] == newentry['loc']:
-
+                                entry['eye'] == newentry['eye'] and \
+                                entry['loc'] == newentry['loc']:
                             exists = True
                             break
 
@@ -164,14 +160,13 @@ class ProtocolPane(wx.Panel):
 
     def update_protocol_list(self):
 
-
         for item in self._protocol:
-
             ind = self.list.GetItemCount()
 
             self.list.InsertItem(ind, str(item['num_obtained']))
             self.list.SetItem(ind, 1, item['loc'][0] + ', ' + item['loc'][1])
-            self.list.SetItem(ind, 2, str(item['fov'][0]) + self._degree_sign + 'x ' + str(item['fov'][1]) + self._degree_sign)
+            self.list.SetItem(ind, 2,
+                              str(item['fov'][0]) + self._degree_sign + 'x ' + str(item['fov'][1]) + self._degree_sign)
             self.list.SetItem(ind, 3, item['eye'])
             self.list.SetItemBackgroundColour(ind, (255, 79, 0))
 
@@ -204,10 +199,12 @@ class ProtocolPane(wx.Panel):
                             fov=(curfov[0], curfov[1]), eye=seleye, loc=location)
             self._protocol.append(newentry)
 
-            ind = self.list.GetItemCount()
+            # If the numbers don't exist, place them at the *top* of the table.
+            ind = 0#self.list.GetItemCount()
 
             self.list.InsertItem(ind, str(newentry['num_obtained']))
             self.list.SetItem(ind, 1, newentry['loc'][0] + ', ' + newentry['loc'][1])
-            self.list.SetItem(ind, 2, str(newentry['fov'][0]) + self._degree_sign + 'x ' + str(newentry['fov'][1]) + self._degree_sign)
+            self.list.SetItem(ind, 2, str(newentry['fov'][0]) + self._degree_sign + 'x ' + str(
+                newentry['fov'][1]) + self._degree_sign)
             self.list.SetItem(ind, 3, newentry['eye'])
             self.list.SetItemBackgroundColour(ind, (0, 0, 0))

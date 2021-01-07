@@ -23,7 +23,7 @@ class wxLightCrafterFrame(wx.Frame):
 
         horzsizer = wx.BoxSizer(wx.HORIZONTAL)
 
-        horzsizer.Add(self.LCCanvas, proportion=0, flag=wx.ALIGN_CENTER | wx.EXPAND)
+        horzsizer.Add(self.LCCanvas, proportion=0, flag=wx.EXPAND)
 
     def set_fixation_centerpoint(self, location):
         self.LCCanvas.set_fixation_centerpoint(location)
