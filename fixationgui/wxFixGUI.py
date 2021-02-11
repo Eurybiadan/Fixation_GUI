@@ -35,7 +35,9 @@ class wxFixationFrame(wx.Frame):
         self.withSerial = False
 
         # Initial Conditions
-        self.pcrash_protopath = ''
+        self.curr_path = ''
+        self.protopath = ''
+        self.protopath_pcrash = 'start'
         self.tracker = -1
         self.horz_loc = 0.0
         self.vert_loc = 0.0
@@ -402,7 +404,13 @@ class wxFixationFrame(wx.Frame):
 
     def on_set_save_protocol_location(self, evt=None):
 
-        # If it doesn't exist, then prompt for the location before continuing...
+        # if we are continuing a protocol after a crash just append to the current one
+        if self.curr_path == self.protopath_pcrash:
+            self._locfileobj = open(self._locationpath + os.sep + self._locationfname, 'a')
+            self._locfileobj.close()
+            return
+
+        # If no path exists, then prompt for the location before continuing...
         dialog = wx.FileDialog(self, 'Save Location List As:', "", "", 'CSV (Comma delimited)|*.csv', wx.FD_SAVE)
         if dialog.ShowModal() == wx.ID_OK:
             self._locationpath = dialog.GetDirectory()
@@ -411,17 +419,7 @@ class wxFixationFrame(wx.Frame):
 
             result = wx.ID_YES
 
-            if self.pcrash_protopath == (self._locationpath + os.sep + self._locationfname):
-                # if yes then append
-                # if not ask if they know what they seek
-                md = wx.MessageDialog(self, "Would you like to append to this Protocol?", "Continue after Savior crash",
-                                      wx.ICON_QUESTION | wx.YES_NO | wx.CANCEL)
-                result = md.ShowModal()
-
-                if result == wx.ID_YES:
-                    self._locfileobj = open(self._locationpath + os.sep + self._locationfname, 'a')
-                    self._locfileobj.close()
-            elif os.path.isfile(self._locationpath + os.sep + self._locationfname):
+            if os.path.isfile(self._locationpath + os.sep + self._locationfname):
                 md = wx.MessageDialog(self, "Protocol file already exists! Overwrite?", "Protocol file already exists!",
                                       wx.ICON_QUESTION | wx.YES_NO | wx.CANCEL)
                 result = md.ShowModal()
@@ -431,12 +429,13 @@ class wxFixationFrame(wx.Frame):
                     self._locfileobj.write(
                         "v0.1,Horizontal Location,Vertical Location,Horizontal FOV,Vertical FOV,Eye\n")
                     self._locfileobj.close()
+                    # set the file to be saved to as the current path
+                    self.curr_path = self._locfileobj
             else:
                 print('Woah Nelly')
 
-
-
     def on_open_protocol_file(self, evt=None):
+
         dialog = wx.FileDialog(self, 'Select protocol file:', self.header_dir, '',
                                'CSV files (*.csv)|*.csv', wx.FD_OPEN)
 
@@ -445,7 +444,7 @@ class wxFixationFrame(wx.Frame):
             protofname = dialog.GetFilename()
             dialog.Destroy()
 
-            protopath = self.header_dir + os.sep + protofname
+            self.protopath = self.header_dir + os.sep + protofname
 
             result = wx.ID_NO
             if not self.protocolpane.is_protocol_empty():
@@ -457,39 +456,41 @@ class wxFixationFrame(wx.Frame):
             if result == wx.ID_YES:
                 self.protocolpane.clear_protocol()
                 self.viewpane.clear_locations()
-                self.protocolpane.load_protocol(protopath)
+                self.curr_path = self.protopath  # set appended protocol to the current path - JG
+                self.protocolpane.load_protocol(self.protopath)
             elif result == wx.ID_NO:
-                self.protocolpane.load_protocol(protopath)
+                self.curr_path = self.protopath  # set appended protocol to the current path -JG
+                self.protocolpane.load_protocol(self.protopath)
 
     def on_open_protocol_file_pcrash(self, evt=None):
-        dialog = wx.FileDialog(self, 'Select protocol file:', self.header_dir, '',
+
+        if self.curr_path == '':
+            dialog = wx.FileDialog(self, 'Select protocol file:', self.header_dir, '',
                                'CSV files (*.csv)|*.csv', wx.FD_OPEN)
 
-        if dialog.ShowModal() == wx.ID_OK:
-            self.header_dir = dialog.GetDirectory()
-            protofname = dialog.GetFilename()
-            dialog.Destroy()
+            if dialog.ShowModal() == wx.ID_OK:
+                self.header_dir = dialog.GetDirectory()
+                protofname = dialog.GetFilename()
+                self._locationpath = dialog.GetDirectory()
+                self._locationfname = dialog.GetFilename()
+                dialog.Destroy()
 
-            protopath_pcrash = self.header_dir + os.sep + protofname
+                self.protopath_pcrash = self.header_dir + os.sep + protofname
 
-            result = wx.ID_NO
-            if not self.protocolpane.is_protocol_empty():
-                md = wx.MessageDialog(self, "Protocol already exists! Overwrite or Append to existing protocol?",
-                                      "Protocol already exists!", wx.ICON_QUESTION | wx.YES_NO | wx.CANCEL)
-                md.SetYesNoCancelLabels("Overwrite", "Append", "Cancel")
-                result = md.ShowModal()
-
-            if result == wx.ID_YES:
-                self.protocolpane.clear_protocol()
-                self.viewpane.clear_locations()
-                pcrash_list = self.protocolpane.load_protocol(protopath_pcrash)
+                pcrash_list = self.protocolpane.load_protocol(self.protopath_pcrash)
                 if pcrash_list:
                     self.viewpane.Repaint(self, pcrash_list)
-            elif result == wx.ID_NO:
-                pcrash_list = self.protocolpane.load_protocol(protopath_pcrash)
-                if pcrash_list:
-                    self.viewpane.Repaint(self, pcrash_list)
-            self.pcrash_protopath = protopath_pcrash
+                self.curr_path = self.protopath_pcrash
+        else:
+
+            # clear protocol to then reload it back in set up as continuing after crash
+            self.protocolpane.clear_protocol()
+            self.viewpane.clear_locations()
+
+            pcrash_list = self.protocolpane.load_protocol(self.curr_path)
+            if pcrash_list:
+                self.viewpane.Repaint(self, pcrash_list)
+
 
     ##        self.update_protocol(self.vert_loc,self.horz_loc)
 
@@ -501,6 +502,7 @@ class wxFixationFrame(wx.Frame):
             self.protocolpane.clear_protocol()
             self.viewpane.clear_locations()
             self._locationfname = None
+            self.curr_path = ''  # JG
 
     def on_open_background_image(self, evt=None):
         dialog = wx.FileDialog(self, 'Select background image:', self.header_dir, self.filename,
