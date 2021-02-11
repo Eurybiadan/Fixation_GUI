@@ -11,7 +11,6 @@ import csv
 import re
 import string
 
-
 class ProtocolPane(wx.Panel):
     def __init__(self, parent, id=-1, pos=wx.DefaultPosition, size=wx.DefaultSize, style=wx.SIMPLE_BORDER, name=''):
 
@@ -31,6 +30,7 @@ class ProtocolPane(wx.Panel):
         self.list.InsertColumn(3, 'Eye', format=wx.LIST_FORMAT_CENTER, width=30)
 
         self.list.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_listitem_selected)
+        # self.list.Bind(wx.EVT_LIST_ITEM_DESELECTED, self.on_listitem_selected)
         print("Bound dat list.")
         vbox2 = wx.BoxSizer(wx.VERTICAL)
 
@@ -41,6 +41,10 @@ class ProtocolPane(wx.Panel):
 
         # Initialize the data structure which will hold the protocol
         self._protocol = list()
+    # JG 2/5
+        # Initial Previously Marked Locations - stored as a list, each tuple containg the FOV and the location, so (HFOV,VFOV,wx.POINT2D(X,Y))
+        self.marked_loc = []
+    #
 
     def on_listitem_selected(self, listevt):
         ind = listevt.GetIndex()
@@ -49,10 +53,12 @@ class ProtocolPane(wx.Panel):
         # print(self.list.GetItemText(ind, 3))
         # Unwrap the items:
 
-        # Update the eye first- other values are relative to the eye.
+        # Update the eye first- other values are relative to the eye
+        # sets the OS or OD radio button
         self._parent.control.OS.SetValue(self.list.GetItemText(ind, 3) == "OS")
         self._parent.control.OD.SetValue(self.list.GetItemText(ind, 3) == "OD")
-        self._parent.on_eye_select(self.list.GetItemText(ind, 3) == "OS")
+        self._parent.on_eye_select_list(self.list.GetItemText(ind, 3) == "OS")
+
 
         # Update the FOV - For simplicity I'm just directly manipulating the string. This should be changed if we change
         # details of how the strings are displayed.
@@ -105,24 +111,25 @@ class ProtocolPane(wx.Panel):
                 for row in protoreader:
                     exists = False
                     num_aq = 0
+                    self.marked_loc.append((float(row[3]), float(row[4]), wx.Point2D(float(row[1]), float(row[2]))))
                     try:  # Attempt the conversion to direction- if this fails, there are incorrect characters here!
                         if float(row[1]) > 0:
                             if row[5] == "OD":
-                                horzloc = str(float(row[1])) + " T"
+                                horzloc = str(float(row[1])) + " N"  # switched N and T -JG
                             else:
-                                horzloc = str(float(row[1])) + " N"
+                                horzloc = str(float(row[1])) + " T"  # switched N and T -JG
                         elif float(row[1]) < 0:
                             if row[5] == "OD":
-                                horzloc = str(float(row[1])) + " N"
+                                horzloc = str(-float(row[1])) + " T"  # switched N and T added (-) -JG
                             else:
-                                horzloc = str(float(row[1])) + " T"
+                                horzloc = str(-float(row[1])) + " N"  # switched N and T added (-) -JG
                         else:
                             horzloc = str(float(row[1]))
 
                         if float(row[2]) > 0:
                             vertloc = str(float(row[2])) + " S"
                         elif float(row[2]) < 0:
-                            vertloc = str(float(row[2])) + " I"
+                            vertloc = str(-float(row[2])) + " I"  # added (-) -JG
                         else:
                             vertloc = str(float(row[2]))
 
@@ -145,6 +152,7 @@ class ProtocolPane(wx.Panel):
                         self._protocol.append(newentry)
 
             self.update_protocol_list()
+            return self.marked_loc
 
     def set_protocol(self, newproto):
 
@@ -168,7 +176,7 @@ class ProtocolPane(wx.Panel):
             self.list.SetItem(ind, 2,
                               str(item['fov'][0]) + self._degree_sign + 'x ' + str(item['fov'][1]) + self._degree_sign)
             self.list.SetItem(ind, 3, item['eye'])
-            self.list.SetItemBackgroundColour(ind, (255, 79, 0))
+            self.list.SetItemBackgroundColour(ind, (0, 102, 102))
 
     # This method updates the protocol based on an input set. If the input doesn't match any
     # of the currently loaded protocol, add the new location/settings to the list.

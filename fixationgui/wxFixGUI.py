@@ -35,6 +35,8 @@ class wxFixationFrame(wx.Frame):
         self.withSerial = False
 
         # Initial Conditions
+        self.pcrash_protopath = ''
+        self.tracker = -1
         self.horz_loc = 0.0
         self.vert_loc = 0.0
         self.diopter_value = 0.0
@@ -182,7 +184,10 @@ class wxFixationFrame(wx.Frame):
         self.id_off_toggle = 10042
         self.id_save_proto_loc = 10004
         self.id_open_proto = 10005
-        self.id_clear_proto = 10006
+        # JG 2/5
+        self.id_open_proto_pcrash = 10006
+        #
+        self.id_clear_proto = 10007
 
         # Creates Menu Bar
         menubar = wx.MenuBar()
@@ -198,6 +203,10 @@ class wxFixationFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_set_save_protocol_location, id=self.id_save_proto_loc)
         protoMenu.Append(self.id_open_proto, 'Open Protocol...\t')
         self.Bind(wx.EVT_MENU, self.on_open_protocol_file, id=self.id_open_proto)
+        # JG 2/4
+        protoMenu.Append(self.id_open_proto_pcrash, 'Continue Protocol After Savior Crash...\t')
+        self.Bind(wx.EVT_MENU, self.on_open_protocol_file_pcrash, id=self.id_open_proto_pcrash)
+        #
         protoMenu.Append(self.id_clear_proto, 'Clear Protocol\t')
         self.Bind(wx.EVT_MENU, self.on_clear_protocol, id=self.id_clear_proto)
 
@@ -401,15 +410,31 @@ class wxFixationFrame(wx.Frame):
             dialog.Destroy()
 
             result = wx.ID_YES
-            if os.path.isfile(self._locationpath + os.sep + self._locationfname):
+
+            if self.pcrash_protopath == (self._locationpath + os.sep + self._locationfname):
+                # if yes then append
+                # if not ask if they know what they seek
+                md = wx.MessageDialog(self, "Would you like to append to this Protocol?", "Continue after Savior crash",
+                                      wx.ICON_QUESTION | wx.YES_NO | wx.CANCEL)
+                result = md.ShowModal()
+
+                if result == wx.ID_YES:
+                    self._locfileobj = open(self._locationpath + os.sep + self._locationfname, 'a')
+                    self._locfileobj.close()
+            elif os.path.isfile(self._locationpath + os.sep + self._locationfname):
                 md = wx.MessageDialog(self, "Protocol file already exists! Overwrite?", "Protocol file already exists!",
                                       wx.ICON_QUESTION | wx.YES_NO | wx.CANCEL)
                 result = md.ShowModal()
 
-            if result == wx.ID_YES:
-                self._locfileobj = open(self._locationpath + os.sep + self._locationfname, 'w')  # Write the header
-                self._locfileobj.write("v0.1,Horizontal Location,Vertical Location,Horizontal FOV,Vertical FOV,Eye\n")
-                self._locfileobj.close()
+                if result == wx.ID_YES:
+                    self._locfileobj = open(self._locationpath + os.sep + self._locationfname, 'w')  # Write the header
+                    self._locfileobj.write(
+                        "v0.1,Horizontal Location,Vertical Location,Horizontal FOV,Vertical FOV,Eye\n")
+                    self._locfileobj.close()
+            else:
+                print('Woah Nelly')
+
+
 
     def on_open_protocol_file(self, evt=None):
         dialog = wx.FileDialog(self, 'Select protocol file:', self.header_dir, '',
@@ -435,6 +460,36 @@ class wxFixationFrame(wx.Frame):
                 self.protocolpane.load_protocol(protopath)
             elif result == wx.ID_NO:
                 self.protocolpane.load_protocol(protopath)
+
+    def on_open_protocol_file_pcrash(self, evt=None):
+        dialog = wx.FileDialog(self, 'Select protocol file:', self.header_dir, '',
+                               'CSV files (*.csv)|*.csv', wx.FD_OPEN)
+
+        if dialog.ShowModal() == wx.ID_OK:
+            self.header_dir = dialog.GetDirectory()
+            protofname = dialog.GetFilename()
+            dialog.Destroy()
+
+            protopath_pcrash = self.header_dir + os.sep + protofname
+
+            result = wx.ID_NO
+            if not self.protocolpane.is_protocol_empty():
+                md = wx.MessageDialog(self, "Protocol already exists! Overwrite or Append to existing protocol?",
+                                      "Protocol already exists!", wx.ICON_QUESTION | wx.YES_NO | wx.CANCEL)
+                md.SetYesNoCancelLabels("Overwrite", "Append", "Cancel")
+                result = md.ShowModal()
+
+            if result == wx.ID_YES:
+                self.protocolpane.clear_protocol()
+                self.viewpane.clear_locations()
+                pcrash_list = self.protocolpane.load_protocol(protopath_pcrash)
+                if pcrash_list:
+                    self.viewpane.Repaint(self, pcrash_list)
+            elif result == wx.ID_NO:
+                pcrash_list = self.protocolpane.load_protocol(protopath_pcrash)
+                if pcrash_list:
+                    self.viewpane.Repaint(self, pcrash_list)
+            self.pcrash_protopath = protopath_pcrash
 
     ##        self.update_protocol(self.vert_loc,self.horz_loc)
 
@@ -539,18 +594,40 @@ class wxFixationFrame(wx.Frame):
 
     def on_eye_select(self, event):
         # Changes Cursor And Location Names Based On on_eye_select Selected cursor
-        state = str(self.control.OS.GetValue())
+        state = str(self.control.OS.GetValue()) # true if OS radio button checked
         if state == 'True':  # If it is OS, eyesign is -1
             self._eyesign = -1
             self.r_text.SetLabel('T\ne\nm\np\no\nr\na\nl')
             self.l_text.SetLabel(' \n \nN\na\ns\na\nl\n \n')
             self.control.horzcontrol.flip_labels()
+            self.tracker = -1
             self.update_fixation_location()
         elif state == 'False':  # If it is OD, eyesign is 1
             self._eyesign = 1
             self.r_text.SetLabel(' \n \nN\na\ns\na\nl\n \n')
             self.l_text.SetLabel('T\ne\nm\np\no\nr\na\nl')
             self.control.horzcontrol.flip_labels()
+            self.tracker = 1
+            self.update_fixation_location()
+
+    def on_eye_select_list(self, event):
+        # Changes Cursor And Location Names Based On on_eye_select Selected cursor
+        state = str(self.control.OS.GetValue())  # true if OS radio button checked
+        if state == 'True':  # If it is OS, eyesign is -1
+            self._eyesign = -1
+            self.r_text.SetLabel('T\ne\nm\np\no\nr\na\nl')
+            self.l_text.SetLabel(' \n \nN\na\ns\na\nl\n \n')
+            if self._eyesign != self.tracker:
+                self.control.horzcontrol.flip_labels()
+                self.tracker = -1
+            self.update_fixation_location()
+        elif state == 'False':  # If it is OD, eyesign is 1
+            self._eyesign = 1
+            self.r_text.SetLabel(' \n \nN\na\ns\na\nl\n \n')
+            self.l_text.SetLabel('T\ne\nm\np\no\nr\na\nl')
+            if self._eyesign != self.tracker:
+                self.control.horzcontrol.flip_labels()
+                self.tracker = 1
             self.update_fixation_location()
 
     def on_minor_step(self, event):
@@ -599,7 +676,7 @@ class wxFixationFrame(wx.Frame):
         self.LCCanvas.set_fixation_size(size)
 
     def reset_fixation_location(self, event):
-        # Reset fixation target Location 
+        # Reset fixation target Location
         self.horz_loc = 0.0
         self.vert_loc = 0.0
 
