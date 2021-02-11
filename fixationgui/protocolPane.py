@@ -106,6 +106,8 @@ class ProtocolPane(wx.Panel):
             header = header.split(',')
 
             protoreader = csv.reader(csvfile, delimiter=',', quotechar='"')
+            #added to clear previous loaded in locations - JG 2/11
+            self.marked_loc.clear()
 
             if header[0].strip() == "v0.1":
                 for row in protoreader:
