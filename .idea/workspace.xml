@@ -6,7 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="10265a4d-0c1d-4a65-8747-ae54663009dc" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fixationgui/protocolPane.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/protocolPane.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fixationgui/paneWidgets.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/paneWidgets.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fixationgui/wxFixGUI.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/wxFixGUI.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fixationgui/wxFixProc.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/wxFixProc.py" afterDir="false" />
     </list>
@@ -353,13 +353,6 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fixationgui/wxFixGUI.py</url>
-          <line>408</line>
-          <option name="timeStamp" value="24" />
-        </line-breakpoint>
-      </breakpoints>
       <default-breakpoints>
         <breakpoint type="python-exception">
           <properties notifyOnTerminate="true" exception="BaseException">
@@ -371,14 +364,13 @@
     <watches-manager>
       <configuration name="PythonConfigurationType">
         <watch expression="self.tracker" language="Python" />
-        <watch expression="self.pcrash_protopath" language="Python" />
-        <watch expression="self.locationpath" language="Python" />
-        <watch expression="self._locationfname" language="Python" />
-        <watch expression="self.pcrash_dir" language="Python" />
-        <watch expression="self.pcrash_fname" language="Python" />
-        <watch expression="os.sep" language="Python" />
         <watch expression="self._locationfname" language="Python" />
         <watch expression="self._locationpath" language="Python" />
+        <watch expression="self.protopath_pcrash" language="Python" />
+        <watch expression="self._locfileobj" language="Python" />
+        <watch expression="pcrash_list" language="Python" />
+        <watch expression="self.curr_path" language="Python" />
+        <watch expression="self.locfileobjname" language="Python" />
       </configuration>
     </watches-manager>
   </component>

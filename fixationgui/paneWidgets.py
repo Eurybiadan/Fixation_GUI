@@ -175,7 +175,7 @@ class CursorPanel(wx.Panel):
         # Bind each button to a listener
         for button in self.buttonList:
             button.Bind(wx.EVT_BUTTON, self.OnButton)
-
+        # Crosshair sizer default is 5, can change
         sizelabel = wx.StaticText(self, id=wx.ID_ANY, label='Cursor Size:')
         sizelabel.SetForegroundColour('white')
         sizelabel.SetFont(labelFont)

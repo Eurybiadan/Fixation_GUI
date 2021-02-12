@@ -46,6 +46,7 @@ class wxFixationFrame(wx.Frame):
 
         self._locationfname = None
         self._locationpath = None
+        self.locfileobjname = None
         self._locfileobj = None
         self.ArduinoSerial = None
 
@@ -408,6 +409,7 @@ class wxFixationFrame(wx.Frame):
         if self.curr_path == self.protopath_pcrash:
             self._locfileobj = open(self._locationpath + os.sep + self._locationfname, 'a')
             self._locfileobj.close()
+            self.locfileobjname = self._locationpath + os.sep + self._locationfname
             return
 
         # If no path exists, then prompt for the location before continuing...
@@ -431,6 +433,19 @@ class wxFixationFrame(wx.Frame):
                     self._locfileobj.close()
                     # set the file to be saved to as the current path
                     self.curr_path = self._locfileobj
+                    self.locfileobjname = self._locationpath + os.sep + self._locationfname
+                    return
+                else:
+                    return
+
+            if result == wx.ID_YES:
+                self._locfileobj = open(self._locationpath + os.sep + self._locationfname, 'w')  # Write the header
+                self._locfileobj.write(
+                    "v0.1,Horizontal Location,Vertical Location,Horizontal FOV,Vertical FOV,Eye\n")
+                self._locfileobj.close()
+                # set the file to be saved to as the current path
+                self.curr_path = self._locfileobj
+                self.locfileobjname = self._locationpath + os.sep + self._locationfname
             else:
                 print('Woah Nelly')
 
@@ -457,9 +472,11 @@ class wxFixationFrame(wx.Frame):
                 self.protocolpane.clear_protocol()
                 self.viewpane.clear_locations()
                 self.curr_path = self.protopath  # set appended protocol to the current path - JG
+                self.locfileobjname = self.protopath
                 self.protocolpane.load_protocol(self.protopath)
             elif result == wx.ID_NO:
                 self.curr_path = self.protopath  # set appended protocol to the current path -JG
+                self.locfileobjname = self.protopath
                 self.protocolpane.load_protocol(self.protopath)
 
     def on_open_protocol_file_pcrash(self, evt=None):
@@ -481,13 +498,14 @@ class wxFixationFrame(wx.Frame):
                 if pcrash_list:
                     self.viewpane.Repaint(self, pcrash_list)
                 self.curr_path = self.protopath_pcrash
+                self.locfileobjname = self.protopath_pcrash
         else:
 
             # clear protocol to then reload it back in set up as continuing after crash
             self.protocolpane.clear_protocol()
             self.viewpane.clear_locations()
 
-            pcrash_list = self.protocolpane.load_protocol(self.curr_path)
+            pcrash_list = self.protocolpane.load_protocol(self.locfileobjname)
             if pcrash_list:
                 self.viewpane.Repaint(self, pcrash_list)
 
