@@ -395,6 +395,9 @@ class RefButtonsPanel(wx.Panel):
                  name='Reference Buttons Panel', port=None):
         super(RefButtonsPanel, self).__init__(parent, id, pos, size, style, name)
 
+        self.buttonList = []
+        self.oldref = None
+        self.oldoffset = None
         self._rootparent = rootparent
         self.SetBackgroundColour('black')
 
@@ -402,29 +405,57 @@ class RefButtonsPanel(wx.Panel):
 
         labelFont = wx.Font(11, wx.SWISS, wx.NORMAL, wx.BOLD, False)
 
+        buttonalignment = wx.ALIGN_CENTER
+
         # Anchor cursor as center
-        self.anchorbut = wx.Button(self, label='Set Reference Point', size=(-1, 30))
-        self.anchorbut.SetBackgroundColour('medium gray')
-        self.anchorbut.SetForegroundColour('white')
-        self.anchorbut.Bind(wx.EVT_BUTTON, self.OnButton)
+        self.setRef = wx.Button(self, label='Set Reference Point', size=(-1, 30))
+        self.setRef.SetBackgroundColour('medium gray')
+        self.setRef.SetForegroundColour('white')
+        self.buttonList.append(self.setRef)
+
+        self.reSet = wx.Button(self, label='Reset Reference Point to (0,0)', size=(-1, 30))
+        self.reSet.SetBackgroundColour('medium gray')
+        self.reSet.SetForegroundColour('white')
+        self.buttonList.append(self.reSet)
+
+        # Bind each button to a listener
+        for button in self.buttonList:
+            button.Bind(wx.EVT_BUTTON, self.OnButton)
+
+        sizer = wx.GridBagSizer()
+        sizer.Add(self.setRef, (0, 0), (1, 3), buttonalignment)
+        sizer.Add(self.reSet, (1, 0), (1, 3), buttonalignment)
 
         box = wx.BoxSizer(wx.VERTICAL)  # To make sure it stays centered in the area it is given
-        box.Add(self.anchorbut, 0, wx.ALIGN_CENTER)
+        box.Add(sizer, 0, wx.ALIGN_CENTER)
 
         self.SetSizerAndFit(box)
 
     def OnButton(self, evt):
         pressed = evt.GetEventObject()
 
-        if pressed is self.anchorbut:
-            dlg = wx.MessageDialog(self._rootparent, "Are you sure you want to set a new reference point? This process is irreversable.", "Are you sure?", wx.YES_NO | wx.ICON_QUESTION)
+        if pressed is self.setRef:
+            dlg = wx.MessageDialog(self._rootparent, "Are you sure you want to set a new reference point?", "Are you sure?", wx.YES_NO | wx.ICON_QUESTION)
 
             res = dlg.ShowModal()
             if res == wx.ID_YES:
                 tmp = self._rootparent.degrees_to_screenpix(self._rootparent.horz_loc, self._rootparent.vert_loc)
+                self.oldref = self._rootparent.degrees_to_screenpix(-self._rootparent.horz_loc, -self._rootparent.vert_loc)
                 offset = wx.Point2D(tmp[0], tmp[1])
+                self.oldoffset = wx.Point2D(self.oldref[0], self.oldref[1])
                 self._rootparent.LCCanvas.set_fixation_centerpoint(offset)
                 self._rootparent.update_fixation_location(wx.Point2D(0, 0))
+
+        if pressed is self.reSet:
+            dlg = wx.MessageDialog(self._rootparent,
+                                       "Would you like to reset the reference point to (0,0)?", "Reset Reference Point?", wx.YES_NO | wx.ICON_QUESTION)
+            res = dlg.ShowModal()
+            if res == wx.ID_YES:
+                if self.oldoffset != None:
+                    self._rootparent.LCCanvas.set_fixation_centerpoint(self.oldoffset)
+                    self._rootparent.update_fixation_location(wx.Point2D(0, 0))
+                    self.oldoffset = None
+            
 
 class QuickLocationsPanel(wx.Panel):
     '''
