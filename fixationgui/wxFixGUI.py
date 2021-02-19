@@ -204,8 +204,8 @@ class wxFixationFrame(wx.Frame):
         # Open a protocol
         protoMenu.Append(self.id_save_proto_loc, 'Set Protocol Save Location...\t')
         self.Bind(wx.EVT_MENU, self.on_set_save_protocol_location, id=self.id_save_proto_loc)
-        protoMenu.Append(self.id_open_proto, 'Open Protocol...\t')
-        self.Bind(wx.EVT_MENU, self.on_open_protocol_file, id=self.id_open_proto)
+        # protoMenu.Append(self.id_open_proto, 'Open Protocol...\t')
+        # self.Bind(wx.EVT_MENU, self.on_open_protocol_file, id=self.id_open_proto)
         # JG 2/4
         protoMenu.Append(self.id_open_proto_pcrash, 'Continue Protocol After Savior Crash...\t')
         self.Bind(wx.EVT_MENU, self.on_open_protocol_file_pcrash, id=self.id_open_proto_pcrash)
@@ -447,37 +447,37 @@ class wxFixationFrame(wx.Frame):
                 self.curr_path = self._locfileobj
                 self.locfileobjname = self._locationpath + os.sep + self._locationfname
             else:
-                print('Woah Nelly')
+                print('Woah Nelly, something went wrong')
 
-    def on_open_protocol_file(self, evt=None):
-
-        dialog = wx.FileDialog(self, 'Select protocol file:', self.header_dir, '',
-                               'CSV files (*.csv)|*.csv', wx.FD_OPEN)
-
-        if dialog.ShowModal() == wx.ID_OK:
-            self.header_dir = dialog.GetDirectory()
-            protofname = dialog.GetFilename()
-            dialog.Destroy()
-
-            self.protopath = self.header_dir + os.sep + protofname
-
-            result = wx.ID_NO
-            if not self.protocolpane.is_protocol_empty():
-                md = wx.MessageDialog(self, "Protocol already exists! Overwrite or Append to existing protocol?",
-                                      "Protocol already exists!", wx.ICON_QUESTION | wx.YES_NO | wx.CANCEL)
-                md.SetYesNoCancelLabels("Overwrite", "Append", "Cancel")
-                result = md.ShowModal()
-
-            if result == wx.ID_YES:
-                self.protocolpane.clear_protocol()
-                self.viewpane.clear_locations()
-                self.curr_path = self.protopath  # set appended protocol to the current path - JG
-                self.locfileobjname = self.protopath
-                self.protocolpane.load_protocol(self.protopath)
-            elif result == wx.ID_NO:
-                self.curr_path = self.protopath  # set appended protocol to the current path -JG
-                self.locfileobjname = self.protopath
-                self.protocolpane.load_protocol(self.protopath)
+    # def on_open_protocol_file(self, evt=None):
+    #
+    #     dialog = wx.FileDialog(self, 'Select protocol file:', self.header_dir, '',
+    #                            'CSV files (*.csv)|*.csv', wx.FD_OPEN)
+    #
+    #     if dialog.ShowModal() == wx.ID_OK:
+    #         self.header_dir = dialog.GetDirectory()
+    #         protofname = dialog.GetFilename()
+    #         dialog.Destroy()
+    #
+    #         self.protopath = self.header_dir + os.sep + protofname
+    #
+    #         result = wx.ID_NO
+    #         if not self.protocolpane.is_protocol_empty():
+    #             md = wx.MessageDialog(self, "Protocol already exists! Overwrite or Append to existing protocol?",
+    #                                   "Protocol already exists!", wx.ICON_QUESTION | wx.YES_NO | wx.CANCEL)
+    #             md.SetYesNoCancelLabels("Overwrite", "Append", "Cancel")
+    #             result = md.ShowModal()
+    #
+    #         if result == wx.ID_YES:
+    #             self.protocolpane.clear_protocol()
+    #             self.viewpane.clear_locations()
+    #             self.curr_path = self.protopath  # set appended protocol to the current path - JG
+    #             self.locfileobjname = self.protopath
+    #             self.protocolpane.load_protocol(self.protopath)
+    #         elif result == wx.ID_NO:
+    #             self.curr_path = self.protopath  # set appended protocol to the current path -JG
+    #             self.locfileobjname = self.protopath
+    #             self.protocolpane.load_protocol(self.protopath)
 
     def on_open_protocol_file_pcrash(self, evt=None):
 
