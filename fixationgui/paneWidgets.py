@@ -66,10 +66,11 @@ class CursorPanel(wx.Panel):
         self.SQOPEN = 1
         self.SQCLOSE = 2
         self.CIRCLE = 3
+        self.SCROSS = 5
 
         self._iconsize = 25
         self._current_pen = self.GRNPEN
-        self._current_bursh = self.GREENBRSH
+        self._current_brush = self.GREENBRSH
 
         # Make the cursor types for each button.
 
@@ -86,6 +87,16 @@ class CursorPanel(wx.Panel):
 
         # Default is the cross button.
         self._cursorpressed = self._crossButton
+
+        # Small Cross -JG
+        self._scross = wx.Bitmap(self._iconsize, self._iconsize)
+        dc.SelectObject(self._scross)
+        dc.SetPen(self.GRAYPEN)
+        dc.SetBrush(self.WHTBRSH_TRANS)
+        dc.DrawLine(7, 12, 17, 12)
+        dc.DrawLine(12, 7, 12, 17)
+
+        self._scrossButton = wx.BitmapButton(self, wx.ID_ANY, self._scross, style=wx.BU_AUTODRAW, name='Small Cross')
 
         # Open Square (Serial command: 6,1,1)
         self._osquare = wx.Bitmap(self._iconsize, self._iconsize)
@@ -116,6 +127,7 @@ class CursorPanel(wx.Panel):
         del dc
 
         self._crossButton.Bind(wx.EVT_BUTTON, self.OnButton)
+        self._scrossButton.Bind(wx.EVT_BUTTON, self.OnButton)
         self._osquareButton.Bind(wx.EVT_BUTTON, self.OnButton)
         self._csquareButton.Bind(wx.EVT_BUTTON, self.OnButton)
         self._circleButton.Bind(wx.EVT_BUTTON, self.OnButton)
@@ -123,6 +135,7 @@ class CursorPanel(wx.Panel):
         cursorsizer = wx.BoxSizer(wx.HORIZONTAL)
 
         cursorsizer.Add(self._crossButton, 0, wx.ALL, 2)
+        cursorsizer.Add(self._scrossButton, 0, wx.ALL, 2)
         cursorsizer.Add(self._osquareButton, 0, wx.ALL, 2)
         cursorsizer.Add(self._csquareButton, 0, wx.ALL, 2)
         cursorsizer.Add(self._circleButton, 0, wx.ALL, 2)
@@ -211,6 +224,20 @@ class CursorPanel(wx.Panel):
 
         self._crossButton.SetBitmapLabel(self._cross)
 
+        # Small Cross -JG
+        self._scross = wx.Bitmap(self._iconsize, self._iconsize)
+        dc.SelectObject(self._scross)
+        if self._cursorpressed is self._scrossButton:
+            dc.SetPen(self._current_pen)
+            dc.SetBrush(self.WHTBRSH_TRANS)
+        else:
+            dc.SetPen(self.GRAYPEN)
+            dc.SetBrush(self.WHTBRSH_TRANS)
+        dc.DrawLine(7, 12, 17, 12)
+        dc.DrawLine(12, 7, 12, 17)
+
+        self._scrossButton.SetBitmapLabel(self._scross)
+
         # Open Square
         self._osquare = wx.Bitmap(self._iconsize, self._iconsize)
         dc.SelectObject(self._osquare)
@@ -226,7 +253,7 @@ class CursorPanel(wx.Panel):
         self._csquare = wx.Bitmap(self._iconsize, self._iconsize)
         dc.SelectObject(self._csquare)
         if self._cursorpressed is self._csquareButton:
-            dc.SetBrush(self._current_bursh)
+            dc.SetBrush(self._current_brush)
             dc.SetPen(self._current_pen)
         else:
             dc.SetPen(self.GRAYPEN)
@@ -240,7 +267,7 @@ class CursorPanel(wx.Panel):
         self._circle = wx.Bitmap(self._iconsize, self._iconsize)
         dc.SelectObject(self._circle)
         if self._cursorpressed is self._circleButton:
-            dc.SetBrush(self._current_bursh)
+            dc.SetBrush(self._current_brush)
             dc.SetPen(self._current_pen)
         else:
             dc.SetPen(self.GRAYPEN)
@@ -259,29 +286,32 @@ class CursorPanel(wx.Panel):
                 ##                print "You pressed "+button.GetName()+"!"
                 if button.GetName() == "Magenta":  # Magenta is 63519
                     self._current_pen = self.MAGPEN
-                    self._current_bursh = self.MAGENTABRSH
+                    self._current_brush = self.MAGENTABRSH
                 elif button.GetName() == "Red":  # Red is 63488
                     self._current_pen = self.REDPEN
-                    self._current_bursh = self.REDBRSH
+                    self._current_brush = self.REDBRSH
                 elif button.GetName() == "Yellow":  # Yellow is 65504
                     self._current_pen = self.YLWPEN
-                    self._current_bursh = self.YELLOWBRSH
+                    self._current_brush = self.YELLOWBRSH
                 elif button.GetName() == "Green":  # Green is 2016
                     self._current_pen = self.GRNPEN
-                    self._current_bursh = self.GREENBRSH
+                    self._current_brush = self.GREENBRSH
                 elif button.GetName() == "Blue":  # Blue is 2047
                     self._current_pen = self.BLUPEN
-                    self._current_bursh = self.BLUEBRSH
+                    self._current_brush = self.BLUEBRSH
                 elif button.GetName() == "White":  # White is 65535
                     self._current_pen = self.WHITEPEN
-                    self._current_bursh = self.WHITEBRSH
+                    self._current_brush = self.WHITEBRSH
 
-                self._rootparent.update_fixation_color(self._current_pen.GetColour(), self._current_bursh.GetColour())
+                self._rootparent.update_fixation_color(self._current_pen.GetColour(), self._current_brush.GetColour())
                 break
 
         if pressed is self._crossButton:
             self._rootparent.update_fixation_cursor(self.CROSS)
             self._cursorpressed = self._crossButton
+        elif pressed is self._scrossButton:
+            self._rootparent.update_fixation_cursor(self.SCROSS)
+            self._cursorpressed = self._scrossButton
         elif pressed is self._osquareButton:
             self._rootparent.update_fixation_cursor(self.SQOPEN)
             self._cursorpressed = self._osquareButton

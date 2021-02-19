@@ -120,6 +120,11 @@ class LightCrafterCanvas(wx.Window):
             dc.SetBrush(self._brush)
             tlcx = self._location.x - (self._fixsize / 2)
             tlcy = self._location.y - (self._fixsize / 2)
+            # Used for Small Cross -JG
+            bx = self._location.x - (self._fixsize * 2)
+            by = self._location.y - (self._fixsize * 2)
+            tx = self._location.x + (self._fixsize * 2)
+            ty = self._location.y + (self._fixsize * 2)
 
             # Draw the fixation shape
             if self._cursor is 0:
@@ -137,6 +142,12 @@ class LightCrafterCanvas(wx.Window):
             elif self._cursor is 3:
                 dc.SetBrush(self._brush)
                 dc.DrawCircle(self._location.x, self._location.y, floor(self._fixsize / 2))
+            # Small Cross -JG
+            elif self._cursor is 5:
+                self._pen.SetWidth(self._fixsize/3)
+                dc.SetPen(self._pen)
+                dc.DrawLine(bx, self._location.y, tx, self._location.y)
+                dc.DrawLine(self._location.x, by, self._location.x, ty)
             elif self._cursor is 4:
                 dc.SetPen(wx.Pen("WHITE"))
                 for xloc in range(0, self.thisSize.x, 50):
