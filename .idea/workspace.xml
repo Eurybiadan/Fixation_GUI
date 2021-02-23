@@ -6,8 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="10265a4d-0c1d-4a65-8747-ae54663009dc" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fixationgui/LightCrafter.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/LightCrafter.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fixationgui/paneWidgets.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/paneWidgets.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fixationgui/ViewPane.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/ViewPane.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fixationgui/wxFixProc.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/wxFixProc.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -365,6 +365,13 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/fixationgui/wxFixProc.py</url>
+          <line>47</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
       <default-breakpoints>
         <breakpoint type="python-exception">
           <properties notifyOnTerminate="true" exception="BaseException">

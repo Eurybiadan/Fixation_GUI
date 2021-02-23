@@ -355,7 +355,8 @@ class ViewPane(wx.Window):
         # paint live protocol locations
         for mark in self.marked_loc:
             mwidth, mheight, mloc = mark  # Unpack the tuple, draw it.
-            self.Colorize(mwidth, mheight, gc)  # sets colors for rectangles to be drawn with
+            # self.Colorize(mwidth, mheight, gc)  # sets colors for rectangles to be drawn with
+            gc.SetPen(wx.Pen(wx.Colour(red=0, green=204, blue=204), 2, wx.SOLID))
             gc.DrawRectangle(mloc.x - (self._pixperdeg * mwidth / 2.0) - .5,
                              mloc.y - (self._pixperdeg * mheight / 2.0) - .5, self._pixperdeg * mwidth,
                              self._pixperdeg * mheight)
