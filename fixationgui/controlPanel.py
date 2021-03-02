@@ -17,7 +17,7 @@ class ControlPanel(wx.Panel):
     This class encapsulates a Panel which contains all of the control ability for the fixation GUI.
     '''
 
-    def __init__(self, parent, id=-1, pos=wx.DefaultPosition, size=wx.DefaultSize, style=wx.SIMPLE_BORDER, name=''):
+    def __init__(self, parent, mode, viewpaneref, id=-1, pos=wx.DefaultPosition, size=wx.DefaultSize, style=wx.SIMPLE_BORDER, name=''):
         '''
         Constructor
         '''
@@ -101,8 +101,14 @@ class ControlPanel(wx.Panel):
         # Image initialization pane
         self._iminitpane = paneWidgets.ImInitPanel(self)
 
-        # Cursor control panel
-        self._cursorpane = paneWidgets.CursorPanel(self, parent)
+        if mode is 0:
+            # Cursor control panel
+            self._cursorpane = paneWidgets.CursorPanel(self, parent)
+        else:
+            # Added in to create the planning panel buttons -JG
+            # Planning panel
+            #print('viewpaneref in PlanningPanel is: ', hex(id(viewpaneref)))
+            self._planningpane = paneWidgets.PlanningPanel(self, parent, viewpaneref)
 
         # QoL Buttons panel
         self._qolpane = paneWidgets.RefButtonsPanel(self, parent)
@@ -126,7 +132,10 @@ class ControlPanel(wx.Panel):
 
 
         sizer.Add(self._quickpane, (4, 0), (1, 4), wx.ALIGN_CENTER | wx.EXPAND)
-        sizer.Add(self._cursorpane, (5, 0), (1, 4), wx.ALIGN_CENTER | wx.EXPAND)
+        if mode is 0:
+            sizer.Add(self._cursorpane, (5, 0), (1, 4), wx.ALIGN_CENTER | wx.EXPAND)
+        else:
+            sizer.Add(self._planningpane, (5, 0), (1, 4), wx.ALIGN_CENTER | wx.EXPAND)
         sizer.Add(self._iminitpane, (6, 0), (1, 4), wx.ALIGN_CENTER | wx.EXPAND)
         sizer.Add(self._qolpane, (7, 0), (1, 4), wx.ALIGN_CENTER | wx.EXPAND)
 

@@ -5,14 +5,24 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="10265a4d-0c1d-4a65-8747-ae54663009dc" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/fixationgui/plannerMode.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fixationgui/ViewPane.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/ViewPane.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fixationgui/wxFixProc.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/wxFixProc.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fixationgui/controlPanel.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/controlPanel.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fixationgui/paneWidgets.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/paneWidgets.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fixationgui/wxFixGUI.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/wxFixGUI.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
@@ -109,7 +119,7 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$USER_HOME$/PycharmProjects/Test1" />
     <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
@@ -126,28 +136,7 @@
       <recent name="$PROJECT_DIR$/fixationgui" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.wxFixProc">
-    <configuration name="LightCrafter" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="Fixation_GUI" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/fixationgui" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/fixationgui/LightCrafter.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
+  <component name="RunManager" selected="Python.plannerMode">
     <configuration default="true" type="PythonConfigurationType" factoryName="Python">
       <module name="Fixation_GUI" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -161,6 +150,27 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="plannerMode" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="Fixation_GUI" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/fixationgui" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/fixationgui/plannerMode.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -276,19 +286,19 @@
     </configuration>
     <list>
       <item itemvalue="Python.wxFixProc" />
-      <item itemvalue="Python.LightCrafter" />
       <item itemvalue="Python.wxFixGUI" />
       <item itemvalue="Python.wxSaviorBottomPanel" />
       <item itemvalue="Python.wxSaviorTopPanel" />
       <item itemvalue="Python.protocolPane" />
+      <item itemvalue="Python.plannerMode" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.protocolPane" />
+        <item itemvalue="Python.plannerMode" />
         <item itemvalue="Python.wxFixGUI" />
+        <item itemvalue="Python.protocolPane" />
         <item itemvalue="Python.wxSaviorBottomPanel" />
         <item itemvalue="Python.wxSaviorTopPanel" />
-        <item itemvalue="Python.LightCrafter" />
       </list>
     </recent_temporary>
   </component>
@@ -367,9 +377,9 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fixationgui/wxFixProc.py</url>
-          <line>47</line>
-          <option name="timeStamp" value="1" />
+          <url>file://$PROJECT_DIR$/fixationgui/controlPanel.py</url>
+          <line>110</line>
+          <option name="timeStamp" value="38" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
@@ -382,14 +392,10 @@
     </breakpoint-manager>
     <watches-manager>
       <configuration name="PythonConfigurationType">
-        <watch expression="self.tracker" language="Python" />
-        <watch expression="self._locationfname" language="Python" />
-        <watch expression="self._locationpath" language="Python" />
-        <watch expression="self.protopath_pcrash" language="Python" />
-        <watch expression="self._locfileobj" language="Python" />
-        <watch expression="pcrash_list" language="Python" />
-        <watch expression="self.curr_path" language="Python" />
-        <watch expression="self.locfileobjname" language="Python" />
+        <watch expression="self.hfov" language="Python" />
+        <watch expression="self.hfovplanned" language="Python" />
+        <watch expression="viewpaneref" language="Python" />
+        <watch expression="self.viewpane" language="Python" />
       </configuration>
     </watches-manager>
   </component>

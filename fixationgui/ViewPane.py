@@ -43,6 +43,9 @@ class ViewPane(wx.Window):
         # Initial Previously Marked Locations - stored as a list, each tuple containg the FOV and the location, so (HFOV,VFOV,wx.POINT2D(X,Y))
         self.marked_loc =[]
         self.marked_loc_p =[]
+        self.hfovplanned = None
+        self.vfovplanned = None
+        #print('self.hfovplanned in init is: ', self.hfovplanned)
 
         # Set up pens we'll use
         self.BLKPEN = wx.Pen(wx.BLACK ,1 ,wx.PENSTYLE_SOLID)
@@ -75,9 +78,12 @@ class ViewPane(wx.Window):
         # All Mouse Event Handlers
         self.Bind(wx.EVT_ENTER_WINDOW, self.on_enter)
         self.Bind(wx.EVT_LEAVE_WINDOW, self.on_exit)
+        #print('in ViewPane init')
 
     def set_fov(self, fov):
-        self.hfov, self.vfov = list(map(float, fov))
+        self.hfov, self.vfov = fov
+        self.hfovplanned = self.hfov
+        self.vfovplanned = self.vfov
         self.Repaint()
 
     def set_v_fov(self, fov):
@@ -442,6 +448,11 @@ class ViewPane(wx.Window):
 
         fovwidth = self._pixperdeg * self.hfov
         fovheight = self._pixperdeg * self.vfov
+
+        if self.hfovplanned is not None:
+            # print('It is not none')
+            fovwidth = self._pixperdeg * self.hfovplanned
+            fovheight = self._pixperdeg * self.vfovplanned
 
         gc.SetBrush(wx.Brush(wx.WHITE, wx.TRANSPARENT))
 

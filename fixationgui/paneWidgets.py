@@ -5,7 +5,13 @@ Created on Sep 20, 2013
 '''
 
 import wx
+
 from array import array
+from LocSpin import LocSpin
+import wx.lib.agw.floatspin as FS
+from ViewPane import ViewPane
+
+
 
 
 class CursorPanel(wx.Panel):
@@ -22,6 +28,8 @@ class CursorPanel(wx.Panel):
         super(CursorPanel, self).__init__(parent, id, pos, size, style, name)
         self.SetBackgroundColour('black')
         self._rootparent = rootparent
+
+        #print('in paneWid Cursor Panel')
 
         labelFont = wx.Font(9, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, False)
 
@@ -329,6 +337,170 @@ class CursorPanel(wx.Panel):
         obj = evt.GetEventObject()
         val = obj.GetValue()
         self._rootparent.update_fixation_cursor_size(val)
+
+# Added to set up all the buttons and usage for the planning panel
+
+
+class PlanningPanel(wx.Panel):
+
+    def __init__(self, parent, viewpaneref, rootparent, id=wx.ID_ANY, pos=wx.DefaultPosition, size=(-1, -1), style=wx.SIMPLE_BORDER,
+                 name='Reference Buttons Panel', port=None):
+        super(PlanningPanel, self).__init__(parent, id, pos, size, style, name)
+        self.imagespace = wx.Panel(parent, wx.ID_ANY)
+        self.viewpaneref = rootparent
+
+        labelFont = wx.Font(11, wx.SWISS, wx.NORMAL, wx.BOLD, False)
+
+        self.quicklabel = wx.StaticText(self, wx.ID_ANY, 'Field of View:', style=wx.ALIGN_CENTER)
+        self.quicklabel.SetForegroundColour('white')
+        self.quicklabel.SetFont(labelFont)
+
+        self.quicklabel2 = wx.StaticText(self, wx.ID_ANY, 'Plan:', style=wx.ALIGN_CENTER)
+        self.quicklabel2.SetForegroundColour('white')
+        self.quicklabel2.SetFont(labelFont)
+
+        #print('In paneWid Planning Panel')
+
+        # self.fovwidth = wx.TextCtrl(self)
+        # width_label = wx.StaticText(self, wx.ID_ANY, 'FOV Width:', style=wx.ALIGN_RIGHT)  # Label
+        # width_label.SetForegroundColour('white')
+        # width_label.SetFont(labelFont)
+        #
+        # self.fovheight = wx.TextCtrl(self)
+        # height_label = wx.StaticText(self, wx.ID_ANY, 'FOV Height:', style=wx.ALIGN_RIGHT)  # Label
+        # height_label.SetForegroundColour('white')
+        # height_label.SetFont(labelFont)
+
+        self.buttonList = []
+        self._rootparent = rootparent
+        self.SetBackgroundColour('black')
+
+        self.__deg_symbol = u'\N{DEGREE SIGN}'
+
+        buttonalignment = wx.ALIGN_CENTER
+        textalignment = wx.ALIGN_RIGHT
+
+        buttonsize = (60, 35)
+        buttonalignment = wx.ALIGN_CENTER
+        self.f05 = wx.Button(self, label='0.5x0.5', size=buttonsize)
+        self.f05.SetBackgroundColour('medium gray')
+        self.f05.SetForegroundColour('white')
+        self.buttonList.append(self.f05)
+        self.f075 = wx.Button(self, label='0.75x0.75', size=buttonsize)
+        self.f075.SetBackgroundColour('medium gray')
+        self.f075.SetForegroundColour('white')
+        self.buttonList.append(self.f075)
+        self.f1 = wx.Button(self, label='1.0x1.0', size=buttonsize)
+        self.f1.SetBackgroundColour('medium gray')
+        self.f1.SetForegroundColour('white')
+        self.buttonList.append(self.f1)
+        self.f125 = wx.Button(self, label='1.25x1.25', size=buttonsize)
+        self.f125.SetBackgroundColour('medium gray')
+        self.f125.SetForegroundColour('white')
+        self.buttonList.append(self.f125)
+        self.f14 = wx.Button(self, label='1.4x1.4', size=buttonsize)
+        self.f14.SetBackgroundColour('medium gray')
+        self.f14.SetForegroundColour('white')
+        self.buttonList.append(self.f14)
+        self.f15 = wx.Button(self, label='1.5x1.5', size=buttonsize)
+        self.f15.SetBackgroundColour('medium gray')
+        self.f15.SetForegroundColour('white')
+        self.buttonList.append(self.f15)
+        self.f175 = wx.Button(self, label='1.75x1.75', size=buttonsize)
+        self.f175.SetBackgroundColour('medium gray')
+        self.f175.SetForegroundColour('white')
+        self.buttonList.append(self.f175)
+        self.f2 = wx.Button(self, label='2.0x2.0', size=buttonsize)
+        self.f2.SetBackgroundColour('medium gray')
+        self.f2.SetForegroundColour('white')
+        self.buttonList.append(self.f2)
+
+
+        # Anchor cursor as center
+        self.plan = wx.Button(self, label='Mark', size=(60, 35))
+        self.plan.SetBackgroundColour('medium gray')
+        self.plan.SetForegroundColour('white')
+        self.buttonList.append(self.plan)
+
+        self.remove = wx.Button(self, label='Remove', size=(60, 35))
+        self.remove.SetBackgroundColour('medium gray')
+        self.remove.SetForegroundColour('white')
+        self.buttonList.append(self.remove)
+
+        # Bind each button to a listener
+        for button in self.buttonList:
+            button.Bind(wx.EVT_BUTTON, self.OnButton)
+
+        sizer = wx.GridBagSizer()
+
+        # sizer.Add(self.fovwidth, (1, 2), (1, 1), textalignment)
+        # sizer.Add(width_label, (1, 0), (1, 1), wx.ALIGN_LEFT)
+        #
+        # sizer.Add(self.fovheight, (2, 2), (1, 1), textalignment)
+        # sizer.Add(height_label, (2, 0), (1, 1), wx.ALIGN_LEFT)
+
+        sizer.Add(self.quicklabel, (0, 0), (1, 4), buttonalignment)
+        sizer.Add(self.f05, (1, 0), (1, 1), buttonalignment)
+        sizer.Add(self.f075, (1, 1), (1, 1), buttonalignment)
+        sizer.Add(self.f1, (1, 2), (1, 1), buttonalignment)
+        sizer.Add(self.f125, (1, 3), (1, 1), buttonalignment)
+        sizer.Add(self.f14, (2, 0), (1, 1), buttonalignment)
+        sizer.Add(self.f15, (2, 1), (1, 1), buttonalignment)
+        sizer.Add(self.f175, (2, 2), (1, 1), buttonalignment)
+        sizer.Add(self.f2, (2, 3), (1, 1), buttonalignment)
+
+        sizer.Add(self.quicklabel2, (3, 0), (1, 4), buttonalignment)
+        sizer.Add(self.plan, (4, 1), (1, 1), buttonalignment)
+        sizer.Add(self.remove, (4, 2), (1, 1), buttonalignment)
+
+
+        box = wx.BoxSizer(wx.VERTICAL)  # To make sure it stays centered in the area it is given
+        box.Add(sizer, 0, wx.ALIGN_CENTER)
+
+        self.SetSizerAndFit(box)
+
+    def OnButton(self, evt):
+        pressed = evt.GetEventObject()
+
+        if pressed is self.f05:
+            fov = (0.5, 0.5)
+            self.viewpaneref.set_fov(fov)
+        if pressed is self.f075:
+            fov = (0.75, 0.75)
+            self.viewpaneref.set_fov(fov)
+        if pressed is self.f1:
+            fov = (1.0, 1.0)
+            self.viewpaneref.set_fov(fov)
+        if pressed is self.f125:
+            fov = (1.25, 1.25)
+            self.viewpaneref.set_fov(fov)
+        if pressed is self.f14:
+            fov = (1.4, 1.4)
+            self.viewpaneref.set_fov(fov)
+        if pressed is self.f15:
+            fov = (1.5, 1.5)
+            self.viewpaneref.set_fov(fov)
+        if pressed is self.f175:
+            fov = (1.75, 1.75)
+            self.viewpaneref.set_fov(fov)
+        if pressed is self.f2:
+            fov = (2.0, 2.0)
+            self.viewpaneref.set_fov(fov)
+
+        if pressed is self.plan:
+            fov = self.viewpaneref.get_fov()
+            self.viewpaneref.mark_location()
+            # self.update_protocol(self.control.horzcontrol.get_label_value(), self.control.vertcontrol.get_label_value())
+            # self.save_location(self.control.horzcontrol.get_value(), self.control.vertcontrol.get_value(), str(fov))
+
+        if pressed is self.remove:
+            print("removed")
+
+
+    # def initView(self, parent):
+    #     self.imagespace = wx.Panel(parent, wx.ID_ANY)
+    #     self.imagespace.SetBackgroundColour('black')
+    #     self.viewpane = ViewPane(self.imagespace, size=(513, 513))
 
 
 class ImInitPanel(wx.Panel):

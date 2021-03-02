@@ -153,9 +153,9 @@ class wxFixationFrame(wx.Frame):
     def initProtocolPanel(self, parent):
         self.protocolpane = ProtocolPane(parent, id=wx.ID_ANY)
 
-    def initControlPanel(self, parent):
+    def initControlPanel(self, parent, mode=0):
 
-        self.control = ControlPanel(parent, id=wx.ID_ANY)
+        self.control = ControlPanel(parent, mode, self.viewpane, id=wx.ID_ANY)
 
         # Bind all the events to the control panel
         self.control.vertcontrol.Bind(FS.EVT_FLOATSPIN, self.on_vert_spin)
