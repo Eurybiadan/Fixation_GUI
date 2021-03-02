@@ -5,11 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="10265a4d-0c1d-4a65-8747-ae54663009dc" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/fixationgui/plannerMode.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fixationgui/ViewPane.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/ViewPane.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fixationgui/controlPanel.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/controlPanel.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fixationgui/paneWidgets.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/paneWidgets.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fixationgui/plannerMode.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/plannerMode.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fixationgui/wxFixGUI.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/wxFixGUI.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -380,6 +380,16 @@
           <url>file://$PROJECT_DIR$/fixationgui/controlPanel.py</url>
           <line>110</line>
           <option name="timeStamp" value="38" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/fixationgui/paneWidgets.py</url>
+          <line>469</line>
+          <option name="timeStamp" value="41" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/fixationgui/wxFixGUI.py</url>
+          <line>681</line>
+          <option name="timeStamp" value="45" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

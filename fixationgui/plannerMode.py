@@ -73,11 +73,6 @@ class PlannerMode(wxFixationFrame):
         # need this line for onquit
         self.LCCanvas = wxLightCrafterFrame()
 
-    def updates(self, fov):
-        self.update_protocol(self.control.horzcontrol.get_label_value(), self.control.vertcontrol.get_label_value())
-        self.save_location(self.control.horzcontrol.get_value(), self.control.vertcontrol.get_value(), fov)
-
-
 
 if __name__ == '__main__':
     app = wx.App(redirect=False)

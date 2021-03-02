@@ -17,7 +17,7 @@ class ControlPanel(wx.Panel):
     This class encapsulates a Panel which contains all of the control ability for the fixation GUI.
     '''
 
-    def __init__(self, parent, mode, viewpaneref, id=-1, pos=wx.DefaultPosition, size=wx.DefaultSize, style=wx.SIMPLE_BORDER, name=''):
+    def __init__(self, parent, mode, viewpaneref, fxguiself, id=-1, pos=wx.DefaultPosition, size=wx.DefaultSize, style=wx.SIMPLE_BORDER, name=''):
         '''
         Constructor
         '''
@@ -108,7 +108,7 @@ class ControlPanel(wx.Panel):
             # Added in to create the planning panel buttons -JG
             # Planning panel
             #print('viewpaneref in PlanningPanel is: ', hex(id(viewpaneref)))
-            self._planningpane = paneWidgets.PlanningPanel(self, parent, viewpaneref)
+            self._planningpane = paneWidgets.PlanningPanel(self, parent, viewpaneref, fxguiself)
 
         # QoL Buttons panel
         self._qolpane = paneWidgets.RefButtonsPanel(self, parent)

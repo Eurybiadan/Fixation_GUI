@@ -5,7 +5,6 @@ Created on Sep 20, 2013
 '''
 
 import wx
-
 from array import array
 from LocSpin import LocSpin
 import wx.lib.agw.floatspin as FS
@@ -343,11 +342,13 @@ class CursorPanel(wx.Panel):
 
 class PlanningPanel(wx.Panel):
 
-    def __init__(self, parent, viewpaneref, rootparent, id=wx.ID_ANY, pos=wx.DefaultPosition, size=(-1, -1), style=wx.SIMPLE_BORDER,
+    def __init__(self, parent, viewpaneref, fxguiself, rootparent, id=wx.ID_ANY, pos=wx.DefaultPosition, size=(-1, -1), style=wx.SIMPLE_BORDER,
                  name='Reference Buttons Panel', port=None):
         super(PlanningPanel, self).__init__(parent, id, pos, size, style, name)
         self.imagespace = wx.Panel(parent, wx.ID_ANY)
-        self.viewpaneref = rootparent
+        # janky that it gets the objects in the opposite order that I send them in, but hey it works -JG
+        self.viewpaneref = fxguiself
+        self.fxguiself = rootparent
 
         labelFont = wx.Font(11, wx.SWISS, wx.NORMAL, wx.BOLD, False)
 
@@ -459,6 +460,8 @@ class PlanningPanel(wx.Panel):
 
         self.SetSizerAndFit(box)
 
+
+
     def OnButton(self, evt):
         pressed = evt.GetEventObject()
 
@@ -488,19 +491,13 @@ class PlanningPanel(wx.Panel):
             self.viewpaneref.set_fov(fov)
 
         if pressed is self.plan:
-            fov = self.viewpaneref.get_fov()
-            self.viewpaneref.mark_location()
-            # self.update_protocol(self.control.horzcontrol.get_label_value(), self.control.vertcontrol.get_label_value())
-            # self.save_location(self.control.horzcontrol.get_value(), self.control.vertcontrol.get_value(), str(fov))
+            # default for wxdata
+            wxdata = 0000
+            from wxFixGUI import wxFixationFrame
+            wxFixationFrame.mark_location(self.fxguiself, wxdata)
 
         if pressed is self.remove:
             print("removed")
-
-
-    # def initView(self, parent):
-    #     self.imagespace = wx.Panel(parent, wx.ID_ANY)
-    #     self.imagespace.SetBackgroundColour('black')
-    #     self.viewpane = ViewPane(self.imagespace, size=(513, 513))
 
 
 class ImInitPanel(wx.Panel):

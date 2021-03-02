@@ -61,8 +61,9 @@ class wxFixationFrame(wx.Frame):
         self.Bind(wx.EVT_CHAR_HOOK, self.on_keyboard_press)
 
         self.initProtocolPanel(self)
-        self.initControlPanel(self)
         self.initViewPane(self)
+        self.initControlPanel(self)
+
 
         # Handles mouse motion, presses, and wheel motions
         self.viewpane.Bind(wx.EVT_MOTION, self.on_mouse_motion)
@@ -155,7 +156,8 @@ class wxFixationFrame(wx.Frame):
 
     def initControlPanel(self, parent, mode=0):
 
-        self.control = ControlPanel(parent, mode, self.viewpane, id=wx.ID_ANY)
+        print(hex(id(self.viewpane)))
+        self.control = ControlPanel(parent, mode, self.viewpane, self, id=wx.ID_ANY)
 
         # Bind all the events to the control panel
         self.control.vertcontrol.Bind(FS.EVT_FLOATSPIN, self.on_vert_spin)
@@ -677,6 +679,7 @@ class wxFixationFrame(wx.Frame):
         # Marks the current lcoation of the fixation target, and dumps it to a file
         self.viewpane.mark_location()
         self.update_protocol(self.control.horzcontrol.get_label_value(), self.control.vertcontrol.get_label_value())
+        data2 = str(data)
         self.save_location(self.control.horzcontrol.get_value(), self.control.vertcontrol.get_value(), str(data))
 
     def set_FOV(self, fov):
