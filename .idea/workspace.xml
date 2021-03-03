@@ -10,7 +10,9 @@
       <change beforePath="$PROJECT_DIR$/fixationgui/controlPanel.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/controlPanel.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fixationgui/paneWidgets.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/paneWidgets.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fixationgui/plannerMode.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/plannerMode.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fixationgui/protocolPane.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/protocolPane.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fixationgui/wxFixGUI.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/wxFixGUI.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fixationgui/wxFixProc.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/wxFixProc.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -377,19 +379,9 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fixationgui/controlPanel.py</url>
-          <line>110</line>
-          <option name="timeStamp" value="38" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fixationgui/paneWidgets.py</url>
-          <line>469</line>
-          <option name="timeStamp" value="41" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fixationgui/wxFixGUI.py</url>
-          <line>681</line>
-          <option name="timeStamp" value="45" />
+          <url>file://$PROJECT_DIR$/fixationgui/ViewPane.py</url>
+          <line>161</line>
+          <option name="timeStamp" value="52" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
@@ -402,10 +394,10 @@
     </breakpoint-manager>
     <watches-manager>
       <configuration name="PythonConfigurationType">
-        <watch expression="self.hfov" language="Python" />
-        <watch expression="self.hfovplanned" language="Python" />
-        <watch expression="viewpaneref" language="Python" />
-        <watch expression="self.viewpane" language="Python" />
+        <watch expression="self._protocol" language="Python" />
+        <watch expression="self.marked_loc" language="Python" />
+        <watch expression="self.list" language="Python" />
+        <watch expression="self.planmode" language="Python" />
       </configuration>
     </watches-manager>
   </component>

@@ -63,12 +63,14 @@ class ProtocolPane(wx.Panel):
         # Update the FOV - For simplicity I'm just directly manipulating the string. This should be changed if we change
         # details of how the strings are displayed.
         # This is disabled for the moment, until I update the talkback to the host application.
-        # fovtokens = self.list.GetItemText(ind, 2).split(self._degree_sign)
-        # width = float(fovtokens[0])
-        # height = fovtokens[1]
-        # height = float(height[2:])
-        # self._parent.set_horizontal_fov(width)
-        # self._parent.set_vertical_fov(height)
+        # This has been put in use but only for planning mode -- needed so that the remove button can work properly if item to remove was selected on the list -JG 3/3/2021
+        if self.planmode == 1:
+            fovtokens = self.list.GetItemText(ind, 2).split(self._degree_sign)
+            width = float(fovtokens[0])
+            height = fovtokens[1]
+            height = float(height[2:])
+            self._parent.set_horizontal_fov(width)
+            self._parent.set_vertical_fov(height)
 
         # Update the Location.
         locsplit = self.list.GetItemText(ind, 1).split(',')
@@ -182,7 +184,8 @@ class ProtocolPane(wx.Panel):
 
     # This method updates the protocol based on an input set. If the input doesn't match any
     # of the currently loaded protocol, add the new location/settings to the list.
-    def update_protocol(self, location, eyesign, curfov):
+    def update_protocol(self, location, eyesign, curfov, removemode, planmode, viewpaneref, locx=0, locy=0):
+        self.planmode = planmode
         exist = False
 
         if eyesign == -1:
@@ -192,6 +195,31 @@ class ProtocolPane(wx.Panel):
 
         # Condition the location a little bit
         location = (location[0].replace(" ", ""), location[1].replace(" ", ""))
+
+        if removemode is 1:
+            entry = dict(num=1, num_obtained=int(1),
+                            fov=(curfov[0], curfov[1]), eye=seleye, loc=location)
+            fov = dict.get(entry, 'fov')
+            eye = dict.get(entry, 'eye')
+            loc = dict.get(entry, 'loc')
+            i = self._protocol.__len__()-1
+            j = 0
+            while i >= 0:
+                protocolitem = self._protocol[j]
+                lfov = dict.get(protocolitem, 'fov')
+                leye = dict.get(protocolitem, 'eye')
+                lloc = dict.get(protocolitem, 'loc')
+
+                if leye == eye:
+                    if lloc == loc:
+                        if lfov == fov:
+                            self.list.DeleteItem(i)
+                            self._protocol.remove(self._protocol[j])
+                            viewpaneref.removePast(lfov[0], lfov[1], locx, locy, j)
+                            return 0
+                j = j+1
+                i = i-1
+            return 1
 
         ind = 0
         for item in self._protocol:
@@ -218,3 +246,8 @@ class ProtocolPane(wx.Panel):
                 newentry['fov'][1]) + self._degree_sign)
             self.list.SetItem(ind, 3, newentry['eye'])
             self.list.SetItemBackgroundColour(ind, (0, 0, 0))
+
+        return 0
+
+
+

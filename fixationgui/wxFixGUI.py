@@ -3,6 +3,7 @@ import os
 import wx
 import math
 import wx.lib.agw.floatspin as FS
+import csv
 
 from time import sleep
 from ViewPane import ViewPane
@@ -154,10 +155,9 @@ class wxFixationFrame(wx.Frame):
     def initProtocolPanel(self, parent):
         self.protocolpane = ProtocolPane(parent, id=wx.ID_ANY)
 
-    def initControlPanel(self, parent, mode=0):
+    def initControlPanel(self, parent, planmode=0):
 
-        print(hex(id(self.viewpane)))
-        self.control = ControlPanel(parent, mode, self.viewpane, self, id=wx.ID_ANY)
+        self.control = ControlPanel(parent, planmode, self.viewpane, self, id=wx.ID_ANY)
 
         # Bind all the events to the control panel
         self.control.vertcontrol.Bind(FS.EVT_FLOATSPIN, self.on_vert_spin)
@@ -674,13 +674,17 @@ class wxFixationFrame(wx.Frame):
         self.horz_loc = round(float(x_ent), 2)
         self.update_fixation_location()
 
-    def mark_location(self, data):
+    def mark_location(self, data, removemode=0, planmode=0):
 
-        # Marks the current lcoation of the fixation target, and dumps it to a file
-        self.viewpane.mark_location()
-        self.update_protocol(self.control.horzcontrol.get_label_value(), self.control.vertcontrol.get_label_value())
-        data2 = str(data)
-        self.save_location(self.control.horzcontrol.get_value(), self.control.vertcontrol.get_value(), str(data))
+        # Marks the current location of the fixation target, and dumps it to a file
+        # removemode and planmode are coming from PlanningPanel 0 is false, 1 is true
+        if removemode == 0:
+            self.viewpane.mark_location()
+        noremoval = self.update_protocol(self.viewpane, removemode, planmode)
+        if noremoval:
+            return
+        else:
+            self.save_location(self.control.horzcontrol.get_value(), self.control.vertcontrol.get_value(), str(data), removemode)
 
     def set_FOV(self, fov):
         if fov != -1:
@@ -705,13 +709,14 @@ class wxFixationFrame(wx.Frame):
 
         self.update_fixation_location()
 
-    def update_protocol(self, horzloc, vertloc):
+    def update_protocol(self, viewpaneref, removemode=0, planmode=0):
         # Send a query to our protocol pane, marking a new location if there is one or fulfilling a protocol requirement
-        self.protocolpane.update_protocol(
+        noremoval = self.protocolpane.update_protocol(
             (self.control.horzcontrol.get_label_value(), self.control.vertcontrol.get_label_value()), self._eyesign,
-            self.viewpane.get_fov())
+            self.viewpane.get_fov(), removemode, planmode, viewpaneref, self.horz_loc, self.vert_loc)
+        return noremoval
 
-    def save_location(self, horzloc, vertloc, vidnum="-1"):
+    def save_location(self, horzloc, vertloc, vidnum="-1", removemode=0):
 
         # Create a file that we will dump all of the relevant information to
         if self._locationfname is None:
@@ -734,8 +739,20 @@ class wxFixationFrame(wx.Frame):
         else:
             eye = "OD"
 
-        print(vidnum)
-        self._locfileobj.write(str(vidnum) + "," + str(horzloc) + "," + str(vertloc) + "," +
+        if removemode == 1:
+            self._locfileobj.close()
+            updatedlist = []
+            with open(self._locationpath + os.sep + self._locationfname, newline="") as r:
+                reader = csv.reader(r)
+                for row in reader:  # for every row in the file
+                    if row[1] != str(horzloc) or row[2] != str(vertloc) or row[3] != str(self.viewpane.get_h_fov()) or row[4] != str(self.viewpane.get_v_fov()) or row[5] != eye:
+                        updatedlist.append(row)  # add each row into the list
+                with open(self._locationpath + os.sep + self._locationfname, "w", newline="") as w:
+                    Writer = csv.writer(w)
+                    Writer.writerows(updatedlist)
+        else:
+            # writing it to the file here
+            self._locfileobj.write(str(vidnum) + "," + str(horzloc) + "," + str(vertloc) + "," +
                                str(self.viewpane.get_h_fov()) + "," + str(self.viewpane.get_v_fov()) +
                                "," + eye + "\n")
 

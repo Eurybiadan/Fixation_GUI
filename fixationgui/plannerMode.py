@@ -43,7 +43,8 @@ class PlannerMode(wxFixationFrame):
 
         self.initProtocolPanel(self)
         self.initViewPane(self)
-        self.initControlPanel(self, 1) #added to wxFixGUI
+        planmode = 1
+        self.initControlPanel(self, planmode) #added to wxFixGUI
 
 
         # Handles mouse motion, presses, and wheel motions

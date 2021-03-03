@@ -88,10 +88,12 @@ class ViewPane(wx.Window):
 
     def set_v_fov(self, fov):
         self.vfov = fov
+        self.vfovplanned = self.vfov
         self.Repaint()
 
     def set_h_fov(self, fov):
         self.hfov = fov
+        self.hfovplanned = self.hfov
         self.Repaint()
 
     def get_v_fov(self):
@@ -376,6 +378,17 @@ class ViewPane(wx.Window):
             gc.DrawRectangle(mloc.x - (self._pixperdeg * mwidth / 2.0) - .5,
                              mloc.y - (self._pixperdeg * mheight / 2.0) - .5, self._pixperdeg * mwidth,
                              self._pixperdeg * mheight)
+
+    def removePast(self, width, height, loch, locv, index):
+
+        loc = wx.Point2D((self._center.x + (float(loch) * self._pixperdeg)),
+                         self._center.y - (float(locv) * self._pixperdeg))
+        for mark in self.marked_loc:
+            mwidth, mheight, mloc = mark  # Unpack the tuple
+            if mwidth == width:
+                if mheight == height:
+                    if mloc == loc:
+                        del self.marked_loc[index]
 
     def Paint(self, dc=None):
 

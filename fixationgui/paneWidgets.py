@@ -337,9 +337,7 @@ class CursorPanel(wx.Panel):
         val = obj.GetValue()
         self._rootparent.update_fixation_cursor_size(val)
 
-# Added to set up all the buttons and usage for the planning panel
-
-
+# Added to set up all the buttons and usage for the planning panel -JG
 class PlanningPanel(wx.Panel):
 
     def __init__(self, parent, viewpaneref, fxguiself, rootparent, id=wx.ID_ANY, pos=wx.DefaultPosition, size=(-1, -1), style=wx.SIMPLE_BORDER,
@@ -349,6 +347,8 @@ class PlanningPanel(wx.Panel):
         # janky that it gets the objects in the opposite order that I send them in, but hey it works -JG
         self.viewpaneref = fxguiself
         self.fxguiself = rootparent
+        # default used for planning mode
+        self.wxdata = 0000
 
         labelFont = wx.Font(11, wx.SWISS, wx.NORMAL, wx.BOLD, False)
 
@@ -491,13 +491,14 @@ class PlanningPanel(wx.Panel):
             self.viewpaneref.set_fov(fov)
 
         if pressed is self.plan:
-            # default for wxdata
-            wxdata = 0000
-            from wxFixGUI import wxFixationFrame
-            wxFixationFrame.mark_location(self.fxguiself, wxdata)
+            removemode = 0
+            planmode = 1
+            self.fxguiself.mark_location(self.wxdata, removemode, planmode)
 
         if pressed is self.remove:
-            print("removed")
+            removemode = 1
+            planmode = 1
+            self.fxguiself.mark_location(self.wxdata, removemode, planmode)
 
 
 class ImInitPanel(wx.Panel):
