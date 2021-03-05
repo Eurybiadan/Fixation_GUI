@@ -678,13 +678,17 @@ class wxFixationFrame(wx.Frame):
 
         # Marks the current location of the fixation target, and dumps it to a file
         # removemode and planmode are coming from PlanningPanel 0 is false, 1 is true
+        # data (which represents the video number) is reduced by 1 to get the video number to start at 0 in the csv
+        data = int(data) - 1
         if removemode == 0:
             self.viewpane.mark_location()
-        noremoval = self.update_protocol(self.viewpane, removemode, planmode)
+        noremoval = self.update_protocol(self.viewpane, str(data), removemode, planmode)
         if noremoval:
             return
         else:
             self.save_location(self.control.horzcontrol.get_value(), self.control.vertcontrol.get_value(), str(data), removemode)
+
+
 
     def set_FOV(self, fov):
         if fov != -1:
@@ -709,11 +713,11 @@ class wxFixationFrame(wx.Frame):
 
         self.update_fixation_location()
 
-    def update_protocol(self, viewpaneref, removemode=0, planmode=0):
+    def update_protocol(self, viewpaneref, vidnum, removemode=0, planmode=0):
         # Send a query to our protocol pane, marking a new location if there is one or fulfilling a protocol requirement
         noremoval = self.protocolpane.update_protocol(
             (self.control.horzcontrol.get_label_value(), self.control.vertcontrol.get_label_value()), self._eyesign,
-            self.viewpane.get_fov(), removemode, planmode, viewpaneref, self.horz_loc, self.vert_loc)
+            self.viewpane.get_fov(), removemode, planmode, viewpaneref, vidnum, self.horz_loc, self.vert_loc)
         return noremoval
 
     def save_location(self, horzloc, vertloc, vidnum="-1", removemode=0):

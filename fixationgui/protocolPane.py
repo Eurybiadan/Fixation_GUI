@@ -24,7 +24,7 @@ class ProtocolPane(wx.Panel):
         self.list = wx.ListCtrl(self, style=wx.LC_REPORT, size=(285, -1))
         self.list.SetBackgroundColour('black')
         self.list.SetTextColour((0, 183, 235))
-        self.list.InsertColumn(0, '# Aq', format=wx.LIST_FORMAT_CENTER, width=40)
+        self.list.InsertColumn(0, 'Video #', format=wx.LIST_FORMAT_CENTER, width=55)
         self.list.InsertColumn(1, 'Location', format=wx.LIST_FORMAT_CENTER, width=80)
         self.list.InsertColumn(2, 'FOV', format=wx.LIST_FORMAT_CENTER, width=75)
         self.list.InsertColumn(3, 'Eye', format=wx.LIST_FORMAT_CENTER, width=30)
@@ -45,6 +45,7 @@ class ProtocolPane(wx.Panel):
         # Initial Previously Marked Locations - stored as a list, each tuple containg the FOV and the location, so (HFOV,VFOV,wx.POINT2D(X,Y))
         self.marked_loc = []
     #
+        self.planmode = 0
 
     def on_listitem_selected(self, listevt):
         ind = listevt.GetIndex()
@@ -108,11 +109,13 @@ class ProtocolPane(wx.Panel):
             header = header.split(',')
 
             protoreader = csv.reader(csvfile, delimiter=',', quotechar='"')
+
             #added to clear previous loaded in locations - JG 2/11
             self.marked_loc.clear()
 
             if header[0].strip() == "v0.1":
-                for row in protoreader:
+                # reversed(list()) used to read in the csv entries backwards to make transition from old to new seamless -JG
+                for row in reversed(list(protoreader)):
                     exists = False
                     num_aq = 0
                     self.marked_loc.append((float(row[3]), float(row[4]), wx.Point2D(float(row[1]), float(row[2]))))
@@ -143,17 +146,19 @@ class ProtocolPane(wx.Panel):
                     newentry = dict(loc=(horzloc, vertloc),
                                     fov=(row[3], row[4]),
                                     eye=row[5],
-                                    num_obtained=int(0))
+                                    videoNumber=row[0])
 
-                    for entry in self._protocol:
-                        if entry['fov'] == newentry['fov'] and \
-                                entry['eye'] == newentry['eye'] and \
-                                entry['loc'] == newentry['loc']:
-                            exists = True
-                            break
+                    # Commented out since we are using video number and don't want to miss any duplicates
+                    # for entry in self._protocol:
+                    #     if entry['fov'] == newentry['fov'] and \
+                    #             entry['eye'] == newentry['eye'] and \
+                    #             entry['loc'] == newentry['loc']:
+                    #         exists = True
+                    #         break
 
-                    if not exists:
-                        self._protocol.append(newentry)
+                    # if not exists:
+
+                    self._protocol.append(newentry)
 
             self.update_protocol_list()
             return self.marked_loc
@@ -175,7 +180,7 @@ class ProtocolPane(wx.Panel):
         for item in self._protocol:
             ind = self.list.GetItemCount()
 
-            self.list.InsertItem(ind, str(item['num_obtained']))
+            self.list.InsertItem(ind, str(item['videoNumber']))
             self.list.SetItem(ind, 1, item['loc'][0] + ', ' + item['loc'][1])
             self.list.SetItem(ind, 2,
                               str(item['fov'][0]) + self._degree_sign + 'x ' + str(item['fov'][1]) + self._degree_sign)
@@ -184,7 +189,7 @@ class ProtocolPane(wx.Panel):
 
     # This method updates the protocol based on an input set. If the input doesn't match any
     # of the currently loaded protocol, add the new location/settings to the list.
-    def update_protocol(self, location, eyesign, curfov, removemode, planmode, viewpaneref, locx=0, locy=0):
+    def update_protocol(self, location, eyesign, curfov, removemode, planmode, viewpaneref, vidnum, locx=0, locy=0):
         self.planmode = planmode
         exist = False
 
@@ -221,31 +226,32 @@ class ProtocolPane(wx.Panel):
                 i = i-1
             return 1
 
-        ind = 0
-        for item in self._protocol:
-            if item['fov'] == curfov and item['eye'] == seleye and item['loc'] == location:
-                item['num_obtained'] += 1
-                itemtext = self.list.GetItemText(ind, 0)
-                self.list.SetItem(ind, 0, str(int(itemtext) + 1))
-                exist = True
-                break
-            else:
-                ind += 1
+        # old logic for Aq #. Checks if video was taken before and adds number to Aq #. Not needed anymore -JG
+        # ind = 0
+        # for item in self._protocol:
+        #     if item['fov'] == curfov and item['eye'] == seleye and item['loc'] == location:
+        #         item['num_obtained'] += 1
+        #         itemtext = self.list.GetItemText(ind, 0)
+        #         self.list.SetItem(ind, 0, str(int(itemtext) + 1))
+        #         exist = True
+        #         break
+        #     else:
+        #         ind += 1
 
-        if not exist:
-            newentry = dict(num=1, num_obtained=int(1),
+        # if not exist:
+        newentry = dict(num=1, videoNumber=vidnum,
                             fov=(curfov[0], curfov[1]), eye=seleye, loc=location)
-            self._protocol.append(newentry)
+        self._protocol.append(newentry)
 
-            # If the numbers don't exist, place them at the *top* of the table.
-            ind = 0#self.list.GetItemCount()
+        # If the numbers don't exist, place them at the *top* of the table.
+        ind = 0  # self.list.GetItemCount()
 
-            self.list.InsertItem(ind, str(newentry['num_obtained']))
-            self.list.SetItem(ind, 1, newentry['loc'][0] + ', ' + newentry['loc'][1])
-            self.list.SetItem(ind, 2, str(newentry['fov'][0]) + self._degree_sign + 'x ' + str(
+        self.list.InsertItem(ind, str(newentry['videoNumber']))
+        self.list.SetItem(ind, 1, newentry['loc'][0] + ', ' + newentry['loc'][1])
+        self.list.SetItem(ind, 2, str(newentry['fov'][0]) + self._degree_sign + 'x ' + str(
                 newentry['fov'][1]) + self._degree_sign)
-            self.list.SetItem(ind, 3, newentry['eye'])
-            self.list.SetItemBackgroundColour(ind, (0, 0, 0))
+        self.list.SetItem(ind, 3, newentry['eye'])
+        self.list.SetItemBackgroundColour(ind, (0, 0, 0))
 
         return 0
 

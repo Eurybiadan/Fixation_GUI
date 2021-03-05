@@ -348,7 +348,7 @@ class PlanningPanel(wx.Panel):
         self.viewpaneref = fxguiself
         self.fxguiself = rootparent
         # default used for planning mode
-        self.wxdata = 0000
+        self.wxdata = 1
 
         labelFont = wx.Font(11, wx.SWISS, wx.NORMAL, wx.BOLD, False)
 
