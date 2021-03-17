@@ -17,7 +17,7 @@ class ControlPanel(wx.Panel):
     This class encapsulates a Panel which contains all of the control ability for the fixation GUI.
     '''
 
-    def __init__(self, parent, planmode, viewpaneref, fxguiself, id=-1, pos=wx.DefaultPosition, size=wx.DefaultSize, style=wx.SIMPLE_BORDER, name=''):
+    def __init__(self, parent, planmode, viewpaneref, fxguiself, protocolref, id=-1, pos=wx.DefaultPosition, size=wx.DefaultSize, style=wx.SIMPLE_BORDER, name=''):
         '''
         Constructor
         '''
@@ -109,6 +109,10 @@ class ControlPanel(wx.Panel):
             # Planning panel
             self._planningpane = paneWidgets.PlanningPanel(self, parent, viewpaneref, fxguiself)
 
+        if planmode is 0:
+            # AutoAdvance Button
+            self._autoadvance = paneWidgets.AutoAdvance(self, parent, protocolref)
+
         # QoL Buttons panel
         self._qolpane = paneWidgets.RefButtonsPanel(self, parent)
 
@@ -136,7 +140,10 @@ class ControlPanel(wx.Panel):
         else:
             sizer.Add(self._planningpane, (5, 0), (1, 4), wx.ALIGN_CENTER | wx.EXPAND)
         sizer.Add(self._iminitpane, (6, 0), (1, 4), wx.ALIGN_CENTER | wx.EXPAND)
-        sizer.Add(self._qolpane, (7, 0), (1, 4), wx.ALIGN_CENTER | wx.EXPAND)
+        if planmode is 0:
+            sizer.Add(self._autoadvance, (7, 0), (1, 4), wx.ALIGN_CENTER | wx.EXPAND)
+        sizer.Add(self._qolpane, (8, 0), (1, 4), wx.ALIGN_CENTER | wx.EXPAND)
+
 
 
         self.SetSizerAndFit(sizer)

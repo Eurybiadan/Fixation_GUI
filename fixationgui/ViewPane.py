@@ -44,7 +44,10 @@ class ViewPane(wx.Window):
         self.marked_loc =[]
         self.marked_loc_p =[]
         self.hfovplanned = None
-        self.vfovplanned = None
+        # vfovplanned set to 0.1 to avoid None error when using loadplanned mode.
+        # hfovplanned is the one that is checked against None so it should not have an effect
+        # as long as you always set hfov first
+        self.vfovplanned = 0.1
         #print('self.hfovplanned in init is: ', self.hfovplanned)
 
         # Set up pens we'll use

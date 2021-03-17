@@ -5,6 +5,7 @@
 @author Robert F Cooper
 
 '''
+from decimal import Decimal
 
 import wx
 import csv
@@ -15,6 +16,7 @@ class ProtocolPane(wx.Panel):
     def __init__(self, parent, id=-1, pos=wx.DefaultPosition, size=wx.DefaultSize, style=wx.SIMPLE_BORDER, name=''):
 
         super(ProtocolPane, self).__init__(parent, id, pos, size, style, name)
+        self.i = 0
         self.SetBackgroundColour('black')
         self._parent = parent
         self.pattern = re.compile("[ntsiNTIS]")
@@ -30,7 +32,6 @@ class ProtocolPane(wx.Panel):
         self.list.InsertColumn(3, 'Eye', format=wx.LIST_FORMAT_CENTER, width=30)
 
         self.list.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_listitem_selected)
-        # self.list.Bind(wx.EVT_LIST_ITEM_DESELECTED, self.on_listitem_selected)
         print("Bound dat list.")
         vbox2 = wx.BoxSizer(wx.VERTICAL)
 
@@ -46,38 +47,55 @@ class ProtocolPane(wx.Panel):
         self.marked_loc = []
     #
         self.planmode = 0
+        self.loadplanmode = 0
 
-    def on_listitem_selected(self, listevt):
-        ind = listevt.GetIndex()
-        # print(self.list.GetItemText(ind, 1))
-        # print(self.list.GetItemText(ind, 2))
-        # print(self.list.GetItemText(ind, 3))
+    def on_listitem_selected(self, listevt, listentry=0):
+
+        if listentry:
+            eye = dict.get(listentry, 'eye')
+            fov = dict.get(listentry, 'fov')
+            loc = dict.get(listentry, 'loc')
+        else:
+            ind = listevt.GetIndex()
+            eye = self.list.GetItemText(ind, 3)
+            fov = self.list.GetItemText(ind, 2)
+            loc = self.list.GetItemText(ind, 1)
         # Unwrap the items:
 
         # Update the eye first- other values are relative to the eye
         # sets the OS or OD radio button
-        self._parent.control.OS.SetValue(self.list.GetItemText(ind, 3) == "OS")
-        self._parent.control.OD.SetValue(self.list.GetItemText(ind, 3) == "OD")
-        self._parent.on_eye_select_list(self.list.GetItemText(ind, 3) == "OS")
+        self._parent.control.OS.SetValue(eye == "OS")
+        self._parent.control.OD.SetValue(eye == "OD")
+        self._parent.on_eye_select_list(eye == "OS")
 
 
         # Update the FOV - For simplicity I'm just directly manipulating the string. This should be changed if we change
         # details of how the strings are displayed.
         # This is disabled for the moment, until I update the talkback to the host application.
-        # This has been put in use but only for planning mode -- needed so that the remove button can work properly if item to remove was selected on the list -JG 3/3/2021
-        if self.planmode == 1:
-            fovtokens = self.list.GetItemText(ind, 2).split(self._degree_sign)
-            width = float(fovtokens[0])
-            height = fovtokens[1]
-            height = float(height[2:])
+        # This has been put in use properly for planmode -- needed so that the remove button can work properly if item to remove was selected on the list -JG 3/3/2021
+
+        # NEED TO CONNECT AND ADJUST FOV ON SAVIOR FOR THIS TO WORK FOR LOADPLANMODE -JG 3/10/2021
+        if self.planmode == 1 or self.loadplanmode == 1:
+            if listentry:
+                fovtokens = fov
+                width = float(fovtokens[0])
+                height = float(fovtokens[1])
+            else:
+                fovtokens = fov.split(self._degree_sign)
+                width = float(fovtokens[0])
+                height = fovtokens[1]
+                height = float(height[2:])
             self._parent.set_horizontal_fov(width)
             self._parent.set_vertical_fov(height)
 
         # Update the Location.
-        locsplit = self.list.GetItemText(ind, 1).split(',')
+        if listentry:
+            locsplit = loc
+        else:
+            locsplit = loc.split(',')
         horzsign = 1
         vertsign = 1
-        if self.list.GetItemText(ind, 3) == "OS":  # For OS, Temporal is postive and Nasal is negative.
+        if eye == "OS":  # For OS, Temporal is postive and Nasal is negative.
             horz = locsplit[0]
             if horz[-1] == "N":
                 horzsign = -1
@@ -90,7 +108,7 @@ class ProtocolPane(wx.Panel):
 
             self._parent.update_fixation_location(wx.Point2D(horzval, vertval))
 
-        elif self.list.GetItemText(ind, 3) == "OD":  # For OD, Temporal is negative and Nasal is positive.
+        elif eye == "OD":  # For OD, Temporal is negative and Nasal is positive.
             horz = locsplit[0]
             if horz[-1] == "T":
                 horzsign = -1
@@ -103,7 +121,8 @@ class ProtocolPane(wx.Panel):
 
             self._parent.update_fixation_location(wx.Point2D(horzval, vertval))
 
-    def load_protocol(self, path):
+    def load_protocol(self, path, loadplanmode=0):
+        self.loadplanmode = loadplanmode
         with open(path, 'r') as csvfile:
             header = next(csvfile, None)
             header = header.split(',')
@@ -113,9 +132,14 @@ class ProtocolPane(wx.Panel):
             #added to clear previous loaded in locations - JG 2/11
             self.marked_loc.clear()
 
-            if header[0].strip() == "v0.1":
-                # reversed(list()) used to read in the csv entries backwards to make transition from old to new seamless -JG
-                for row in reversed(list(protoreader)):
+            if header[0].strip() == "v0.1" or header[0].strip() == "v0.2":
+                # if the planned mode is set to true (1), then don't read file backwards
+                if loadplanmode == 1:
+                    rowlist = protoreader
+                else:
+                    # reversed(list()) used to read in the csv entries backwards to make transition from old to new seamless -JG
+                    rowlist = reversed(list(protoreader))
+                for row in rowlist:
                     exists = False
                     num_aq = 0
                     self.marked_loc.append((float(row[3]), float(row[4]), wx.Point2D(float(row[1]), float(row[2]))))
@@ -143,7 +167,13 @@ class ProtocolPane(wx.Panel):
                     except ValueError:
                         return
 
-                    newentry = dict(loc=(horzloc, vertloc),
+                    # to make sure that the video numbers start all as -1 if loadplanmode is 1
+                    if loadplanmode:
+                        newentry = dict(loc=(horzloc, vertloc),
+                                        fov=(row[3], row[4]),
+                                        eye=row[5], videoNumber='-1')
+                    else:
+                        newentry = dict(loc=(horzloc, vertloc),
                                     fov=(row[3], row[4]),
                                     eye=row[5],
                                     videoNumber=row[0])
@@ -174,6 +204,9 @@ class ProtocolPane(wx.Panel):
     def clear_protocol(self):
         self._protocol = []
         self.list.DeleteAllItems()
+        self.i = 0
+        self._parent.set_horizontal_fov(0.1)
+        self._parent.set_vertical_fov(0.1)
 
     def update_protocol_list(self):
 
@@ -238,20 +271,50 @@ class ProtocolPane(wx.Panel):
         #     else:
         #         ind += 1
 
-        # if not exist:
-        newentry = dict(num=1, videoNumber=vidnum,
+        if self.loadplanmode == 1:
+            ind = 0
+            for item in self._protocol:
+                fovitem = dict.get(item, 'fov')
+                fovx = f"{float(fovitem[0]):.2f}"
+                fovy = f"{float(fovitem[1]):.2f}"
+                fovitem = (fovx, fovy)
+
+                locitem = dict.get(item, 'loc')
+                locx = f"{float(locitem[0]):.2f}"
+                locy = f"{float(locitem[1]):.2f}"
+                locitem = (locx,locy)
+
+                curfovitemx = f"{float(curfov[0]):.2f}"
+                curfovitemy = f"{float(curfov[1]):.2f}"
+                curfovitem = (curfovitemx, curfovitemy)
+                locationitemx = f"{float(location[0]):.2f}"
+                locationitemy = f"{float(location[1]):.2f}"
+                locationitem = (locationitemx, locationitemy)
+
+                if fovitem == curfovitem and item['eye'] == seleye and locitem == locationitem and item['videoNumber'] == '-1':
+                    item['videoNumber'] = vidnum
+                    itemtext = self.list.GetItemText(ind, 0)
+                    self.list.SetItem(ind, 0, str(int(vidnum)))
+                    self.list.SetItemBackgroundColour(ind, (0, 0, 0))
+                    exist = True
+                    break
+                else:
+                    ind += 1
+
+        if not exist:
+            newentry = dict(num=1, videoNumber=vidnum,
                             fov=(curfov[0], curfov[1]), eye=seleye, loc=location)
-        self._protocol.append(newentry)
+            self._protocol.append(newentry)
 
-        # If the numbers don't exist, place them at the *top* of the table.
-        ind = 0  # self.list.GetItemCount()
+            # If the numbers don't exist, place them at the *top* of the table.
+            ind = 0  # self.list.GetItemCount()
 
-        self.list.InsertItem(ind, str(newentry['videoNumber']))
-        self.list.SetItem(ind, 1, newentry['loc'][0] + ', ' + newentry['loc'][1])
-        self.list.SetItem(ind, 2, str(newentry['fov'][0]) + self._degree_sign + 'x ' + str(
+            self.list.InsertItem(ind, str(newentry['videoNumber']))
+            self.list.SetItem(ind, 1, newentry['loc'][0] + ', ' + newentry['loc'][1])
+            self.list.SetItem(ind, 2, str(newentry['fov'][0]) + self._degree_sign + 'x ' + str(
                 newentry['fov'][1]) + self._degree_sign)
-        self.list.SetItem(ind, 3, newentry['eye'])
-        self.list.SetItemBackgroundColour(ind, (0, 0, 0))
+            self.list.SetItem(ind, 3, newentry['eye'])
+            self.list.SetItemBackgroundColour(ind, (0, 0, 0))
 
         return 0
 

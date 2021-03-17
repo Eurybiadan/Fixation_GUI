@@ -340,15 +340,18 @@ class CursorPanel(wx.Panel):
 # Added to set up all the buttons and usage for the planning panel -JG
 class PlanningPanel(wx.Panel):
 
-    def __init__(self, parent, viewpaneref, fxguiself, rootparent, id=wx.ID_ANY, pos=wx.DefaultPosition, size=(-1, -1), style=wx.SIMPLE_BORDER,
+    def __init__(self, parent, rootparent, viewpaneref, fxguiself, id=wx.ID_ANY, pos=wx.DefaultPosition, size=(-1, -1), style=wx.SIMPLE_BORDER,
                  name='Reference Buttons Panel', port=None):
         super(PlanningPanel, self).__init__(parent, id, pos, size, style, name)
         self.imagespace = wx.Panel(parent, wx.ID_ANY)
+        self.viewpaneref = viewpaneref
+        self.fxguiself = fxguiself
+        # below was done in the past when viewpaneref and fxguiself were listed in init before rootparent -JG
         # janky that it gets the objects in the opposite order that I send them in, but hey it works -JG
-        self.viewpaneref = fxguiself
-        self.fxguiself = rootparent
+        # self.viewpaneref = fxguiself
+        # self.fxguiself = rootparent
         # default used for planning mode
-        self.wxdata = 1
+        self.wxdata = 0
 
         labelFont = wx.Font(11, wx.SWISS, wx.NORMAL, wx.BOLD, False)
 
@@ -360,26 +363,11 @@ class PlanningPanel(wx.Panel):
         self.quicklabel2.SetForegroundColour('white')
         self.quicklabel2.SetFont(labelFont)
 
-        #print('In paneWid Planning Panel')
-
-        # self.fovwidth = wx.TextCtrl(self)
-        # width_label = wx.StaticText(self, wx.ID_ANY, 'FOV Width:', style=wx.ALIGN_RIGHT)  # Label
-        # width_label.SetForegroundColour('white')
-        # width_label.SetFont(labelFont)
-        #
-        # self.fovheight = wx.TextCtrl(self)
-        # height_label = wx.StaticText(self, wx.ID_ANY, 'FOV Height:', style=wx.ALIGN_RIGHT)  # Label
-        # height_label.SetForegroundColour('white')
-        # height_label.SetFont(labelFont)
-
         self.buttonList = []
         self._rootparent = rootparent
         self.SetBackgroundColour('black')
 
         self.__deg_symbol = u'\N{DEGREE SIGN}'
-
-        buttonalignment = wx.ALIGN_CENTER
-        textalignment = wx.ALIGN_RIGHT
 
         buttonsize = (60, 35)
         buttonalignment = wx.ALIGN_CENTER
@@ -433,12 +421,6 @@ class PlanningPanel(wx.Panel):
             button.Bind(wx.EVT_BUTTON, self.OnButton)
 
         sizer = wx.GridBagSizer()
-
-        # sizer.Add(self.fovwidth, (1, 2), (1, 1), textalignment)
-        # sizer.Add(width_label, (1, 0), (1, 1), wx.ALIGN_LEFT)
-        #
-        # sizer.Add(self.fovheight, (2, 2), (1, 1), textalignment)
-        # sizer.Add(height_label, (2, 0), (1, 1), wx.ALIGN_LEFT)
 
         sizer.Add(self.quicklabel, (0, 0), (1, 4), buttonalignment)
         sizer.Add(self.f05, (1, 0), (1, 1), buttonalignment)
@@ -586,12 +568,78 @@ class ImInitPanel(wx.Panel):
     def BindTo(self, callback):
         self._sliderObservers.append(callback)
 
+
+class AutoAdvance(wx.Panel):
+
+    '''
+    classdocs
+    '''
+
+    def __init__(self, parent, rootparent, protocolref, id=wx.ID_ANY, pos=wx.DefaultPosition, size=(-1, -1), style=wx.SIMPLE_BORDER,
+                 name='Quick Locations Panel', port=None):
+        super(AutoAdvance, self).__init__(parent, id, pos, size, style, name)
+
+        self.protocolref = protocolref
+        self.protocolref.i = 0
+        self.buttonList = []
+        self._rootparent = rootparent
+        self.SetBackgroundColour('black')
+
+        self.__deg_symbol = u'\N{DEGREE SIGN}'
+
+        buttonalignment = wx.ALIGN_CENTER
+
+        # Auto Advance
+        self.autoA = wx.Button(self, label='Advance', size=(-1, 30))
+        self.autoA.SetBackgroundColour('medium gray')
+        self.autoA.SetForegroundColour('white')
+        self.buttonList.append(self.autoA)
+
+        # Bind each button to a listener
+        for button in self.buttonList:
+            button.Bind(wx.EVT_BUTTON, self.OnButton)
+
+        sizer = wx.GridBagSizer()
+        sizer.Add(self.autoA, (0, 0), (1, 0), buttonalignment)
+
+        box = wx.BoxSizer(wx.VERTICAL)  # To make sure it stays centered in the area it is given
+        box.Add(sizer, 0, wx.ALIGN_CENTER)
+
+        self.SetSizerAndFit(box)
+
+    def OnButton(self, evt):
+        # if we aren't in load planed mode button has no functionality
+        if self.protocolref.loadplanmode == 0:
+            return
+        ind = self.protocolref.list.GetItemCount()
+        pressed = evt.GetEventObject()
+        if pressed == self.autoA:
+            # check to make sure the index won't go out of bounds
+            if self.protocolref.i >= ind:
+                return
+            item = self.protocolref._protocol[self.protocolref.i]
+            self.protocolref.on_listitem_selected(0, item)
+            # sets the current auto advance selected color
+            self.protocolref.list.SetItemBackgroundColour(self.protocolref.i, (74, 0, 0))
+            # setting the list item colors after the auto advance has passed
+            if self.protocolref.i > 0:
+                # get the previous item on the list
+                previtem = self.protocolref._protocol[self.protocolref.i - 1]
+                # if imaged there, set color to black, else set back to loaded in blue color
+                if int(previtem['videoNumber']) >= 0:
+                    self.protocolref.list.SetItemBackgroundColour(self.protocolref.i-1, (0, 0, 0))
+                else:
+                    self.protocolref.list.SetItemBackgroundColour(self.protocolref.i-1, (0, 102, 102))
+            self.protocolref.i = self.protocolref.i+1
+
+
+
 class RefButtonsPanel(wx.Panel):
     '''
     classdocs
     '''
 
-    def __init__(self, parent, rootparent,id=wx.ID_ANY, pos=wx.DefaultPosition, size=(-1, -1), style=wx.SIMPLE_BORDER,
+    def __init__(self, parent, rootparent, id=wx.ID_ANY, pos=wx.DefaultPosition, size=(-1, -1), style=wx.SIMPLE_BORDER,
                  name='Reference Buttons Panel', port=None):
         super(RefButtonsPanel, self).__init__(parent, id, pos, size, style, name)
 

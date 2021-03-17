@@ -35,6 +35,8 @@ class wxFixationFrame(wx.Frame):
 
         self.withSerial = False
 
+        self.loadplanMode = 0
+
         # Initial Conditions
         self.curr_path = ''
         self.protopath = ''
@@ -157,7 +159,7 @@ class wxFixationFrame(wx.Frame):
 
     def initControlPanel(self, parent, planmode=0):
 
-        self.control = ControlPanel(parent, planmode, self.viewpane, self, id=wx.ID_ANY)
+        self.control = ControlPanel(parent, planmode, self.viewpane, self, self.protocolpane, id=wx.ID_ANY)
 
         # Bind all the events to the control panel
         self.control.vertcontrol.Bind(FS.EVT_FLOATSPIN, self.on_vert_spin)
@@ -188,7 +190,8 @@ class wxFixationFrame(wx.Frame):
         self.id_on_toggle = 10041
         self.id_off_toggle = 10042
         self.id_save_proto_loc = 10004
-        self.id_open_proto = 10005
+        #self.id_open_proto = 10005
+        self.id_open_planned_proto = 10005
         # JG 2/5
         self.id_open_proto_pcrash = 10006
         #
@@ -208,9 +211,14 @@ class wxFixationFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_set_save_protocol_location, id=self.id_save_proto_loc)
         # protoMenu.Append(self.id_open_proto, 'Open Protocol...\t')
         # self.Bind(wx.EVT_MENU, self.on_open_protocol_file, id=self.id_open_proto)
+
+        protoMenu.Append(self.id_open_planned_proto, 'Open Planned Protocol...\t')
+        self.Bind(wx.EVT_MENU, self.OnPlannedClick, id=self.id_open_planned_proto)
+
+        #self.Bind(wx.EVT_MENU, self.on_open_protocol, id=self.id_open_planned_proto)
         # JG 2/4
         protoMenu.Append(self.id_open_proto_pcrash, 'Continue Protocol After Savior Crash...\t')
-        self.Bind(wx.EVT_MENU, self.on_open_protocol_file_pcrash, id=self.id_open_proto_pcrash)
+        self.Bind(wx.EVT_MENU, self.on_open_protocol, id=self.id_open_proto_pcrash)
         #
         protoMenu.Append(self.id_clear_proto, 'Clear Protocol\t')
         self.Bind(wx.EVT_MENU, self.on_clear_protocol, id=self.id_clear_proto)
@@ -405,14 +413,21 @@ class wxFixationFrame(wx.Frame):
 
             self.viewpane.pane_to_file(locationpath + os.sep + locationfname)
 
-    def on_set_save_protocol_location(self, evt=None):
+    def on_set_save_protocol_location(self, evt=None, loadplanMode=0):
 
-        # if we are continuing a protocol after a crash just append to the current one
-        if self.curr_path == self.protopath_pcrash:
-            self._locfileobj = open(self._locationpath + os.sep + self._locationfname, 'a')
-            self._locfileobj.close()
-            self.locfileobjname = self._locationpath + os.sep + self._locationfname
-            return
+        if self.loadplanMode == 0:
+            # if we are continuing a protocol after a crash just append to the current one
+            if self.curr_path == self.protopath_pcrash:
+                self._locfileobj = open(self._locationpath + os.sep + self._locationfname, 'a')
+                self._locfileobj.close()
+                self.locfileobjname = self._locationpath + os.sep + self._locationfname
+                return
+        if self.loadplanMode == 1:
+            if self.curr_path == self._locfileobj:
+                self._locfileobj = open(self._locationpath + os.sep + self._locationfname, 'a')
+                self._locfileobj.close()
+                self.locfileobjname = self._locationpath + os.sep + self._locationfname
+                return
 
         # If no path exists, then prompt for the location before continuing...
         dialog = wx.FileDialog(self, 'Save Location List As:', "", "", 'CSV (Comma delimited)|*.csv', wx.FD_SAVE)
@@ -431,7 +446,7 @@ class wxFixationFrame(wx.Frame):
                 if result == wx.ID_YES:
                     self._locfileobj = open(self._locationpath + os.sep + self._locationfname, 'w')  # Write the header
                     self._locfileobj.write(
-                        "v0.1,Horizontal Location,Vertical Location,Horizontal FOV,Vertical FOV,Eye\n")
+                        "v0.2,Horizontal Location,Vertical Location,Horizontal FOV,Vertical FOV,Eye\n")
                     self._locfileobj.close()
                     # set the file to be saved to as the current path
                     self.curr_path = self._locfileobj
@@ -443,7 +458,7 @@ class wxFixationFrame(wx.Frame):
             if result == wx.ID_YES:
                 self._locfileobj = open(self._locationpath + os.sep + self._locationfname, 'w')  # Write the header
                 self._locfileobj.write(
-                    "v0.1,Horizontal Location,Vertical Location,Horizontal FOV,Vertical FOV,Eye\n")
+                    "v0.2,Horizontal Location,Vertical Location,Horizontal FOV,Vertical FOV,Eye\n")
                 self._locfileobj.close()
                 # set the file to be saved to as the current path
                 self.curr_path = self._locfileobj
@@ -481,11 +496,23 @@ class wxFixationFrame(wx.Frame):
     #             self.locfileobjname = self.protopath
     #             self.protocolpane.load_protocol(self.protopath)
 
-    def on_open_protocol_file_pcrash(self, evt=None):
+    # used to set the mode for on_open_protocol to planned mode
+    def OnPlannedClick(self, evt=None):
+        self.on_open_protocol(evt=None, loadplanMode=1)
 
-        if self.curr_path == '':
-            dialog = wx.FileDialog(self, 'Select protocol file:', self.header_dir, '',
+    def on_open_protocol(self, evt=None, loadplanMode=0):
+        self.loadplanMode = loadplanMode
+
+        if self.curr_path == '' or self.loadplanMode == 1:
+            # if opening a planned proto, clear anything that might be on the screen then ask what to open
+            if self.loadplanMode == 1:
+                self.protocolpane.clear_protocol()
+                self.viewpane.clear_locations()
+                dialog = wx.FileDialog(self, 'Select planned protocol file:', self.header_dir, '',
                                'CSV files (*.csv)|*.csv', wx.FD_OPEN)
+            else:
+                dialog = wx.FileDialog(self, 'Select protocol file:', self.header_dir, '',
+                                       'CSV files (*.csv)|*.csv', wx.FD_OPEN)
 
             if dialog.ShowModal() == wx.ID_OK:
                 self.header_dir = dialog.GetDirectory()
@@ -496,7 +523,10 @@ class wxFixationFrame(wx.Frame):
 
                 self.protopath_pcrash = self.header_dir + os.sep + protofname
 
-                pcrash_list = self.protocolpane.load_protocol(self.protopath_pcrash)
+                if loadplanMode:
+                    pcrash_list = self.protocolpane.load_protocol(self.protopath_pcrash, loadplanMode)
+                else:
+                    pcrash_list = self.protocolpane.load_protocol(self.protopath_pcrash)
                 if pcrash_list:
                     self.viewpane.Repaint(self, pcrash_list)
                 self.curr_path = self.protopath_pcrash
@@ -507,12 +537,13 @@ class wxFixationFrame(wx.Frame):
             self.protocolpane.clear_protocol()
             self.viewpane.clear_locations()
 
-            pcrash_list = self.protocolpane.load_protocol(self.locfileobjname)
+            if loadplanMode:
+                pcrash_list = self.protocolpane.load_protocol(self.locfileobjname, loadplanMode)
+            else:
+                pcrash_list = self.protocolpane.load_protocol(self.locfileobjname)
             if pcrash_list:
                 self.viewpane.Repaint(self, pcrash_list)
 
-
-    ##        self.update_protocol(self.vert_loc,self.horz_loc)
 
     def on_clear_protocol(self, evt=None):
         dlg = wx.MessageDialog(None, 'Are you sure you want to clear the protocol?', 'Clear Protocol',
@@ -686,7 +717,7 @@ class wxFixationFrame(wx.Frame):
         if noremoval:
             return
         else:
-            self.save_location(self.control.horzcontrol.get_value(), self.control.vertcontrol.get_value(), str(data), removemode)
+            self.save_location(self.control.horzcontrol.get_value(), self.control.vertcontrol.get_value(), str(data), removemode, self.loadplanMode)
 
 
 
@@ -720,12 +751,12 @@ class wxFixationFrame(wx.Frame):
             self.viewpane.get_fov(), removemode, planmode, viewpaneref, vidnum, self.horz_loc, self.vert_loc)
         return noremoval
 
-    def save_location(self, horzloc, vertloc, vidnum="-1", removemode=0):
+    def save_location(self, horzloc, vertloc, vidnum="-1", removemode=0, loadplanmode=0):
 
         # Create a file that we will dump all of the relevant information to
-        if self._locationfname is None:
+        if self._locationfname is None or self.loadplanMode is 1:
             # If it doesn't exist, then prompt for the location before continuing...
-            self.on_set_save_protocol_location()
+            self.on_set_save_protocol_location(None, loadplanmode)
 
         try:
             self._locfileobj = open(self._locationpath + os.sep + self._locationfname, 'a')
@@ -811,6 +842,10 @@ class ConnListener(asyncore.dispatcher):
         asyncore.dispatcher.__init__(self)
         self.thisparent = parent
 
+        # need to change host to an IP address of the computer that Savior is on
+        # ip = u"141.106.183.180"
+        # import ipaddress
+        # self.HOST = ipaddress.ip_address(ip)
         self.HOST = 'localhost'
         self.PORT = 1222
         self.buffer = []

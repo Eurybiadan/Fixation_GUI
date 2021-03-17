@@ -24,6 +24,7 @@ class PlannerMode(wxFixationFrame):
         self.vert_loc = 0.0
         self.diopter_value = 0.0
         self._eyesign = -1
+        self.loadplanMode = 0
 
         self._locationfname = None
         self._locationpath = None
