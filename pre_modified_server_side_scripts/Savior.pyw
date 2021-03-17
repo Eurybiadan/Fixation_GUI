@@ -546,6 +546,12 @@ class SaviorApp(wx.App):
                 keypress = wx.KeyEvent(wx.wxEVT_CHAR)
                 keypress.m_keyCode = wx.WXK_F4
                 self.OnKeyDown(keypress)
+            if recvVal == "Hello":
+                print('wazzuppp')
+                fov = (2, 2)
+                self.savior_panel.optical_scanners_control_panel.OnGUISetFOV(fov)
+
+
 
     def OnKeyDown(self, event):
         """

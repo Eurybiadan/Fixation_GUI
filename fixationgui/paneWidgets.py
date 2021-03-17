@@ -575,12 +575,14 @@ class AutoAdvance(wx.Panel):
     classdocs
     '''
 
-    def __init__(self, parent, rootparent, protocolref, id=wx.ID_ANY, pos=wx.DefaultPosition, size=(-1, -1), style=wx.SIMPLE_BORDER,
+    def __init__(self, parent, rootparent, protocolref, MessageEvent, myEVT_RETURN_MESSAGE, id=wx.ID_ANY, pos=wx.DefaultPosition, size=(-1, -1), style=wx.SIMPLE_BORDER,
                  name='Quick Locations Panel', port=None):
         super(AutoAdvance, self).__init__(parent, id, pos, size, style, name)
 
         self.protocolref = protocolref
         self.protocolref.i = 0
+        self.messageEvent = MessageEvent
+        self.myEvtRetMsg = myEVT_RETURN_MESSAGE
         self.buttonList = []
         self._rootparent = rootparent
         self.SetBackgroundColour('black')
@@ -618,7 +620,7 @@ class AutoAdvance(wx.Panel):
             if self.protocolref.i >= ind:
                 return
             item = self.protocolref._protocol[self.protocolref.i]
-            self.protocolref.on_listitem_selected(0, item)
+            self.protocolref.on_listitem_selected(0, self.messageEvent, self.myEvtRetMsg, item)
             # sets the current auto advance selected color
             self.protocolref.list.SetItemBackgroundColour(self.protocolref.i, (74, 0, 0))
             # setting the list item colors after the auto advance has passed

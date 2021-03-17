@@ -17,7 +17,7 @@ class ControlPanel(wx.Panel):
     This class encapsulates a Panel which contains all of the control ability for the fixation GUI.
     '''
 
-    def __init__(self, parent, planmode, viewpaneref, fxguiself, protocolref, id=-1, pos=wx.DefaultPosition, size=wx.DefaultSize, style=wx.SIMPLE_BORDER, name=''):
+    def __init__(self, parent, planmode, viewpaneref, fxguiself, protocolref, MessageEvent, myEVT_RETURN_MESSAGE, id=-1, pos=wx.DefaultPosition, size=wx.DefaultSize, style=wx.SIMPLE_BORDER, name=''):
         '''
         Constructor
         '''
@@ -111,7 +111,8 @@ class ControlPanel(wx.Panel):
 
         if planmode is 0:
             # AutoAdvance Button
-            self._autoadvance = paneWidgets.AutoAdvance(self, parent, protocolref)
+            # Added message things
+            self._autoadvance = paneWidgets.AutoAdvance(self, parent, protocolref, MessageEvent, myEVT_RETURN_MESSAGE)
 
         # QoL Buttons panel
         self._qolpane = paneWidgets.RefButtonsPanel(self, parent)

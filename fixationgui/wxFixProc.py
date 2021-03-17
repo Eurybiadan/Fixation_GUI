@@ -80,12 +80,13 @@ class QueueWhisperer(asyncore.dispatcher):
 if __name__ == '__main__':
 
     testQ = Queue()
+    recvQ = Queue()
 
     CYANIDE = -1
     VIDNUM = 0
     FOV = 1
 
-    server = FixGUIServer(testQ)
+    server = FixGUIServer(testQ,recvQ)
     # time.sleep(10)
     # print("Starting test packets...")
     # testQ.put((FOV, 1, 1))

@@ -159,7 +159,7 @@ class wxFixationFrame(wx.Frame):
 
     def initControlPanel(self, parent, planmode=0):
 
-        self.control = ControlPanel(parent, planmode, self.viewpane, self, self.protocolpane, id=wx.ID_ANY)
+        self.control = ControlPanel(parent, planmode, self.viewpane, self, self.protocolpane, MessageEvent, myEVT_RETURN_MESSAGE, id=wx.ID_ANY)
 
         # Bind all the events to the control panel
         self.control.vertcontrol.Bind(FS.EVT_FLOATSPIN, self.on_vert_spin)
@@ -585,6 +585,8 @@ class wxFixationFrame(wx.Frame):
 
         if event.GetKeyCode() == wx.WXK_F4:
             evt = MessageEvent(myEVT_RETURN_MESSAGE, -1, 4, "F4")
+            print(hex(id(myEVT_RETURN_MESSAGE)))
+            print(hex(id(MessageEvent)))
             wx.PostEvent(self, evt)
 
         # elif event.GetKeyCode() == wx.WXK_NUMPAD_SUBTRACT:
@@ -872,13 +874,14 @@ class QueueListener(asyncore.dispatcher_with_send):
         self.thisparent.Bind(EVT_RETURN_MESSAGE, self.handle_return_message)
 
     def handle_return_message(self, evt):
-        # print("Sending!")
+        print("Sending!")
+        print(evt.get_data().encode("utf-8"))
         self.send(evt.get_data().encode("utf-8"))
 
     def handle_read(self):
         try:
             recvmsg = self.recv(32).decode("utf-8")
-            # print("Recieved: "+recvmsg)
+            print("Recieved: "+recvmsg)
 
             list_o_msg = recvmsg.split("!")
 
