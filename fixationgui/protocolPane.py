@@ -52,7 +52,12 @@ class ProtocolPane(wx.Panel):
         self.planmode = 0
         self.loadplanmode = 0
 
-    def on_listitem_selected(self, listevt, messageEvent, myEvtRetMsg, listentry=0):
+    def loadMessageEvtObjects(self, messageEvent, myEvtRetMsg):
+
+        self.messageEvent = messageEvent
+        self.myEvtRetMsg = myEvtRetMsg
+
+    def on_listitem_selected(self, listevt, listentry=0):
 
         if listentry:
             eye = dict.get(listentry, 'eye')
@@ -79,8 +84,9 @@ class ProtocolPane(wx.Panel):
 
         # NEED TO CONNECT AND ADJUST FOV ON SAVIOR FOR THIS TO WORK FOR LOADPLANMODE -JG 3/10/2021
         if self.planmode == 1 or self.loadplanmode == 1:
-            print(hex(id(myEvtRetMsg)))
-            print(hex(id(messageEvent)))
+            print('protocolpane message values:')
+            print(hex(id(self.myEvtRetMsg)))
+            print(hex(id(self.messageEvent)))
             if listentry:
                 fovtokens = fov
                 width = float(fovtokens[0])
@@ -93,7 +99,7 @@ class ProtocolPane(wx.Panel):
             self._parent.set_horizontal_fov(width)
             self._parent.set_vertical_fov(height)
             # need to send width and height to savior.pyw
-            evt = messageEvent(myEvtRetMsg, -1, 4, "Hello")
+            evt = self.messageEvent(self.myEvtRetMsg, -1, 4, "Hello")
             wx.PostEvent(self, evt)
 
         # Update the Location.

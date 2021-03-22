@@ -585,6 +585,7 @@ class wxFixationFrame(wx.Frame):
 
         if event.GetKeyCode() == wx.WXK_F4:
             evt = MessageEvent(myEVT_RETURN_MESSAGE, -1, 4, "F4")
+            print('fixgui message values:')
             print(hex(id(myEVT_RETURN_MESSAGE)))
             print(hex(id(MessageEvent)))
             wx.PostEvent(self, evt)
@@ -874,7 +875,7 @@ class QueueListener(asyncore.dispatcher_with_send):
         self.thisparent.Bind(EVT_RETURN_MESSAGE, self.handle_return_message)
 
     def handle_return_message(self, evt):
-        print("Sending!")
+        print("Sending from fixgui!")
         print(evt.get_data().encode("utf-8"))
         self.send(evt.get_data().encode("utf-8"))
 

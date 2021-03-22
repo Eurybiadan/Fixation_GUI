@@ -52,11 +52,14 @@ class QueueWhisperer(asyncore.dispatcher):
         return self._sendQueue.qsize() > 0
 
     def handle_read(self):
+        # reads things sent from gui to savior?
         recvmsg = self.recv(32).decode("utf-8")
-        #print("Recieved: " + recvmsg)
+        print("read in fixproc")
+        print("Recieved: " + recvmsg)
         self._recvQueue.put(recvmsg)
 
     def handle_write(self):
+        # writes the stuff coming into the fixation gui from savior
         try:
             qData = self._sendQueue.get()  # This is expected to be a tuple, but handle it in case it's not.
 
@@ -86,8 +89,8 @@ if __name__ == '__main__':
     VIDNUM = 0
     FOV = 1
 
-    server = FixGUIServer(testQ,recvQ)
-    # time.sleep(10)
+    server = FixGUIServer(testQ, recvQ)
+    # time.sleep(2)
     # print("Starting test packets...")
     # testQ.put((FOV, 1, 1))
     # testQ.put((VIDNUM, '0001'))

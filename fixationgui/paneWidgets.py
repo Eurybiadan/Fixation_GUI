@@ -609,6 +609,8 @@ class AutoAdvance(wx.Panel):
 
         self.SetSizerAndFit(box)
 
+        protocolref.loadMessageEvtObjects(self.messageEvent, self.myEvtRetMsg)
+
     def OnButton(self, evt):
         # if we aren't in load planed mode button has no functionality
         if self.protocolref.loadplanmode == 0:
@@ -620,7 +622,7 @@ class AutoAdvance(wx.Panel):
             if self.protocolref.i >= ind:
                 return
             item = self.protocolref._protocol[self.protocolref.i]
-            self.protocolref.on_listitem_selected(0, self.messageEvent, self.myEvtRetMsg, item)
+            self.protocolref.on_listitem_selected(0, item)
             # sets the current auto advance selected color
             self.protocolref.list.SetItemBackgroundColour(self.protocolref.i, (74, 0, 0))
             # setting the list item colors after the auto advance has passed
