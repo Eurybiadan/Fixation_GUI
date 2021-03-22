@@ -287,6 +287,8 @@ class ProtocolPane(wx.Panel):
 
         if self.loadplanmode == 1:
             ind = 0
+            # checks new locations to be recorded against ones that are in the planned protocol
+            # needed to reformat the numbers so they have the correct amount of decimal places to match
             for item in self._protocol:
                 fovitem = dict.get(item, 'fov')
                 fovx = f"{float(fovitem[0]):.2f}"
@@ -294,15 +296,22 @@ class ProtocolPane(wx.Panel):
                 fovitem = (fovx, fovy)
 
                 locitem = dict.get(item, 'loc')
-                locx = f"{float(locitem[0]):.2f}"
-                locy = f"{float(locitem[1]):.2f}"
-                locitem = (locx,locy)
+                locxsplit = locitem[0].split(' ')
+                locx = f"{float(locxsplit[0]):.2f}"
+                if locx != '0.00':
+                    locx = locx + locxsplit[1]
+                locysplit = locitem[1].split(' ')
+                locy = f"{float(locysplit[0]):.2f}"
+                if locy != '0.00':
+                    locy = locy +locysplit[1]
+                locitem = (locx, locy)
 
                 curfovitemx = f"{float(curfov[0]):.2f}"
                 curfovitemy = f"{float(curfov[1]):.2f}"
                 curfovitem = (curfovitemx, curfovitemy)
-                locationitemx = f"{float(location[0]):.2f}"
-                locationitemy = f"{float(location[1]):.2f}"
+
+                locationitemx = location[0]
+                locationitemy = location[1]
                 locationitem = (locationitemx, locationitemy)
 
                 if fovitem == curfovitem and item['eye'] == seleye and locitem == locationitem and item['videoNumber'] == '-1':

@@ -83,6 +83,12 @@ class ViewPane(wx.Window):
         self.Bind(wx.EVT_LEAVE_WINDOW, self.on_exit)
         #print('in ViewPane init')
 
+    def set_fov_savior(self, fov):
+        self.hfov, self.vfov = list(map(float, fov))
+        self.hfovplanned = None
+        self.vfovplanned = None
+        self.Repaint()
+
     def set_fov(self, fov):
         self.hfov, self.vfov = list(map(float, fov))
         self.hfovplanned = self.hfov

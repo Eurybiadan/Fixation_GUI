@@ -5,13 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="10265a4d-0c1d-4a65-8747-ae54663009dc" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/fixationgui/testImage.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fixationgui/paneWidgets.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/paneWidgets.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fixationgui/ViewPane.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/ViewPane.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fixationgui/protocolPane.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/protocolPane.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fixationgui/wxFixGUI.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/wxFixGUI.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fixationgui/wxFixProc.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/wxFixProc.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pre_modified_server_side_scripts/Savior.pyw" beforeDir="false" afterPath="$PROJECT_DIR$/pre_modified_server_side_scripts/Savior.pyw" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -394,9 +392,19 @@
           <option name="timeStamp" value="111" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/fixationgui/wxFixGUI.py</url>
+          <line>729</line>
+          <option name="timeStamp" value="122" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fixationgui/wxFixProc.py</url>
           <line>55</line>
-          <option name="timeStamp" value="121" />
+          <option name="timeStamp" value="124" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/fixationgui/wxFixGUI.py</url>
+          <line>761</line>
+          <option name="timeStamp" value="131" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

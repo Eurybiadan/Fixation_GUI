@@ -90,10 +90,10 @@ if __name__ == '__main__':
     FOV = 1
 
     server = FixGUIServer(testQ, recvQ)
-    # time.sleep(2)
-    # print("Starting test packets...")
-    # testQ.put((FOV, 1, 1))
-    # testQ.put((VIDNUM, '0001'))
+    time.sleep(10)
+    print("Starting test packets...")
+    testQ.put((FOV, 5, 5))
+    testQ.put((VIDNUM, '0001'))
     # time.sleep(3)
     # testQ.put((FOV, 1, 1))
     # testQ.put((VIDNUM, '0002'))
