@@ -7,6 +7,7 @@
 '''
 from decimal import Decimal
 
+import numpy as np
 import wx
 import csv
 import re
@@ -291,23 +292,23 @@ class ProtocolPane(wx.Panel):
             # needed to reformat the numbers so they have the correct amount of decimal places to match
             for item in self._protocol:
                 fovitem = dict.get(item, 'fov')
-                fovx = f"{float(fovitem[0]):.2f}"
-                fovy = f"{float(fovitem[1]):.2f}"
+                fovx = '{:.2f}'.format(round(float(fovitem[0]), 2))
+                fovy = '{:.2f}'.format(round(float(fovitem[1]), 2))
                 fovitem = (fovx, fovy)
 
                 locitem = dict.get(item, 'loc')
                 locxsplit = locitem[0].split(' ')
-                locx = f"{float(locxsplit[0]):.2f}"
+                locx = '{:.2f}'.format(round(float(locxsplit[0]), 2))
                 if locx != '0.00':
                     locx = locx + locxsplit[1]
                 locysplit = locitem[1].split(' ')
-                locy = f"{float(locysplit[0]):.2f}"
+                locy = '{:.2f}'.format(round(float(locxsplit[0]), 2))
                 if locy != '0.00':
-                    locy = locy +locysplit[1]
+                    locy = locy + locysplit[1]
                 locitem = (locx, locy)
 
-                curfovitemx = f"{float(curfov[0]):.2f}"
-                curfovitemy = f"{float(curfov[1]):.2f}"
+                curfovitemx = '{:.2f}'.format(round(float(curfov[0]), 2))
+                curfovitemy = '{:.2f}'.format(round(float(curfov[1]), 2))
                 curfovitem = (curfovitemx, curfovitemy)
 
                 locationitemx = location[0]

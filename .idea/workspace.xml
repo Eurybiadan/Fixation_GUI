@@ -6,10 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="10265a4d-0c1d-4a65-8747-ae54663009dc" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fixationgui/ViewPane.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/ViewPane.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fixationgui/protocolPane.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/protocolPane.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fixationgui/wxFixGUI.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/wxFixGUI.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fixationgui/wxFixProc.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/wxFixProc.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -405,6 +402,11 @@
           <url>file://$PROJECT_DIR$/fixationgui/wxFixGUI.py</url>
           <line>761</line>
           <option name="timeStamp" value="131" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/fixationgui/protocolPane.py</url>
+          <line>294</line>
+          <option name="timeStamp" value="134" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
