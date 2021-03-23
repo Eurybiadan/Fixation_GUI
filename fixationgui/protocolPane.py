@@ -82,26 +82,36 @@ class ProtocolPane(wx.Panel):
         # details of how the strings are displayed.
         # This is disabled for the moment, until I update the talkback to the host application.
         # This has been put in use properly for planmode -- needed so that the remove button can work properly if item to remove was selected on the list -JG 3/3/2021
+        if self.planmode == 1:
+            fovtokens = fov.split(self._degree_sign)
+            width = float(fovtokens[0])
+            height = fovtokens[1]
+            height = float(height[2:])
+            self._parent.set_horizontal_fov(width)
+            self._parent.set_vertical_fov(height)
 
-        # NEED TO CONNECT AND ADJUST FOV ON SAVIOR FOR THIS TO WORK FOR LOADPLANMODE -JG 3/10/2021
-        if self.planmode == 1 or self.loadplanmode == 1:
+        # in this mode, the fov does not get updated here, it sends message to savior who then updates the fov
+        if self.loadplanmode == 1:
             print('protocolpane message values:')
             print(hex(id(self.myEvtRetMsg)))
             print(hex(id(self.messageEvent)))
+
+            # if item on the list is selected
             if listentry:
                 fovtokens = fov
                 width = float(fovtokens[0])
                 height = float(fovtokens[1])
+            # if auto advance button is pressed
             else:
                 fovtokens = fov.split(self._degree_sign)
                 width = float(fovtokens[0])
                 height = fovtokens[1]
                 height = float(height[2:])
-            self._parent.set_horizontal_fov(width)
-            self._parent.set_vertical_fov(height)
+            fovset = str((width, height))
             # need to send width and height to savior.pyw
-            evt = self.messageEvent(self.myEvtRetMsg, -1, 4, "Hello")
+            evt = self.messageEvent(self.myEvtRetMsg, -1, 4, fovset)
             wx.PostEvent(self, evt)
+
 
         # Update the Location.
         if listentry:
@@ -302,7 +312,7 @@ class ProtocolPane(wx.Panel):
                 if locx != '0.00':
                     locx = locx + locxsplit[1]
                 locysplit = locitem[1].split(' ')
-                locy = '{:.2f}'.format(round(float(locxsplit[0]), 2))
+                locy = '{:.2f}'.format(round(float(locysplit[0]), 2))
                 if locy != '0.00':
                     locy = locy + locysplit[1]
                 locitem = (locx, locy)
