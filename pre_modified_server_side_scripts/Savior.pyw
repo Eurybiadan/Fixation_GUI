@@ -540,21 +540,31 @@ class SaviorApp(wx.App):
 
     def OnRecvQueue(self):
         while True:
-            recvVal = self.recvQ.get() # Block until we get something.
+            recvVal = self.recvQ.get()  # Block until we get something.
             # In this setup with our FixationGUI, we should only get key commands.
             if recvVal == "F4":
                 keypress = wx.KeyEvent(wx.wxEVT_CHAR)
                 keypress.m_keyCode = wx.WXK_F4
                 self.OnKeyDown(keypress)
+
+            # a fov was sent via the gui
             else:
-                fov = float(recvVal)
-                print('fov in onRecvQueue: ', fov)
-                check = isinstance(fov, float)
-                print('type of fov in onRecvQueue: ', check)
-                # fov = (2, 2)
-                self.savior_panel.optical_scanners_control_panel.OnGUISetFOV(fov)
+                # remove parentheses and split the string for the two numbers
+                fov = recvVal.strip('()')
+                fov = fov.decode("utf-8").split()
 
+                # get rid of comma behind first value
+                fov[0] = fov[0].replace(',', '')
 
+                # convert fov numbers to floats
+                # if unicode has error line under it don't mess with it, it works on AO computers
+                fov0 = float(unicode(fov[0]))
+                fov1 = float(unicode(fov[1]))
+
+                fovfinal = (fov0, fov1)
+
+                # send fov to savior
+                self.savior_panel.optical_scanners_control_panel.OnGUISetFOV(fovfinal)
 
     def OnKeyDown(self, event):
         """

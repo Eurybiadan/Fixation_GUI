@@ -423,11 +423,13 @@ class wxFixationFrame(wx.Frame):
                 self.locfileobjname = self._locationpath + os.sep + self._locationfname
                 return
         if self.loadplanMode == 1:
-            if self.curr_path == self._locfileobj:
-                self._locfileobj = open(self._locationpath + os.sep + self._locationfname, 'a')
-                self._locfileobj.close()
-                self.locfileobjname = self._locationpath + os.sep + self._locationfname
-                return
+            if self._locfileobj is not None:
+                # if the file location has already been set, just append to the file
+                if self.curr_path.name == self._locfileobj.name:
+                    self._locfileobj = open(self._locationpath + os.sep + self._locationfname, 'a')
+                    self._locfileobj.close()
+                    self.locfileobjname = self._locationpath + os.sep + self._locationfname
+                    return
 
         # If no path exists, then prompt for the location before continuing...
         dialog = wx.FileDialog(self, 'Save Location List As:', "", "", 'CSV (Comma delimited)|*.csv', wx.FD_SAVE)
@@ -502,7 +504,6 @@ class wxFixationFrame(wx.Frame):
 
     def on_open_protocol(self, evt=None, loadplanMode=0):
         self.loadplanMode = loadplanMode
-        #self.loadplanfname = None
 
         if self.curr_path == '' or self.loadplanMode == 1:
             # if opening a planned proto, clear anything that might be on the screen then ask what to open
@@ -759,13 +760,12 @@ class wxFixationFrame(wx.Frame):
     def save_location(self, horzloc, vertloc, vidnum="-1", removemode=0, loadplanmode=0):
 
         # get the fov directly from the savior queue
-        saviorfov = self.saviorfov
-        saviorfovh, saviorfovv = list(map(float, saviorfov))
+        # saviorfov = self.saviorfov
+        # saviorfovh, saviorfovv = list(map(float, saviorfov))
         # Create a file that we will dump all of the relevant information to
         if self._locationfname is None or loadplanmode is 1:
             # If it doesn't exist, then prompt for the location before continuing...
             self.on_set_save_protocol_location(None, loadplanmode)
-            #self.loadplanfname = 'set'
 
         try:
             self._locfileobj = open(self._locationpath + os.sep + self._locationfname, 'a')
@@ -796,13 +796,13 @@ class wxFixationFrame(wx.Frame):
                     Writer.writerows(updatedlist)
         else:
             # writing it to the file here
-            # self._locfileobj.write(str(vidnum) + "," + str(horzloc) + "," + str(vertloc) + "," +
-            #                    str(self.viewpane.get_h_fov()) + "," + str(self.viewpane.get_v_fov()) +
-            #                    "," + eye + "\n")
-            # this is to make sure that the savior fov will be saved in the file for testing purposes
             self._locfileobj.write(str(vidnum) + "," + str(horzloc) + "," + str(vertloc) + "," +
-                                   str(saviorfovh) + "," + str(saviorfovv) +
-                                   "," + eye + "\n")
+                               str(self.viewpane.get_h_fov()) + "," + str(self.viewpane.get_v_fov()) +
+                               "," + eye + "\n")
+            # this is to make sure that the savior fov will be saved in the file for testing purposes
+            # self._locfileobj.write(str(vidnum) + "," + str(horzloc) + "," + str(vertloc) + "," +
+            #                        str(saviorfovh) + "," + str(saviorfovv) +
+            #                        "," + eye + "\n")
 
         self._locfileobj.close()
 

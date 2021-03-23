@@ -6,7 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="10265a4d-0c1d-4a65-8747-ae54663009dc" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fixationgui/protocolPane.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/protocolPane.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fixationgui/wxFixGUI.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/wxFixGUI.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fixationgui/wxFixProc.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/wxFixProc.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pre_modified_server_side_scripts/Savior.pyw" beforeDir="false" afterPath="$PROJECT_DIR$/pre_modified_server_side_scripts/Savior.pyw" afterDir="false" />
@@ -136,7 +135,7 @@
       <recent name="$PROJECT_DIR$/fixationgui" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.wxFixProc">
+  <component name="RunManager" selected="Python.testImage">
     <configuration default="true" type="PythonConfigurationType" factoryName="Python">
       <module name="Fixation_GUI" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -294,9 +293,9 @@
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.testImage" />
         <item itemvalue="Python.plannerMode" />
         <item itemvalue="Python.wxFixGUI" />
-        <item itemvalue="Python.testImage" />
         <item itemvalue="Python.protocolPane" />
         <item itemvalue="Python.wxSaviorBottomPanel" />
       </list>
@@ -383,33 +382,8 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fixationgui/wxFixGUI.py</url>
-          <line>426</line>
-          <option name="timeStamp" value="69" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/pre_modified_server_side_scripts/Savior.pyw</url>
-          <line>544</line>
-          <option name="timeStamp" value="111" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fixationgui/wxFixGUI.py</url>
-          <line>729</line>
-          <option name="timeStamp" value="122" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fixationgui/wxFixProc.py</url>
-          <line>55</line>
-          <option name="timeStamp" value="124" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fixationgui/wxFixGUI.py</url>
-          <line>764</line>
-          <option name="timeStamp" value="135" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fixationgui/wxFixGUI.py</url>
-          <line>894</line>
-          <option name="timeStamp" value="136" />
+          <line>427</line>
+          <option name="timeStamp" value="146" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
@@ -426,6 +400,8 @@
         <watch expression="myEVT_RETURN_MESSAGE" language="Python" />
         <watch expression="self._recvQueue" language="Python" />
         <watch expression="sendQueue" language="Python" />
+        <watch expression="self.curr_path" language="Python" />
+        <watch expression="self._locfileobj" language="Python" />
       </configuration>
     </watches-manager>
   </component>
