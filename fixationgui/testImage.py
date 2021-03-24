@@ -110,6 +110,11 @@ class wxImageFrame(wx.Frame):
             dlg.Destroy()
             print('y dimension is: ', int(self.ydim))
 
+            # make a string out of the resolution dimensions
+            resolution = str(self.xdim) + ' x ' + str(self.ydim)
+            # reset the res label from No Image to the resolution that was entered
+            self.sidepane.res.SetLabel(resolution)
+
     def on_mouse_motion(self, event):
         pos = event.GetPosition()
 
@@ -214,9 +219,14 @@ class SidePane(wx.Panel):
         self.reslabel.SetForegroundColour('white')
         self.reslabel.SetFont(labelFont)
 
+        self.res = wx.StaticText(self, wx.ID_ANY, 'No Image', style=wx.ALIGN_CENTER)
+        self.res.SetForegroundColour('white')
+        self.res.SetFont(labelFont)
+
         sizer = wx.GridBagSizer()
         sizer.Add(self.quicklabel, (1, 0), (1, 4), wx.ALIGN_CENTER)
         sizer.Add(self.reslabel, (4, 0), (1, 4), wx.ALIGN_CENTER)
+        sizer.Add(self.res, (5, 0), (1, 4), wx.ALIGN_CENTER)
 
         box = wx.BoxSizer(wx.VERTICAL)  # To make sure it stays centered in the area it is given
         box.Add(sizer, 0, wx.ALIGN_CENTER)
