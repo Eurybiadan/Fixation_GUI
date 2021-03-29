@@ -74,6 +74,7 @@ class CursorPanel(wx.Panel):
         self.SQCLOSE = 2
         self.CIRCLE = 3
         self.SCROSS = 5
+        # self.STIMULUS = 6
 
         self._iconsize = 25
         self._current_pen = self.GRNPEN
@@ -129,7 +130,15 @@ class CursorPanel(wx.Panel):
         dc.SetBrush(self.GRAYBRSH)
         dc.DrawCircle(12, 12, 9)
 
-        self._circleButton = wx.BitmapButton(self, wx.ID_ANY, self._circle, style=wx.BU_AUTODRAW, name='Square')
+        self._circleButton = wx.BitmapButton(self, wx.ID_ANY, self._circle, style=wx.BU_AUTODRAW, name='Circle')
+
+        # Heather Stimulus
+        # self._stim = wx.Bitmap(self._iconsize, self._iconsize)
+        # dc.SelectObject(self._stim)
+        # dc.SetBrush(self.GRAYBRSH)
+        # dc.DrawCircle(12, 12, 9)
+        #
+        # self._stimButton = wx.BitmapButton(self, wx.ID_ANY, self._stim, style=wx.BU_AUTODRAW, name='Stimulus')
 
         del dc
 
@@ -138,6 +147,7 @@ class CursorPanel(wx.Panel):
         self._osquareButton.Bind(wx.EVT_BUTTON, self.OnButton)
         self._csquareButton.Bind(wx.EVT_BUTTON, self.OnButton)
         self._circleButton.Bind(wx.EVT_BUTTON, self.OnButton)
+        # self._stimButton.Bind(wx.EVT_BUTTON, self.OnButton)
 
         cursorsizer = wx.BoxSizer(wx.HORIZONTAL)
 
@@ -146,6 +156,7 @@ class CursorPanel(wx.Panel):
         cursorsizer.Add(self._osquareButton, 0, wx.ALL, 2)
         cursorsizer.Add(self._csquareButton, 0, wx.ALL, 2)
         cursorsizer.Add(self._circleButton, 0, wx.ALL, 2)
+        # cursorsizer.Add(self._stimButton, 0, wx.ALL, 2)
 
         self.buttonList = []
 
@@ -283,6 +294,20 @@ class CursorPanel(wx.Panel):
 
         self._circleButton.SetBitmapLabel(self._circle)
 
+        # Stimulus for Heather
+        # self._stim = wx.Bitmap(self._iconsize, self._iconsize)
+        # dc.SelectObject(self._stim)
+        # if self._cursorpressed is self._stimButton:
+        #     dc.SetBrush(self._current_brush)
+        #     dc.SetPen(self._current_pen)
+        # else:
+        #     dc.SetPen(self.GRAYPEN)
+        #     dc.SetBrush(self.GRAYBRSH)
+        # dc.DrawCircle(12, 12, 9)
+        #
+        # self._stimButton.SetBitmapLabel(self._stim)
+
+
         del dc
 
     def OnButton(self, evt):
@@ -328,6 +353,9 @@ class CursorPanel(wx.Panel):
         elif pressed is self._circleButton:
             self._rootparent.update_fixation_cursor(self.CIRCLE)
             self._cursorpressed = self._circleButton
+        # elif pressed is self._stimButton:
+        #     self._rootparent.update_fixation_cursor(self.STIMULUS)
+        #     self._cursorpressed = self._stimButton
 
         self.RedrawCursors()
 

@@ -1,5 +1,8 @@
 import asyncore
 import os
+import struct
+import time
+
 import wx
 import math
 import wx.lib.agw.floatspin as FS
@@ -13,6 +16,8 @@ from LightCrafter import wxLightCrafterFrame
 from PreferencesDialog import PreferencesDialog
 import socket
 import threading
+import serial
+
 
 myEVT_MESSAGE = wx.NewEventType()
 EVT_MESSAGE = wx.PyEventBinder(myEVT_MESSAGE, 1)
@@ -591,6 +596,24 @@ class wxFixationFrame(wx.Frame):
             print(hex(id(myEVT_RETURN_MESSAGE)))
             print(hex(id(MessageEvent)))
             wx.PostEvent(self, evt)
+
+            # Heather Stimulus
+            self.LCCanvas.set_fixation_cursor(6, 1)
+            # with serial.Serial() as ser:
+            #     ser.baudrate = 9600
+            #     ser.port = 'COM3'
+            #     ser.open()
+            #
+            #     Open = struct.pack('!B', 64)
+            #     Close = struct.pack('!B', 65)
+            #
+            #     print(Open)
+            #     ser.write(Open)
+            #
+            #     time.sleep(1)  # careful with this, if sleep duration longer than the timer for redraw in lightcrafter, it will mess the timer up
+            #     print(Close)
+            #     ser.write(Close)
+
 
         # elif event.GetKeyCode() == wx.WXK_NUMPAD_SUBTRACT:
         #     self.zoom_out(self)

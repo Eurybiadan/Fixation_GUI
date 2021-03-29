@@ -1,5 +1,11 @@
 __author__ = 'Robert F Cooper'
 
+import struct
+import time
+from random import randint
+from threading import Timer
+
+import serial
 import wx
 from math import floor
 
@@ -37,8 +43,8 @@ class wxLightCrafterFrame(wx.Frame):
     def set_fixation_size(self, size):
         self.LCCanvas.set_fixation_size(size)
 
-    def set_fixation_cursor(self, cursor):
-        return self.LCCanvas.set_fixation_cursor(cursor)
+    def set_fixation_cursor(self, cursor, start=0):
+        return self.LCCanvas.set_fixation_cursor(cursor, start)
 
     def get_fixation_cursor(self):
         return self.LCCanvas.get_fixation_cursor()
@@ -51,6 +57,12 @@ class LightCrafterCanvas(wx.Window):
 
     def __init__(self, parent, id=wx.ID_ANY, pos=wx.DefaultPosition, size=wx.DefaultSize, style=0, name='LCCanvas'):
         wx.Window.__init__(self, parent, id, pos, size, style, name)
+
+        #stimulus
+        self.i = 0
+        self.c = 0
+        self.j = 0
+        self.count = 0
 
         self._cursor = 0
         self._fixsize = 5
@@ -85,10 +97,10 @@ class LightCrafterCanvas(wx.Window):
         self._fixsize = size
         self.repaint()
 
-    def set_fixation_cursor(self, cursor):
+    def set_fixation_cursor(self, cursor, start=0):
         lastcursor = self._cursor
         self._cursor = cursor
-        self.repaint()
+        self.repaint(start)
         return lastcursor
 
     def set_visible(self, is_visible):
@@ -107,7 +119,7 @@ class LightCrafterCanvas(wx.Window):
         self._Buffer = wx.Bitmap(*self.thisSize)
         self.repaint()
 
-    def repaint(self):
+    def repaint(self, start=0):
         dc = wx.MemoryDC()
         dc.SelectObject(self._Buffer)
 
@@ -156,9 +168,83 @@ class LightCrafterCanvas(wx.Window):
                 dc.DrawLine(bx, self._location.y, tx, self._location.y)
                 dc.DrawLine(self._location.x, by, self._location.x, ty)
 
+            # Heather Stimulus only selected if piece of code is uncommented in fixgui keyboardpress f4
+            elif self._cursor is 6:
+                self.sequence(dc, self._location.x, self._location.y, start)
+
+
         del dc  # need to get rid of the MemoryDC before Update() is called.
         self.Refresh(eraseBackground=False)
         self.Update()
+        # s.enter(2, 1, self.repaint)
+        # s.run(False)
+
+    def sequence(self, dc, locationx, locationy, start):
+        with serial.Serial() as ser:
+            # 0: blue, 1: green, 2: red; color array
+            colors = [wx.Colour(red=0, green=0, blue=225), wx.Colour(red=94, green=255, blue=0), wx.Colour(red=195, green=255, blue=0)]
+            # can use this to make the colors in random order, will probably work better if we have more colors
+            index = randint(0, 2)
+
+            ser.baudrate = 9600
+            ser.port = 'COM3'
+            ser.open()
+
+            Open = struct.pack('!B', 64)
+            Close = struct.pack('!B', 65)
+
+            print('Open')
+            ser.write(Open)
+
+            time.sleep(1)  # careful with this, adds to redraw timer time
+            print('Close')
+            ser.write(Close)
+
+            if self.i == 0:
+                if self.c == 0:
+                    self._pen.SetColour(colors[0])
+                    self._brush.SetColour(colors[0])
+                    dc.SetPen(self._pen)
+                    dc.SetBrush(self._brush)
+                    self.c = 1
+                    dc.DrawCircle(locationx, locationy, 200)
+                    print(time.perf_counter())
+
+            if self.i == 1:
+                if self.c == 1:
+                    self._pen.SetColour(colors[1])
+                    self._brush.SetColour(colors[1])
+                    dc.SetPen(self._pen)
+                    dc.SetBrush(self._brush)
+                    self.c = 2
+                    dc.DrawCircle(locationx, locationy, 200)
+                    print(time.perf_counter())
+
+            if self.i == 2:
+                if self.c == 2:
+                    self._pen.SetColour(colors[2])
+                    self._brush.SetColour(colors[2])
+                    dc.SetPen(self._pen)
+                    dc.SetBrush(self._brush)
+                    self.c = 0
+                    dc.DrawCircle(locationx, locationy, 200)
+                    print(time.perf_counter())
+
+            self.i = self.i + 1
+            if self.i == 3:
+                self.i = 0
+
+            del dc  # need to get rid of the MemoryDC before Update() is called.
+            self.Refresh(eraseBackground=False)
+            self.Update()
+
+            if start == 1:
+                self.count = 0
+            t = Timer(0.5, self.repaint)
+            t.start()
+            if self.count >= 5:
+                t.cancel()
+            self.count = self.count + 1
 
 
 # Shows The Window
