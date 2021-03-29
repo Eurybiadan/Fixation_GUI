@@ -223,15 +223,80 @@ class SidePane(wx.Panel):
         self.res.SetForegroundColour('white')
         self.res.SetFont(labelFont)
 
+        self._zoom = Buttons(self, parent)
+
         sizer = wx.GridBagSizer()
         sizer.Add(self.quicklabel, (1, 0), (1, 4), wx.ALIGN_CENTER)
         sizer.Add(self.reslabel, (4, 0), (1, 4), wx.ALIGN_CENTER)
         sizer.Add(self.res, (5, 0), (1, 4), wx.ALIGN_CENTER)
 
+        sizer.Add(self._zoom, (7, 0), (1, 4), wx.ALIGN_CENTER | wx.EXPAND)
+
         box = wx.BoxSizer(wx.VERTICAL)  # To make sure it stays centered in the area it is given
         box.Add(sizer, 0, wx.ALIGN_CENTER)
 
         self.SetSizerAndFit(box)
+
+class Buttons(wx.Panel):
+
+    '''
+    classdocs
+    '''
+
+    def __init__(self, parent, rootparent, id=wx.ID_ANY, pos=wx.DefaultPosition, size=(-1, -1), style=wx.SIMPLE_BORDER,
+                 name='Quick Locations Panel', port=None):
+        super(Buttons, self).__init__(parent, id, pos, size, style, name)
+
+        self.buttonList = []
+        self._rootparent = rootparent
+        self.SetBackgroundColour('black')
+
+        self.__deg_symbol = u'\N{DEGREE SIGN}'
+
+        buttonalignment = wx.ALIGN_CENTER
+
+        # Zoom
+        self.zoom = wx.Button(self, label='Zoom', size=(-1, 30))
+        self.zoom.SetBackgroundColour('medium gray')
+        self.zoom.SetForegroundColour('white')
+        self.buttonList.append(self.zoom)
+
+        # Pan
+        self.pan = wx.Button(self, label='Pan', size=(-1, 30))
+        self.pan.SetBackgroundColour('medium gray')
+        self.pan.SetForegroundColour('white')
+        self.buttonList.append(self.pan)
+
+        # Rotate
+        self.rotate = wx.Button(self, label='Rotate', size=(-1, 30))
+        self.rotate.SetBackgroundColour('medium gray')
+        self.rotate.SetForegroundColour('white')
+        self.buttonList.append(self.rotate)
+
+        # Bind each button to a listener
+        for button in self.buttonList:
+            button.Bind(wx.EVT_BUTTON, self.OnButton)
+
+        sizer = wx.GridBagSizer()
+        sizer.Add(self.zoom, (0, 0), (1, 0), buttonalignment)
+        sizer.Add(self.pan, (1, 0), (1, 0), buttonalignment)
+        sizer.Add(self.rotate, (2, 0), (1, 0), buttonalignment)
+
+        box = wx.BoxSizer(wx.VERTICAL)  # To make sure it stays centered in the area it is given
+        box.Add(sizer, 0, wx.ALIGN_CENTER)
+
+        self.SetSizerAndFit(box)
+
+    def OnButton(self, evt):
+        pressed = evt.GetEventObject()
+        if pressed == self.zoom:
+            print("Hello")
+        if pressed == self.pan:
+            print("How are you?")
+        if pressed == self.rotate:
+            print("Bomb diggity")
+
+
 
 if __name__ == '__main__':
     app = wx.App(redirect=False)

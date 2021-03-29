@@ -856,17 +856,19 @@ class ConnListener(asyncore.dispatcher):
         self.thisparent = parent
 
         # need to change host to an IP address of the computer that Savior is on
-        # ip = u"141.106.183.180"
-        # import ipaddress
-        # self.HOST = ipaddress.ip_address(ip)
+        #ip = u"141.106.183.180"
+        #import ipaddress
+        #self.HOST = ipaddress.ip_address(ip)
         self.HOST = 'localhost'
         self.PORT = 1222
         self.buffer = []
 
         self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
         self.bind((self.HOST, self.PORT))
+        # s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # s.connect((self.HOST, self.PORT))
         print("Listening for a careless whisper from a queue thread...")
-        self.listen(1)
+        #self.listen(1)
 
     def handle_accept(self):
         pair = self.accept()

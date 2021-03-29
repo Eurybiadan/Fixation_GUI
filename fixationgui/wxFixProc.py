@@ -1,4 +1,5 @@
 import asyncore
+import ipaddress
 import threading
 from multiprocessing import Queue
 import subprocess
@@ -39,6 +40,7 @@ class QueueWhisperer(asyncore.dispatcher):
 
         self._sendQueue = sendQueue
         self._recvQueue = recvQueue
+
 
         self.HOST = 'localhost'
         self.PORT = 1222
