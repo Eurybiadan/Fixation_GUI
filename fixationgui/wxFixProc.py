@@ -1,5 +1,4 @@
 import asyncore
-import ipaddress
 import threading
 from multiprocessing import Queue
 import subprocess
@@ -96,8 +95,8 @@ if __name__ == '__main__':
     # print("Starting test packets...")
     # testQ.put((FOV, 2, 2))
     # testQ.put((VIDNUM, '0001'))
-    # time.sleep(10)
-    # testQ.put((FOV, 1.4, 1.4))
+    # time.sleep(3)
+    # testQ.put((FOV, 1.5, 1.5))
     # testQ.put((VIDNUM, '0002'))
     # time.sleep(10)
     # testQ.put((FOV, 1.25, 1.25))

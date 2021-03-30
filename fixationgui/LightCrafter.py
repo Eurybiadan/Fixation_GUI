@@ -43,8 +43,8 @@ class wxLightCrafterFrame(wx.Frame):
     def set_fixation_size(self, size):
         self.LCCanvas.set_fixation_size(size)
 
-    def set_fixation_cursor(self, cursor, start=0):
-        return self.LCCanvas.set_fixation_cursor(cursor, start)
+    def set_fixation_cursor(self, cursor, start=0, port=100):
+        return self.LCCanvas.set_fixation_cursor(cursor, start, port)
 
     def get_fixation_cursor(self):
         return self.LCCanvas.get_fixation_cursor()
@@ -97,10 +97,10 @@ class LightCrafterCanvas(wx.Window):
         self._fixsize = size
         self.repaint()
 
-    def set_fixation_cursor(self, cursor, start=0):
+    def set_fixation_cursor(self, cursor, start=0, port=100):
         lastcursor = self._cursor
         self._cursor = cursor
-        self.repaint(start)
+        self.repaint(start, port)
         return lastcursor
 
     def set_visible(self, is_visible):
@@ -119,7 +119,7 @@ class LightCrafterCanvas(wx.Window):
         self._Buffer = wx.Bitmap(*self.thisSize)
         self.repaint()
 
-    def repaint(self, start=0):
+    def repaint(self, start=0, port=100):
         dc = wx.MemoryDC()
         dc.SelectObject(self._Buffer)
 
@@ -170,7 +170,7 @@ class LightCrafterCanvas(wx.Window):
 
             # Heather Stimulus only selected if piece of code is uncommented in fixgui keyboardpress f4
             elif self._cursor is 6:
-                self.sequence(dc, self._location.x, self._location.y, start)
+                self.sequence(dc, self._location.x, self._location.y, start, port)
 
 
         del dc  # need to get rid of the MemoryDC before Update() is called.
@@ -179,17 +179,21 @@ class LightCrafterCanvas(wx.Window):
         # s.enter(2, 1, self.repaint)
         # s.run(False)
 
-    def sequence(self, dc, locationx, locationy, start):
+    def sequence(self, dc, locationx, locationy, start, port):
         with serial.Serial() as ser:
             # 0: blue, 1: green, 2: red; color array
             colors = [wx.Colour(red=0, green=0, blue=225), wx.Colour(red=94, green=255, blue=0), wx.Colour(red=195, green=255, blue=0)]
             # can use this to make the colors in random order, will probably work better if we have more colors
             index = randint(0, 2)
+            # set the com port to the number the user specified
+            comPort = 'COM' + str(port)
+            # print('comPort is: ', comPort)
 
             ser.baudrate = 9600
-            ser.port = 'COM3'
+            ser.port = comPort
             ser.open()
 
+            # messages to send to the driver
             Open = struct.pack('!B', 64)
             Close = struct.pack('!B', 65)
 
@@ -200,6 +204,7 @@ class LightCrafterCanvas(wx.Window):
             print('Close')
             ser.write(Close)
 
+            # adapted from javascript, most likely don't actually need self.i but I kept in in for now
             if self.i == 0:
                 if self.c == 0:
                     self._pen.SetColour(colors[0])
@@ -238,12 +243,16 @@ class LightCrafterCanvas(wx.Window):
             self.Refresh(eraseBackground=False)
             self.Update()
 
+            # reset the count if a new video is being taken
             if start == 1:
                 self.count = 0
-            t = Timer(0.5, self.repaint)
+            # set and start the timer to call repaint. Send the port number through
+            t = Timer(0.5, self.repaint, args=[0, port])
             t.start()
+            # cancel the timer if done with the cycle
             if self.count >= 5:
                 t.cancel()
+            # keep track of how many times repaint has been called
             self.count = self.count + 1
 
 

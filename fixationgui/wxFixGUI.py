@@ -1,14 +1,11 @@
 import asyncore
 import os
-import struct
-import time
 
 import wx
 import math
 import wx.lib.agw.floatspin as FS
 import csv
 
-from time import sleep
 from ViewPane import ViewPane
 from protocolPane import ProtocolPane
 from controlPanel import ControlPanel
@@ -16,7 +13,6 @@ from LightCrafter import wxLightCrafterFrame
 from PreferencesDialog import PreferencesDialog
 import socket
 import threading
-import serial
 
 
 myEVT_MESSAGE = wx.NewEventType()
@@ -51,6 +47,7 @@ class wxFixationFrame(wx.Frame):
         self.vert_loc = 0.0
         self.diopter_value = 0.0
         self._eyesign = -1
+        self.stimulus = 0
 
         self._locationfname = None
         self._locationpath = None
@@ -201,6 +198,8 @@ class wxFixationFrame(wx.Frame):
         self.id_open_proto_pcrash = 10006
         #
         self.id_clear_proto = 10007
+        # Heather Stimulus
+        self.id_stimulus = 10009
 
         # Creates Menu Bar
         menubar = wx.MenuBar()
@@ -261,6 +260,10 @@ class wxFixationFrame(wx.Frame):
         self.on_grid = self.gridMenu.AppendRadioItem(self.id_on_grid, 'On')
         self.Bind(wx.EVT_MENU, self.on_grid_press, self.on_grid)
         targetMenu.AppendSubMenu(self.gridMenu, 'Grid')
+        # # Heather Stimulus
+        targetMenu.Append(self.id_stimulus, 'Set and Test Stimulus\t')
+        self.Bind(wx.EVT_MENU, self.on_run_stimulus, id=self.id_stimulus)
+
 
         # Compounds the Menu Bar
         self.SetMenuBar(menubar)
@@ -317,6 +320,15 @@ class wxFixationFrame(wx.Frame):
             print(str(self.prev_cursor))
         elif event.Id == self.id_off_grid:
             self.LCCanvas.set_fixation_cursor(self.prev_cursor)
+
+    def on_run_stimulus(self, event):
+        dlg = wx.TextEntryDialog(self, 'Which COM port? (enter number only):', 'Specify Port')
+        if dlg.ShowModal() == wx.ID_OK:
+            self.com = dlg.GetValue()
+        dlg.Destroy()
+        print('COM Port is: ', int(self.com))
+        self.LCCanvas.set_fixation_cursor(6, 1, self.com)
+        self.stimulus = 1
 
     # End of Menu Bar
 
@@ -598,7 +610,8 @@ class wxFixationFrame(wx.Frame):
             wx.PostEvent(self, evt)
 
             # Heather Stimulus
-            self.LCCanvas.set_fixation_cursor(6, 1)
+            if self.stimulus is 1:
+                self.LCCanvas.set_fixation_cursor(6, 1, self.com)
             # with serial.Serial() as ser:
             #     ser.baudrate = 9600
             #     ser.port = 'COM3'
@@ -891,7 +904,7 @@ class ConnListener(asyncore.dispatcher):
         # s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         # s.connect((self.HOST, self.PORT))
         print("Listening for a careless whisper from a queue thread...")
-        #self.listen(1)
+        self.listen(1)
 
     def handle_accept(self):
         pair = self.accept()
