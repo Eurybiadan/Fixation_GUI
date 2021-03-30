@@ -199,16 +199,21 @@ class wxFixationFrame(wx.Frame):
         #
         self.id_clear_proto = 10007
         # Heather Stimulus
-        self.id_stimulus = 10009
+        self.id_stimulus = 10008
+        # FOV toggle sending from gui to savior
+        self.id_on_toggleFOV = 10009
+        self.id_off_toggleFOV = 10010
 
         # Creates Menu Bar
         menubar = wx.MenuBar()
         fileMenu = wx.Menu()
         protoMenu = wx.Menu()
         targetMenu = wx.Menu()
+        FOVMenu = wx.Menu()
         menubar.Append(fileMenu, 'File')
         menubar.Append(protoMenu, 'Protocol')
         menubar.Append(targetMenu, 'Target')
+        menubar.Append(FOVMenu, 'FOV')
 
         # Open a protocol
         protoMenu.Append(self.id_save_proto_loc, 'Set Protocol Save Location...\t')
@@ -264,6 +269,14 @@ class wxFixationFrame(wx.Frame):
         targetMenu.Append(self.id_stimulus, 'Set and Test Stimulus\t')
         self.Bind(wx.EVT_MENU, self.on_run_stimulus, id=self.id_stimulus)
 
+        # Toggle FOV sending from fixation on/off
+        self.toggleMenuFOV = wx.Menu()
+        self.on_toggleFOV = self.toggleMenuFOV.AppendRadioItem(self.id_on_toggleFOV, 'Yes')
+        self.Bind(wx.EVT_MENU, self.on_FOV_toggle, self.on_toggleFOV)
+        self.off_toggleFOV = self.toggleMenuFOV.AppendRadioItem(self.id_off_toggleFOV, 'No')
+        self.Bind(wx.EVT_MENU, self.on_FOV_toggle, self.off_toggleFOV)
+        FOVMenu.AppendSubMenu(self.toggleMenuFOV, 'Update Savior FOV on list click?')
+
 
         # Compounds the Menu Bar
         self.SetMenuBar(menubar)
@@ -308,6 +321,12 @@ class wxFixationFrame(wx.Frame):
             self.LCCanvas.show_fixation(True)
         elif event.Id == self.id_off_toggle:
             self.LCCanvas.show_fixation(False)
+
+    def on_FOV_toggle(self, event):
+        if event.Id == self.id_on_toggleFOV:
+            self.protocolpane.updateFOVtoggle(1)
+        elif event.Id == self.id_off_toggleFOV:
+            self.protocolpane.updateFOVtoggle(0)
 
     # Alignment
     def on_align_presss(self, event):
@@ -604,9 +623,9 @@ class wxFixationFrame(wx.Frame):
 
         if event.GetKeyCode() == wx.WXK_F4:
             evt = MessageEvent(myEVT_RETURN_MESSAGE, -1, 4, "F4")
-            print('fixgui message values:')
-            print(hex(id(myEVT_RETURN_MESSAGE)))
-            print(hex(id(MessageEvent)))
+            # print('fixgui message values:')
+            # print(hex(id(myEVT_RETURN_MESSAGE)))
+            # print(hex(id(MessageEvent)))
             wx.PostEvent(self, evt)
 
             # Heather Stimulus
@@ -923,8 +942,8 @@ class QueueListener(asyncore.dispatcher_with_send):
         self.thisparent.Bind(EVT_RETURN_MESSAGE, self.handle_return_message)
 
     def handle_return_message(self, evt):
-        print("Sending from fixgui!")
-        print(evt.get_data().encode("utf-8"))
+        # print("Sending from fixgui!")
+        # print(evt.get_data().encode("utf-8"))
         self.send(evt.get_data().encode("utf-8"))
 
     def handle_read(self):

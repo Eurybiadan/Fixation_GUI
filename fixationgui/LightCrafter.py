@@ -1,5 +1,6 @@
 __author__ = 'Robert F Cooper'
 
+import random
 import struct
 import time
 from random import randint
@@ -181,10 +182,15 @@ class LightCrafterCanvas(wx.Window):
 
     def sequence(self, dc, locationx, locationy, start, port):
         with serial.Serial() as ser:
-            # 0: blue, 1: green, 2: red; color array
-            colors = [wx.Colour(red=0, green=0, blue=225), wx.Colour(red=94, green=255, blue=0), wx.Colour(red=195, green=255, blue=0)]
-            # can use this to make the colors in random order, will probably work better if we have more colors
-            index = randint(0, 2)
+            # test color array
+            # colors = [wx.Colour(red=163, green=255, blue=0), wx.Colour(red=255, green=0, blue=0), wx.Colour(red=0, green=255, blue=0), wx.Colour(red=0, green=0, blue=225)]
+            if start == 1:
+                self.indexList = list(range(0, 4))
+                random.shuffle(self.indexList)
+                # print(self.indexList)
+            # 0: original, 1: red, 2: green, 3: blue; color array
+            colors = [wx.Colour(red=163, green=255, blue=0), wx.Colour(red=195, green=255, blue=0), wx.Colour(red=94, green=255, blue=0), wx.Colour(red=0, green=0, blue=225)]
+
             # set the com port to the number the user specified
             comPort = 'COM' + str(port)
             # print('comPort is: ', comPort)
@@ -197,60 +203,69 @@ class LightCrafterCanvas(wx.Window):
             Open = struct.pack('!B', 64)
             Close = struct.pack('!B', 65)
 
-            print('Open')
-            ser.write(Open)
-
-            time.sleep(1)  # careful with this, adds to redraw timer time
-            print('Close')
-            ser.write(Close)
-
             # adapted from javascript, most likely don't actually need self.i but I kept in in for now
             if self.i == 0:
                 if self.c == 0:
-                    self._pen.SetColour(colors[0])
-                    self._brush.SetColour(colors[0])
+                    self._pen.SetColour(colors[self.indexList[0]])
+                    self._brush.SetColour(colors[self.indexList[0]])
                     dc.SetPen(self._pen)
                     dc.SetBrush(self._brush)
                     self.c = 1
                     dc.DrawCircle(locationx, locationy, 200)
-                    print(time.perf_counter())
 
             if self.i == 1:
                 if self.c == 1:
-                    self._pen.SetColour(colors[1])
-                    self._brush.SetColour(colors[1])
+                    self._pen.SetColour(colors[self.indexList[1]])
+                    self._brush.SetColour(colors[self.indexList[1]])
                     dc.SetPen(self._pen)
                     dc.SetBrush(self._brush)
                     self.c = 2
                     dc.DrawCircle(locationx, locationy, 200)
-                    print(time.perf_counter())
 
             if self.i == 2:
                 if self.c == 2:
-                    self._pen.SetColour(colors[2])
-                    self._brush.SetColour(colors[2])
+                    self._pen.SetColour(colors[self.indexList[2]])
+                    self._brush.SetColour(colors[self.indexList[2]])
+                    dc.SetPen(self._pen)
+                    dc.SetBrush(self._brush)
+                    self.c = 3
+                    dc.DrawCircle(locationx, locationy, 200)
+
+            if self.i == 3:
+                if self.c == 3:
+                    self._pen.SetColour(colors[self.indexList[3]])
+                    self._brush.SetColour(colors[self.indexList[3]])
                     dc.SetPen(self._pen)
                     dc.SetBrush(self._brush)
                     self.c = 0
                     dc.DrawCircle(locationx, locationy, 200)
-                    print(time.perf_counter())
 
             self.i = self.i + 1
-            if self.i == 3:
+            if self.i == 4:
                 self.i = 0
 
             del dc  # need to get rid of the MemoryDC before Update() is called.
             self.Refresh(eraseBackground=False)
             self.Update()
 
+            # sleep to make sure there the color is fully switched before opening
+            time.sleep(0.1)
+            # print('Open @', time.perf_counter())
+            ser.write(Open)
+
+            # display the color through the open shutter for 1 second
+            time.sleep(1)  # careful with this, adds to redraw timer time
+            # print('Closed @', time.perf_counter())
+            ser.write(Close)
+
             # reset the count if a new video is being taken
             if start == 1:
                 self.count = 0
             # set and start the timer to call repaint. Send the port number through
-            t = Timer(0.5, self.repaint, args=[0, port])
+            t = Timer(1, self.repaint, args=[0, port])
             t.start()
-            # cancel the timer if done with the cycle
-            if self.count >= 5:
+            # cancel the timer if done with the cycle; 1 cycle = going through all the wavelengths once
+            if self.count >= 3:
                 t.cancel()
             # keep track of how many times repaint has been called
             self.count = self.count + 1

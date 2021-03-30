@@ -52,6 +52,8 @@ class ProtocolPane(wx.Panel):
     #
         self.planmode = 0
         self.loadplanmode = 0
+        # by default the gui will send FOV values to savior and update FOV when list items are selected
+        self.guiSendFOV = 1
 
     def loadMessageEvtObjects(self, messageEvent, myEvtRetMsg):
 
@@ -77,10 +79,6 @@ class ProtocolPane(wx.Panel):
         self._parent.control.OD.SetValue(eye == "OD")
         self._parent.on_eye_select_list(eye == "OS")
 
-
-        # Update the FOV - For simplicity I'm just directly manipulating the string. This should be changed if we change
-        # details of how the strings are displayed.
-        # This is disabled for the moment, until I update the talkback to the host application.
         # This has been put in use properly for planmode -- needed so that the remove button can work properly if item to remove was selected on the list -JG 3/3/2021
         if self.planmode == 1:
             fovtokens = fov.split(self._degree_sign)
@@ -90,8 +88,10 @@ class ProtocolPane(wx.Panel):
             self._parent.set_horizontal_fov(width)
             self._parent.set_vertical_fov(height)
 
-        # in this mode, the fov does not get updated here, it sends message to savior who then updates the fov
-        if self.loadplanmode == 1:
+        # The fov does not get updated here, it sends message to savior who then updates the fov
+        # This capability can be toggled on and off from the FOV tab in the menubar
+        #if self.loadplanmode == 1:
+        if self.guiSendFOV == 1:
             print('protocolpane message values:')
             print(hex(id(self.myEvtRetMsg)))
             print(hex(id(self.messageEvent)))
@@ -351,6 +351,9 @@ class ProtocolPane(wx.Panel):
             self.list.SetItemBackgroundColour(ind, (0, 0, 0))
 
         return 0
+
+    def updateFOVtoggle(self, fovtoggle):
+        self.guiSendFOV = fovtoggle
 
 
 

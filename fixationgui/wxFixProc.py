@@ -55,8 +55,8 @@ class QueueWhisperer(asyncore.dispatcher):
     def handle_read(self):
         # reads things sent from gui to savior?
         recvmsg = self.recv(32).decode("utf-8")
-        print("read in fixproc")
-        print("Recieved: " + recvmsg)
+        # print("read in fixproc")
+        # print("Recieved: " + recvmsg)
         self._recvQueue.put(recvmsg)
 
     def handle_write(self):
