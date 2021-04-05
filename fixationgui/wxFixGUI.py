@@ -48,6 +48,7 @@ class wxFixationFrame(wx.Frame):
         self.diopter_value = 0.0
         self._eyesign = -1
         self.stimulus = 0
+        self.flicker_stimulus = 0
 
         self._locationfname = None
         self._locationpath = None
@@ -200,6 +201,7 @@ class wxFixationFrame(wx.Frame):
         self.id_clear_proto = 10007
         # Heather Stimulus
         self.id_stimulus = 10008
+        self.id_flicker_stimulus = 10020
         # FOV toggle sending from gui to savior
         self.id_on_toggleFOV = 10009
         self.id_off_toggleFOV = 10010
@@ -268,6 +270,8 @@ class wxFixationFrame(wx.Frame):
         # # Heather Stimulus
         targetMenu.Append(self.id_stimulus, 'Set and Test Stimulus\t')
         self.Bind(wx.EVT_MENU, self.on_run_stimulus, id=self.id_stimulus)
+        targetMenu.Append(self.id_flicker_stimulus, 'Set and Test Flicker\t')
+        self.Bind(wx.EVT_MENU, self.on_run_flicker_stimulus, id=self.id_flicker_stimulus)
 
         # Toggle FOV sending from fixation on/off
         self.toggleMenuFOV = wx.Menu()
@@ -348,6 +352,17 @@ class wxFixationFrame(wx.Frame):
         print('COM Port is: ', int(self.com))
         self.LCCanvas.set_fixation_cursor(6, 1, self.com)
         self.stimulus = 1
+        self.flicker_stimulus = 0
+
+    def on_run_flicker_stimulus(self, event):
+        dlg = wx.TextEntryDialog(self, 'Which COM port? (enter number only):', 'Specify Port')
+        if dlg.ShowModal() == wx.ID_OK:
+            self.com = dlg.GetValue()
+        dlg.Destroy()
+        print('COM Port is: ', int(self.com))
+        self.LCCanvas.set_fixation_cursor(7, 1, self.com)
+        self.flicker_stimulus = 1
+        self.stimulus = 0
 
     # End of Menu Bar
 
@@ -631,21 +646,8 @@ class wxFixationFrame(wx.Frame):
             # Heather Stimulus
             if self.stimulus is 1:
                 self.LCCanvas.set_fixation_cursor(6, 1, self.com)
-            # with serial.Serial() as ser:
-            #     ser.baudrate = 9600
-            #     ser.port = 'COM3'
-            #     ser.open()
-            #
-            #     Open = struct.pack('!B', 64)
-            #     Close = struct.pack('!B', 65)
-            #
-            #     print(Open)
-            #     ser.write(Open)
-            #
-            #     time.sleep(1)  # careful with this, if sleep duration longer than the timer for redraw in lightcrafter, it will mess the timer up
-            #     print(Close)
-            #     ser.write(Close)
-
+            if self.flicker_stimulus is 1:
+                self.LCCanvas.set_fixation_cursor(7, 1, self.com)
 
         # elif event.GetKeyCode() == wx.WXK_NUMPAD_SUBTRACT:
         #     self.zoom_out(self)

@@ -3,7 +3,6 @@ __author__ = 'Robert F Cooper'
 import random
 import struct
 import time
-from random import randint
 from threading import Timer
 
 import serial
@@ -171,8 +170,11 @@ class LightCrafterCanvas(wx.Window):
 
             # Heather Stimulus only selected if piece of code is uncommented in fixgui keyboardpress f4
             elif self._cursor is 6:
-                self.sequence(dc, self._location.x, self._location.y, start, port)
+                self.stimulus(dc, self._location.x, self._location.y, start, port)
 
+            # Heather Stimulus only selected if piece of code is uncommented in fixgui keyboardpress f4
+            elif self._cursor is 7:
+                self.flicker(dc, self._location.x, self._location.y, start, port)
 
         del dc  # need to get rid of the MemoryDC before Update() is called.
         self.Refresh(eraseBackground=False)
@@ -180,15 +182,19 @@ class LightCrafterCanvas(wx.Window):
         # s.enter(2, 1, self.repaint)
         # s.run(False)
 
-    def sequence(self, dc, locationx, locationy, start, port):
+    def stimulus(self, dc, locationx, locationy, start, port):
         with serial.Serial() as ser:
-            # test color array
+            # test color array w/ arbitrary wavelengths that are easy to tell the difference between
             # colors = [wx.Colour(red=163, green=255, blue=0), wx.Colour(red=255, green=0, blue=0), wx.Colour(red=0, green=255, blue=0), wx.Colour(red=0, green=0, blue=225)]
             if start == 1:
                 self.indexList = list(range(0, 4))
                 random.shuffle(self.indexList)
                 # print(self.indexList)
-            # 0: original, 1: red, 2: green, 3: blue; color array
+            # Index 0: Original cone stimulus: 550 nm (163, 255, 0)
+            # Index 1: Red cone peak spectral sensitivity: 560 nm (195, 255, 0)
+            # Index 2: Green cone peak spectral sensitivity: 530 nm (94, 255, 0)
+            # Index 3: Blue cone peak spectral sensitivity: 440 nm (0, 0, 255)
+            # Wavelength to rgb values generated from: https://academo.org/demos/wavelength-to-colour-relationship/
             colors = [wx.Colour(red=163, green=255, blue=0), wx.Colour(red=195, green=255, blue=0), wx.Colour(red=94, green=255, blue=0), wx.Colour(red=0, green=0, blue=225)]
 
             # set the com port to the number the user specified
@@ -211,7 +217,7 @@ class LightCrafterCanvas(wx.Window):
                     dc.SetPen(self._pen)
                     dc.SetBrush(self._brush)
                     self.c = 1
-                    dc.DrawCircle(locationx, locationy, 200)
+                    dc.DrawCircle(locationx, locationy, 75)
 
             if self.i == 1:
                 if self.c == 1:
@@ -220,7 +226,7 @@ class LightCrafterCanvas(wx.Window):
                     dc.SetPen(self._pen)
                     dc.SetBrush(self._brush)
                     self.c = 2
-                    dc.DrawCircle(locationx, locationy, 200)
+                    dc.DrawCircle(locationx, locationy, 75)
 
             if self.i == 2:
                 if self.c == 2:
@@ -229,7 +235,7 @@ class LightCrafterCanvas(wx.Window):
                     dc.SetPen(self._pen)
                     dc.SetBrush(self._brush)
                     self.c = 3
-                    dc.DrawCircle(locationx, locationy, 200)
+                    dc.DrawCircle(locationx, locationy, 75)
 
             if self.i == 3:
                 if self.c == 3:
@@ -238,7 +244,7 @@ class LightCrafterCanvas(wx.Window):
                     dc.SetPen(self._pen)
                     dc.SetBrush(self._brush)
                     self.c = 0
-                    dc.DrawCircle(locationx, locationy, 200)
+                    dc.DrawCircle(locationx, locationy, 75)
 
             self.i = self.i + 1
             if self.i == 4:
@@ -249,12 +255,12 @@ class LightCrafterCanvas(wx.Window):
             self.Update()
 
             # sleep to make sure there the color is fully switched before opening
-            time.sleep(0.1)
+            time.sleep(0.01)
             # print('Open @', time.perf_counter())
             ser.write(Open)
 
             # display the color through the open shutter for 1 second
-            time.sleep(1)  # careful with this, adds to redraw timer time
+            time.sleep(0.5)  # careful with this, adds to redraw timer time
             # print('Closed @', time.perf_counter())
             ser.write(Close)
 
@@ -262,10 +268,70 @@ class LightCrafterCanvas(wx.Window):
             if start == 1:
                 self.count = 0
             # set and start the timer to call repaint. Send the port number through
-            t = Timer(1, self.repaint, args=[0, port])
+            t = Timer(1.75, self.repaint, args=[0, port])
             t.start()
             # cancel the timer if done with the cycle; 1 cycle = going through all the wavelengths once
             if self.count >= 3:
+                t.cancel()
+            # keep track of how many times repaint has been called
+            self.count = self.count + 1
+
+    def flicker(self, dc, locationx, locationy, start, port):
+        with serial.Serial() as ser:
+
+            if start == 1:
+                self.indexList = list(range(0, 4))
+                random.shuffle(self.indexList)
+
+            # Wavelength to rgb values generated from: https://academo.org/demos/wavelength-to-colour-relationship/
+            # Original cone stimulus: 550 nm (163, 255, 0)
+            color = wx.Colour(red=163, green=255, blue=0)
+
+            # set the com port to the number the user specified
+            comPort = 'COM' + str(port)
+            # print('comPort is: ', comPort)
+
+            ser.baudrate = 9600
+            ser.port = comPort
+            ser.open()
+
+            # messages to send to the driver
+            Open = struct.pack('!B', 64)
+            Close = struct.pack('!B', 65)
+
+            self._pen.SetColour(color)
+            self._brush.SetColour(color)
+            dc.SetPen(self._pen)
+            dc.SetBrush(self._brush)
+            dc.DrawCircle(locationx, locationy, 75)
+            print('DrawCircle @', time.perf_counter())
+
+            self.i = self.i + 1
+            if self.i == 4:
+                self.i = 0
+
+            del dc  # need to get rid of the MemoryDC before Update() is called.
+            self.Refresh(eraseBackground=False)
+            self.Update()
+
+            # sleep to make sure there the color is fully switched before opening
+            time.sleep(0.01)
+            #print('Open @', time.perf_counter())
+            ser.write(Open)
+
+            # display the color through the open shutter for 1 second
+            time.sleep(0.1)  # careful with this, adds to redraw timer time
+            #print('Closed @', time.perf_counter())
+            ser.write(Close)
+
+            # reset the count if a new video is being taken
+            if start == 1:
+                self.count = 0
+            # set and start the timer to call repaint. Send the port number through
+            t = Timer(0.1, self.repaint, args=[0, port])
+            t.start()
+            # cancel the timer if done with the cycle; 1 cycle = going through all the wavelengths once
+            if self.count >= 20:
                 t.cancel()
             # keep track of how many times repaint has been called
             self.count = self.count + 1
