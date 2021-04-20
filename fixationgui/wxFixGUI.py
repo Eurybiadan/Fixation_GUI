@@ -49,8 +49,6 @@ class wxFixationFrame(wx.Frame):
         self._eyesign = -1
         self.stimulus = 0
         self.flicker_stimulus = 0
-        self.wavelength = 550
-        self.frequency = 30
 
         self._locationfname = None
         self._locationpath = None
@@ -207,15 +205,6 @@ class wxFixationFrame(wx.Frame):
         # FOV toggle sending from gui to savior
         self.id_on_toggleFOV = 10009
         self.id_off_toggleFOV = 10010
-        self.id_wavelength = 10020
-        self.id_frequency = 10030
-        self.id_on_550_press = 10040
-        self.id_on_560_press = 10050
-        self.id_on_530_press = 10051
-        self.id_on_440_press = 10052
-        self.id_on_30_press = 10053
-        self.id_on_10_press = 10054
-
 
         # Creates Menu Bar
         menubar = wx.MenuBar()
@@ -283,29 +272,6 @@ class wxFixationFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_run_stimulus, id=self.id_stimulus)
         targetMenu.Append(self.id_flicker_stimulus, 'Set and Test Flicker\t')
         self.Bind(wx.EVT_MENU, self.on_run_flicker_stimulus, id=self.id_flicker_stimulus)
-
-        # Flicker options
-        self.FlickerOptionsMenu = wx.Menu()
-        # wavelengths
-        self.WavelengthOptionsMenu = wx.Menu()
-        self.on_550_press = self.WavelengthOptionsMenu.AppendRadioItem(self.id_on_550_press, '550nm (original)')
-        self.Bind(wx.EVT_MENU, self.on_wavelength, self.on_550_press)
-        self.on_560_press = self.WavelengthOptionsMenu.AppendRadioItem(self.id_on_560_press, '560nm (red)')
-        self.Bind(wx.EVT_MENU, self.on_wavelength, self.on_560_press)
-        self.on_530_press = self.WavelengthOptionsMenu.AppendRadioItem(self.id_on_530_press, '530nm (green)')
-        self.Bind(wx.EVT_MENU, self.on_wavelength, self.on_530_press)
-        self.on_440_press = self.WavelengthOptionsMenu.AppendRadioItem(self.id_on_440_press, '440nm (blue)')
-        self.Bind(wx.EVT_MENU, self.on_wavelength, self.on_440_press)
-        # frequencies
-        self.FrequencyOptionsMenu = wx.Menu()
-        self.on_30_press = self.FrequencyOptionsMenu.AppendRadioItem(self.id_on_30_press, '30Hz')
-        self.Bind(wx.EVT_MENU, self.on_frequency, self.on_30_press)
-        self.on_10_press = self.FrequencyOptionsMenu.AppendRadioItem(self.id_on_10_press, '10Hz')
-        self.Bind(wx.EVT_MENU, self.on_frequency, self.on_10_press)
-
-        targetMenu.AppendSubMenu(self.FlickerOptionsMenu, 'Flicker Options')
-        self.FlickerOptionsMenu.AppendSubMenu(self.WavelengthOptionsMenu, 'Set Wavelength')
-        self.FlickerOptionsMenu.AppendSubMenu(self.FrequencyOptionsMenu, 'Set Frequency')
 
         # Toggle FOV sending from fixation on/off
         self.toggleMenuFOV = wx.Menu()
@@ -394,38 +360,9 @@ class wxFixationFrame(wx.Frame):
             self.com = dlg.GetValue()
         dlg.Destroy()
         print('COM Port is: ', int(self.com))
-        self.LCCanvas.set_fixation_cursor(7, 1, self.com, self.wavelength, self.frequency)
+        self.LCCanvas.set_fixation_cursor(7, 1, self.com)
         self.flicker_stimulus = 1
         self.stimulus = 0
-
-    def on_wavelength(self, event):
-        if event.Id == self.id_on_550_press:
-            # original/default
-            self.wavelength = 550
-            self.LCCanvas.set_fixation_cursor(7, 1, self.com, self.wavelength, self.frequency)
-            print('wavelength 550')
-        elif event.Id == self.id_on_560_press:
-            self.wavelength = 560
-            self.LCCanvas.set_fixation_cursor(7, 1, self.com, self.wavelength, self.frequency)
-            print('wavelength 560')
-        elif event.Id == self.id_on_530_press:
-            self.wavelength = 530
-            self.LCCanvas.set_fixation_cursor(7, 1, self.com, self.wavelength, self.frequency)
-            print('wavelength 530')
-        elif event.Id == self.id_on_440_press:
-            self.wavelength = 440
-            self.LCCanvas.set_fixation_cursor(7, 1, self.com, self.wavelength, self.frequency)
-            print('wavelength 440')
-
-    def on_frequency(self, event):
-        if event.Id == self.id_on_30_press:
-            self.frequency = 30
-            self.LCCanvas.set_fixation_cursor(7, 1, self.com, self.wavelength, self.frequency)
-            print('frequency 30')
-        if event.Id == self.id_on_10_press:
-            self.frequency = 10
-            self.LCCanvas.set_fixation_cursor(7, 1, self.com, self.wavelength, self.frequency)
-            print('frequency 50')
 
     # End of Menu Bar
 
@@ -710,7 +647,7 @@ class wxFixationFrame(wx.Frame):
             if self.stimulus is 1:
                 self.LCCanvas.set_fixation_cursor(6, 1, self.com)
             if self.flicker_stimulus is 1:
-                self.LCCanvas.set_fixation_cursor(7, 1, self.com, self.wavelength, self.frequency)
+                self.LCCanvas.set_fixation_cursor(7, 1, self.com)
 
         # elif event.GetKeyCode() == wx.WXK_NUMPAD_SUBTRACT:
         #     self.zoom_out(self)
