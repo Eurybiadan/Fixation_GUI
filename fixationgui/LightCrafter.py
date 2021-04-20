@@ -195,9 +195,9 @@ class LightCrafterCanvas(wx.Window):
                 dc.SetPen(self._pen)
                 dc.SetBrush(self._brush)
                 dc.DrawCircle(self._location.x, self._location.y, 75)
-                print('DrawCircle @', time.perf_counter())
+                #print('DrawCircle @', time.perf_counter())
 
-                self.flicker(start, port, wavelength, frequency)  # dc, self._location.x, self._location.y,
+                self.flicker(port, frequency)
 
         del dc  # need to get rid of the MemoryDC before Update() is called.
         self.Refresh(eraseBackground=False)
@@ -299,18 +299,19 @@ class LightCrafterCanvas(wx.Window):
             # keep track of how many times repaint has been called
             self.count = self.count + 1
 
-    def flicker(self, start, port, wavelength=550, frequency=30):  # edited to just deal with clock not drawing JG 4/20
+    def flicker(self, port, frequency=30):  # edited to just deal with clock not drawing JG 4/20
         with serial.Serial() as ser:
 
             # default values
-            # set to run for approx 10 seconds
-            iterations = 75
-            openTime = 0.015
-            closedTime = 0.015
+            # still random numbers bc the math is confusing
+            # 100 iterations should make it 3.3 seconds long?
+            iterations = 100
+            openTime = 0.01
+            closedTime = 0.023
 
             if frequency == 10:
-                # set to run for approx 10 seconds
-                iterations = 50
+                # 40 iterations should make it 4 seconds long?
+                iterations = 40
                 openTime = 0.05
                 closedTime = 0.05
 
@@ -326,28 +327,17 @@ class LightCrafterCanvas(wx.Window):
             Open = struct.pack('!B', 64)
             Close = struct.pack('!B', 65)
 
-            print('Open @', time.perf_counter())
-            ser.write(Open)
-
-            # display the color through the open shutter
-            time.sleep(openTime)  # careful with this, adds to redraw timer time
-            print('Closed @', time.perf_counter())
-            ser.write(Close)
+            i = 0
+            for i in range(iterations):
+                #print('Open @', time.perf_counter())
+                ser.write(Open)
+                time.sleep(openTime)  # careful with this, adds to redraw timer time
+                #print('Closed @', time.perf_counter())
+                ser.write(Close)
+                time.sleep(closedTime)
+                i = i + 1
 
             ser.close()
-
-            # reset the count if a new video is being taken
-            if start == 1:
-                self.count = 0
-            # set and start the timer to call flicker again. Send the port number through
-            t = Timer(closedTime, self.flicker, args=[0, port, wavelength, frequency])
-            t.start()
-            # cancel the timer if done with the iterations
-            if self.count >= iterations:
-                t.cancel()
-            # keep track of how many times flicker has been called
-            self.count = self.count + 1
-
 
 # Shows The Window
 if __name__ == '__main__':
