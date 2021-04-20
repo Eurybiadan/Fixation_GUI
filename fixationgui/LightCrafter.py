@@ -43,8 +43,8 @@ class wxLightCrafterFrame(wx.Frame):
     def set_fixation_size(self, size):
         self.LCCanvas.set_fixation_size(size)
 
-    def set_fixation_cursor(self, cursor, start=0, port=100):
-        return self.LCCanvas.set_fixation_cursor(cursor, start, port)
+    def set_fixation_cursor(self, cursor, start=0, port=100, wavelength=550, frequency=30):
+        return self.LCCanvas.set_fixation_cursor(cursor, start, port, wavelength, frequency)
 
     def get_fixation_cursor(self):
         return self.LCCanvas.get_fixation_cursor()
@@ -97,10 +97,10 @@ class LightCrafterCanvas(wx.Window):
         self._fixsize = size
         self.repaint()
 
-    def set_fixation_cursor(self, cursor, start=0, port=100):
+    def set_fixation_cursor(self, cursor, start=0, port=100, wavelength=500, frequency=30):
         lastcursor = self._cursor
         self._cursor = cursor
-        self.repaint(start, port)
+        self.repaint(start, port, wavelength, frequency)
         return lastcursor
 
     def set_visible(self, is_visible):
@@ -119,7 +119,7 @@ class LightCrafterCanvas(wx.Window):
         self._Buffer = wx.Bitmap(*self.thisSize)
         self.repaint()
 
-    def repaint(self, start=0, port=100):
+    def repaint(self, start=0, port=100, wavelength=500, frequency=30):
         dc = wx.MemoryDC()
         dc.SelectObject(self._Buffer)
 
@@ -174,7 +174,7 @@ class LightCrafterCanvas(wx.Window):
 
             # Heather Stimulus only selected if piece of code is uncommented in fixgui keyboardpress f4
             elif self._cursor is 7:
-                self.flicker(dc, self._location.x, self._location.y, start, port)
+                self.flicker(dc, self._location.x, self._location.y, start, port, wavelength, frequency)
 
         del dc  # need to get rid of the MemoryDC before Update() is called.
         self.Refresh(eraseBackground=False)
@@ -276,16 +276,38 @@ class LightCrafterCanvas(wx.Window):
             # keep track of how many times repaint has been called
             self.count = self.count + 1
 
-    def flicker(self, dc, locationx, locationy, start, port):
+    def flicker(self, dc, locationx, locationy, start, port, wavelength=550, frequency=30):
         with serial.Serial() as ser:
 
             if start == 1:
                 self.indexList = list(range(0, 4))
                 random.shuffle(self.indexList)
 
+            # Index 0: Original cone stimulus: 550 nm (163, 255, 0)
+            # Index 1: Red cone peak spectral sensitivity: 560 nm (195, 255, 0)
+            # Index 2: Green cone peak spectral sensitivity: 530 nm (94, 255, 0)
+            # Index 3: Blue cone peak spectral sensitivity: 440 nm (0, 0, 255)
             # Wavelength to rgb values generated from: https://academo.org/demos/wavelength-to-colour-relationship/
-            # Original cone stimulus: 550 nm (163, 255, 0)
-            color = wx.Colour(red=163, green=255, blue=0)
+            colors = [wx.Colour(red=163, green=255, blue=0), wx.Colour(red=195, green=255, blue=0), wx.Colour(red=94, green=255, blue=0), wx.Colour(red=0, green=0, blue=225)]
+            if wavelength == 560:
+                color = colors[1]
+            elif wavelength == 530:
+                color = colors[2]
+            elif wavelength == 440:
+                color = colors[3]
+            else:
+                color = colors[0]
+
+            # all arbitrary values right now - need to do some calculating for real deal
+            # default values
+            iterations = 300
+            openTime = 0.015
+            closedTime = 0.015
+
+            if frequency == 10:
+                iterations = 100
+                openTime = 0.05
+                closedTime = 0.05
 
             # set the com port to the number the user specified
             comPort = 'COM' + str(port)
@@ -315,12 +337,12 @@ class LightCrafterCanvas(wx.Window):
             self.Update()
 
             # sleep to make sure there the color is fully switched before opening
-            time.sleep(0.01)
+            time.sleep(0.001)
             #print('Open @', time.perf_counter())
             ser.write(Open)
 
             # display the color through the open shutter for 1 second
-            time.sleep(0.1)  # careful with this, adds to redraw timer time
+            time.sleep(openTime)  # careful with this, adds to redraw timer time
             #print('Closed @', time.perf_counter())
             ser.write(Close)
 
@@ -328,10 +350,10 @@ class LightCrafterCanvas(wx.Window):
             if start == 1:
                 self.count = 0
             # set and start the timer to call repaint. Send the port number through
-            t = Timer(0.1, self.repaint, args=[0, port])
+            t = Timer(closedTime, self.repaint, args=[0, port, wavelength, frequency])
             t.start()
             # cancel the timer if done with the cycle; 1 cycle = going through all the wavelengths once
-            if self.count >= 20:
+            if self.count >= iterations:
                 t.cancel()
             # keep track of how many times repaint has been called
             self.count = self.count + 1
