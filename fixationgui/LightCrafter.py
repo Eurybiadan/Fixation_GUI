@@ -174,7 +174,30 @@ class LightCrafterCanvas(wx.Window):
 
             # Heather Stimulus only selected if piece of code is uncommented in fixgui keyboardpress f4
             elif self._cursor is 7:
-                self.flicker(dc, self._location.x, self._location.y, start, port, wavelength, frequency)
+                # Index 0: Original cone stimulus: 550 nm (163, 255, 0)
+                # Index 1: Red cone peak spectral sensitivity: 560 nm (195, 255, 0)
+                # Index 2: Green cone peak spectral sensitivity: 530 nm (94, 255, 0)
+                # Index 3: Blue cone peak spectral sensitivity: 440 nm (0, 0, 255)
+                # Wavelength to rgb values generated from: https://academo.org/demos/wavelength-to-colour-relationship/
+                colors = [wx.Colour(red=163, green=255, blue=0), wx.Colour(red=195, green=255, blue=0),
+                          wx.Colour(red=94, green=255, blue=0), wx.Colour(red=0, green=0, blue=225)]
+                if wavelength == 560:
+                    color = colors[1]
+                elif wavelength == 530:
+                    color = colors[2]
+                elif wavelength == 440:
+                    color = colors[3]
+                else:
+                    color = colors[0]
+
+                self._pen.SetColour(color)
+                self._brush.SetColour(color)
+                dc.SetPen(self._pen)
+                dc.SetBrush(self._brush)
+                dc.DrawCircle(self._location.x, self._location.y, 75)
+                print('DrawCircle @', time.perf_counter())
+
+                self.flicker(start, port, wavelength, frequency)  # dc, self._location.x, self._location.y,
 
         del dc  # need to get rid of the MemoryDC before Update() is called.
         self.Refresh(eraseBackground=False)
@@ -276,36 +299,18 @@ class LightCrafterCanvas(wx.Window):
             # keep track of how many times repaint has been called
             self.count = self.count + 1
 
-    def flicker(self, dc, locationx, locationy, start, port, wavelength=550, frequency=30):
+    def flicker(self, start, port, wavelength=550, frequency=30):  # edited to just deal with clock not drawing JG 4/20
         with serial.Serial() as ser:
 
-            if start == 1:
-                self.indexList = list(range(0, 4))
-                random.shuffle(self.indexList)
-
-            # Index 0: Original cone stimulus: 550 nm (163, 255, 0)
-            # Index 1: Red cone peak spectral sensitivity: 560 nm (195, 255, 0)
-            # Index 2: Green cone peak spectral sensitivity: 530 nm (94, 255, 0)
-            # Index 3: Blue cone peak spectral sensitivity: 440 nm (0, 0, 255)
-            # Wavelength to rgb values generated from: https://academo.org/demos/wavelength-to-colour-relationship/
-            colors = [wx.Colour(red=163, green=255, blue=0), wx.Colour(red=195, green=255, blue=0), wx.Colour(red=94, green=255, blue=0), wx.Colour(red=0, green=0, blue=225)]
-            if wavelength == 560:
-                color = colors[1]
-            elif wavelength == 530:
-                color = colors[2]
-            elif wavelength == 440:
-                color = colors[3]
-            else:
-                color = colors[0]
-
-            # all arbitrary values right now - need to do some calculating for real deal
             # default values
-            iterations = 300
+            # set to run for approx 10 seconds
+            iterations = 75
             openTime = 0.015
             closedTime = 0.015
 
             if frequency == 10:
-                iterations = 100
+                # set to run for approx 10 seconds
+                iterations = 50
                 openTime = 0.05
                 closedTime = 0.05
 
@@ -321,41 +326,26 @@ class LightCrafterCanvas(wx.Window):
             Open = struct.pack('!B', 64)
             Close = struct.pack('!B', 65)
 
-            self._pen.SetColour(color)
-            self._brush.SetColour(color)
-            dc.SetPen(self._pen)
-            dc.SetBrush(self._brush)
-            dc.DrawCircle(locationx, locationy, 75)
-            print('DrawCircle @', time.perf_counter())
-
-            self.i = self.i + 1
-            if self.i == 4:
-                self.i = 0
-
-            del dc  # need to get rid of the MemoryDC before Update() is called.
-            self.Refresh(eraseBackground=False)
-            self.Update()
-
-            # sleep to make sure there the color is fully switched before opening
-            time.sleep(0.001)
-            #print('Open @', time.perf_counter())
+            print('Open @', time.perf_counter())
             ser.write(Open)
 
-            # display the color through the open shutter for 1 second
+            # display the color through the open shutter
             time.sleep(openTime)  # careful with this, adds to redraw timer time
-            #print('Closed @', time.perf_counter())
+            print('Closed @', time.perf_counter())
             ser.write(Close)
+
+            ser.close()
 
             # reset the count if a new video is being taken
             if start == 1:
                 self.count = 0
-            # set and start the timer to call repaint. Send the port number through
-            t = Timer(closedTime, self.repaint, args=[0, port, wavelength, frequency])
+            # set and start the timer to call flicker again. Send the port number through
+            t = Timer(closedTime, self.flicker, args=[0, port, wavelength, frequency])
             t.start()
-            # cancel the timer if done with the cycle; 1 cycle = going through all the wavelengths once
+            # cancel the timer if done with the iterations
             if self.count >= iterations:
                 t.cancel()
-            # keep track of how many times repaint has been called
+            # keep track of how many times flicker has been called
             self.count = self.count + 1
 
 

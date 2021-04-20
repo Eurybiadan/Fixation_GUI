@@ -402,30 +402,30 @@ class wxFixationFrame(wx.Frame):
         if event.Id == self.id_on_550_press:
             # original/default
             self.wavelength = 550
-            self.LCCanvas.set_fixation_cursor(7, 1, self.com, self.wavelength, self.frequency)
-            print('wavelength 550')
+            # self.LCCanvas.set_fixation_cursor(7, 1, self.com, self.wavelength, self.frequency)
+            # print('wavelength 550')
         elif event.Id == self.id_on_560_press:
             self.wavelength = 560
-            self.LCCanvas.set_fixation_cursor(7, 1, self.com, self.wavelength, self.frequency)
-            print('wavelength 560')
+            # self.LCCanvas.set_fixation_cursor(7, 1, self.com, self.wavelength, self.frequency)
+            # print('wavelength 560')
         elif event.Id == self.id_on_530_press:
             self.wavelength = 530
-            self.LCCanvas.set_fixation_cursor(7, 1, self.com, self.wavelength, self.frequency)
-            print('wavelength 530')
+            # self.LCCanvas.set_fixation_cursor(7, 1, self.com, self.wavelength, self.frequency)
+            # print('wavelength 530')
         elif event.Id == self.id_on_440_press:
             self.wavelength = 440
-            self.LCCanvas.set_fixation_cursor(7, 1, self.com, self.wavelength, self.frequency)
-            print('wavelength 440')
+            # self.LCCanvas.set_fixation_cursor(7, 1, self.com, self.wavelength, self.frequency)
+            # print('wavelength 440')
 
     def on_frequency(self, event):
         if event.Id == self.id_on_30_press:
             self.frequency = 30
-            self.LCCanvas.set_fixation_cursor(7, 1, self.com, self.wavelength, self.frequency)
-            print('frequency 30')
+            # self.LCCanvas.set_fixation_cursor(7, 1, self.com, self.wavelength, self.frequency)
+
         if event.Id == self.id_on_10_press:
             self.frequency = 10
-            self.LCCanvas.set_fixation_cursor(7, 1, self.com, self.wavelength, self.frequency)
-            print('frequency 10')
+            # self.LCCanvas.set_fixation_cursor(7, 1, self.com, self.wavelength, self.frequency)
+
 
     # End of Menu Bar
 
