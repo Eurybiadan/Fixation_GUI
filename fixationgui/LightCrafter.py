@@ -43,7 +43,7 @@ class wxLightCrafterFrame(wx.Frame):
     def set_fixation_size(self, size):
         self.LCCanvas.set_fixation_size(size)
 
-    def set_fixation_cursor(self, cursor, start=0, port=100, wavelength=550, frequency=30):
+    def set_fixation_cursor(self, cursor, start=0, port=100, wavelength=550, frequency=10):
         return self.LCCanvas.set_fixation_cursor(cursor, start, port, wavelength, frequency)
 
     def get_fixation_cursor(self):
@@ -97,7 +97,7 @@ class LightCrafterCanvas(wx.Window):
         self._fixsize = size
         self.repaint()
 
-    def set_fixation_cursor(self, cursor, start=0, port=100, wavelength=500, frequency=30):
+    def set_fixation_cursor(self, cursor, start=0, port=100, wavelength=500, frequency=10):
         lastcursor = self._cursor
         self._cursor = cursor
         self.repaint(start, port, wavelength, frequency)
@@ -119,7 +119,7 @@ class LightCrafterCanvas(wx.Window):
         self._Buffer = wx.Bitmap(*self.thisSize)
         self.repaint()
 
-    def repaint(self, start=0, port=100, wavelength=500, frequency=30):
+    def repaint(self, start=0, port=100, wavelength=500, frequency=10):
         dc = wx.MemoryDC()
         dc.SelectObject(self._Buffer)
 
@@ -299,21 +299,20 @@ class LightCrafterCanvas(wx.Window):
             # keep track of how many times repaint has been called
             self.count = self.count + 1
 
-    def flicker(self, port, frequency=30):  # edited to just deal with clock not drawing JG 4/20
+    def flicker(self, port, frequency=10):  # edited to just deal with clock- no drawing JG 4/20
         with serial.Serial() as ser:
 
             # default values
-            # still random numbers bc the math is confusing
-            # 100 iterations should make it 3.3 seconds long?
-            iterations = 100
-            openTime = 0.01
-            closedTime = 0.023
+            # 40 iterations should make it 4 seconds long?
+            iterations = 40
+            openTime = 0.05
+            closedTime = 0.05
 
-            if frequency == 10:
-                # 40 iterations should make it 4 seconds long?
-                iterations = 40
-                openTime = 0.05
-                closedTime = 0.05
+            if frequency == 30:
+                # 100 iterations should make it 3.3 seconds long?
+                iterations = 100
+                openTime = 0.01
+                closedTime = 0.023
 
             # set the com port to the number the user specified
             comPort = 'COM' + str(port)

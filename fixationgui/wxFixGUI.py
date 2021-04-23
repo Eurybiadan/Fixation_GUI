@@ -50,7 +50,7 @@ class wxFixationFrame(wx.Frame):
         self.stimulus = 0
         self.flicker_stimulus = 0
         self.wavelength = 550
-        self.frequency = 30
+        self.frequency = 10
 
         self._locationfname = None
         self._locationpath = None
@@ -298,10 +298,11 @@ class wxFixationFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_wavelength, self.on_440_press)
         # frequencies
         self.FrequencyOptionsMenu = wx.Menu()
-        self.on_30_press = self.FrequencyOptionsMenu.AppendRadioItem(self.id_on_30_press, '30Hz')
-        self.Bind(wx.EVT_MENU, self.on_frequency, self.on_30_press)
         self.on_10_press = self.FrequencyOptionsMenu.AppendRadioItem(self.id_on_10_press, '10Hz')
         self.Bind(wx.EVT_MENU, self.on_frequency, self.on_10_press)
+        self.on_30_press = self.FrequencyOptionsMenu.AppendRadioItem(self.id_on_30_press, '30Hz')
+        self.Bind(wx.EVT_MENU, self.on_frequency, self.on_30_press)
+
 
         targetMenu.AppendSubMenu(self.FlickerOptionsMenu, 'Flicker Options')
         self.FlickerOptionsMenu.AppendSubMenu(self.WavelengthOptionsMenu, 'Set Wavelength')
@@ -418,13 +419,15 @@ class wxFixationFrame(wx.Frame):
             # print('wavelength 440')
 
     def on_frequency(self, event):
+        if event.Id == self.id_on_10_press:
+            self.frequency = 10
+            # self.LCCanvas.set_fixation_cursor(7, 1, self.com, self.wavelength, self.frequency)
+
         if event.Id == self.id_on_30_press:
             self.frequency = 30
             # self.LCCanvas.set_fixation_cursor(7, 1, self.com, self.wavelength, self.frequency)
 
-        if event.Id == self.id_on_10_press:
-            self.frequency = 10
-            # self.LCCanvas.set_fixation_cursor(7, 1, self.com, self.wavelength, self.frequency)
+
 
 
     # End of Menu Bar
