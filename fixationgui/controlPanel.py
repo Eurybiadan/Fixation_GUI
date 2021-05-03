@@ -99,7 +99,7 @@ class ControlPanel(wx.Panel):
         self._quickpane = paneWidgets.QuickLocationsPanel(self, parent)
 
         # Image initialization pane
-        self._iminitpane = paneWidgets.ImInitPanel(self)
+        self._iminitpane = paneWidgets.ImInitPanel(self, viewpaneref)
 
         if planmode is 0:
             # Cursor control panel

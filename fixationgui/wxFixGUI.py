@@ -81,7 +81,7 @@ class wxFixationFrame(wx.Frame):
         self.Bind(wx.EVT_MOUSEWHEEL, self.on_mouse_wheel)
 
         # Bind to any changes in the rotation slider
-        self.control._iminitpane.BindTo(self.on_rotation_slider)
+        # self.control._iminitpane.BindTo(self.on_rotation_slider)
 
         horzsizer = wx.BoxSizer(wx.HORIZONTAL)
 
@@ -176,8 +176,8 @@ class wxFixationFrame(wx.Frame):
         self.control.OS.Bind(wx.EVT_RADIOBUTTON, self.on_eye_select)
         self.control.OD.Bind(wx.EVT_RADIOBUTTON, self.on_eye_select)
 
-        self.control._iminitpane.selectim.Bind(wx.EVT_BUTTON, self.on_button_press)
-        self.control._iminitpane.initalign.Bind(wx.EVT_BUTTON, self.on_button_press)
+        # self.control._iminitpane.loadim.Bind(wx.EVT_BUTTON, self.on_button_press)
+        # self.control._iminitpane.calibrate.Bind(wx.EVT_BUTTON, self.on_button_press)
 
     # Menu Bar
     def init_menubar(self):
@@ -467,28 +467,29 @@ class wxFixationFrame(wx.Frame):
         if self.viewpane.get_state() is 1 or self.viewpane.get_state() is 2:
             self.viewpane.SetBkgrdScale(math.copysign(1.0, event.GetWheelRotation()) * .01)
 
-    def on_button_press(self, evt):
-        button = evt.GetEventObject()
-
-        # If the user clicked on Select Image
-        if button is self.control._iminitpane.selectim:
-            self.on_open_background_image(None)
-        elif button is self.control._iminitpane.initalign:
-
-            state = self.viewpane.get_state() + 1
-
-            if state == 2:
-                self.viewpane.SetPanAnchor()
-            elif state == 3:  # If they hit the button after the initialization, restart the process.
-                state = 0
-
-            # Update the states in the two panels
-            self.control.SetState(state)
-            self.viewpane.set_state(state)
-
-
-        else:
-            pass
+    # commented out because don't need old image loading feature -JG 5/03/2021
+    # def on_button_press(self, evt):
+    #     button = evt.GetEventObject()
+    #
+    #     # If the user clicked on Select Image
+    #     if button is self.control._iminitpane.selectim:
+    #         self.on_open_background_image(None)
+    #     elif button is self.control._iminitpane.initalign:
+    #
+    #         state = self.viewpane.get_state() + 1
+    #
+    #         if state == 2:
+    #             self.viewpane.SetPanAnchor()
+    #         elif state == 3:  # If they hit the button after the initialization, restart the process.
+    #             state = 0
+    #
+    #         # Update the states in the two panels
+    #         self.control.SetState(state)
+    #         self.viewpane.set_state(state)
+    #
+    #
+    #     else:
+    #         pass
 
     def update_fixation_location(self, degrees=None):
 

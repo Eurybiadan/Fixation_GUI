@@ -9,6 +9,10 @@ from array import array
 from LocSpin import LocSpin
 import wx.lib.agw.floatspin as FS
 from ViewPane import ViewPane
+import numpy
+import cv2
+import os
+
 
 
 
@@ -516,86 +520,167 @@ class ImInitPanel(wx.Panel):
     classdocs
     '''
 
-    def __init__(self, parent, id=wx.ID_ANY, pos=wx.DefaultPosition, size=(-1, -1), style=wx.SIMPLE_BORDER,
+    def __init__(self, parent, viewpaneref, id=wx.ID_ANY, pos=wx.DefaultPosition, size=(-1, -1), style=wx.SIMPLE_BORDER,
                  name='Image Initialization Panel', port=None):
         wx.Panel.__init__(self, parent, id, pos, size, style, name)
 
+        self.header_dir = ""
+        self.filename = ""
+        self.viewpaneref = viewpaneref
+        self.buttonList = []
         self.SetBackgroundColour('black')
+        self.tracker = 0
+        self.ImageCoords = numpy.empty((0, 2), float)
+        self.LiveCoords = numpy.empty((0, 2), float)
 
         self.__deg_symbol = u'\N{DEGREE SIGN}'
-        self._slider_val = 0
-        self._sliderObservers = []
 
-        labelFont = wx.Font(11, wx.SWISS, wx.NORMAL, wx.BOLD, False)
+        buttonalignment = wx.ALIGN_CENTER
 
-        # Select Image Button
-        self.selectim = wx.Button(self, label='Select Image', size=(-1, 30))
-        self.selectim.SetBackgroundColour('medium gray')
-        self.selectim.SetForegroundColour('white')
+        # AddImage
+        self.AddImage = wx.Button(self, label='Load Background Image', size=(-1, 30))
+        self.AddImage.SetBackgroundColour('medium gray')
+        self.AddImage.SetForegroundColour('white')
+        self.buttonList.append(self.AddImage)
 
-        # Align ViewPane
-        self.initalign = wx.Button(self, label='Initialization', size=(-1, 30))
-        self.initalign.SetBackgroundColour('medium gray')
-        self.initalign.SetForegroundColour('white')
+        # Calibration & Select button
+        self.Cali = wx.Button(self, label='  Start Image Calibration  ', size=(-1, 30))
+        self.Cali.SetBackgroundColour('medium gray')
+        self.Cali.SetForegroundColour('white')
+        self.buttonList.append(self.Cali)
 
-        butsizer = wx.BoxSizer(wx.HORIZONTAL)
-        butsizer.Add(self.selectim, 1, wx.ALIGN_CENTER | wx.ALL, 5)
-        butsizer.Add(self.initalign, 1, wx.ALIGN_CENTER | wx.ALL, 5)
+        # Bind each button to a listener
+        for button in self.buttonList:
+            button.Bind(wx.EVT_BUTTON, self.OnButton)
 
-        # Rotation slider
-        self.rotlabel = wx.StaticText(self, wx.ID_ANY, '0.0' + self.__deg_symbol)
-        self.rotlabel.SetForegroundColour('white')
-        self.rotlabel.SetFont(labelFont)
-        self.rotlabel.Hide()
-        self.rotslider = wx.Slider(self, wx.ID_ANY, value=0, minValue=-20, maxValue=20)
-        self.rotslider.SetTickFreq(1)
+        sizer = wx.GridBagSizer()
+        sizer.Add(self.AddImage, (0, 0), (1, 0), buttonalignment)
+        sizer.Add(self.Cali, (1, 0), (1, 0), buttonalignment)
+        # sizer.Add(self.zoom, (2, 0), (1, 0), buttonalignment)
+        # sizer.Add(self.pan, (3, 0), (1, 0), buttonalignment)
+        # sizer.Add(self.rotate, (4, 0), (1, 0), buttonalignment)
 
-        self.Bind(wx.EVT_SCROLL, self.OnRotationSlider)
+        box = wx.BoxSizer(wx.VERTICAL)  # To make sure it stays centered in the area it is given
+        box.Add(sizer, 0, wx.ALIGN_CENTER)
 
-        rotsizer = wx.BoxSizer(wx.HORIZONTAL)
-        rotsizer.Add(self.rotslider, 0, wx.ALIGN_CENTER)
-        rotsizer.Add(self.rotlabel, 0, wx.ALIGN_CENTER)
+        self.SetSizerAndFit(box)
 
-        panesizer = wx.BoxSizer(wx.VERTICAL)
+    def OnButton(self, evt):
 
-        panesizer.Add(butsizer, 0, wx.ALIGN_CENTER)
-        panesizer.Add(rotsizer, 0, wx.ALIGN_CENTER)
+        pressed = evt.GetEventObject()
+        if pressed == self.AddImage:
+            self.on_open_background_image()
+        if pressed == self.Cali:
+            if self.tracker == 0:
+                self.Cali.SetLabel('Select 1st Point on Image')
+                self.tracker = self.tracker + 1
+                # make sure the matrices are empty
+                self.ImageCoords = numpy.empty((0, 2), float)
+                self.LiveCoords = numpy.empty((0, 2), float)
 
-        self.SetSizerAndFit(panesizer)
-        self.rotslider.Hide()
-        self.rotlabel.Hide()
+            elif self.tracker == 1:
+                # coordinates from 1st spot on image
+                coordinates = self.viewpaneref._fixLoc
+                self.ptim1 = numpy.float32(coordinates)
 
-    def SetState(self, state):
+                # change button label for next point
+                self.Cali.SetLabel('Select Corresponding Point')
+                self.tracker = self.tracker + 1
 
-        if state == 0:
-            self.rotslider.Hide()
-            self.rotlabel.Hide()
-            self.Layout()
-            self.initalign.SetLabel("Initialization")
-        elif state == 1:
-            self.initalign.SetLabel("Pan/Zoom")
-        elif state == 2:
-            self.rotslider.Show()
-            self.rotlabel.Show()
-            self.Layout()
-            self.initalign.SetLabel("Rotate/Zoom")
+            elif self.tracker == 2:
+                # coordinates from 1st corresponding spot on live
+                coordinates = self.viewpaneref._fixLoc
+                self.ptli1 = numpy.float32(coordinates)
 
-    def OnRotationSlider(self, event):
-        if event.GetEventObject() is self.rotslider:
-            self.SetRotationValue(event.GetPosition() / 2.0)
-            self.rotlabel.SetLabel(str(self._slider_val) + self.__deg_symbol)
+                # change button label for next point
+                self.Cali.SetLabel('Select 2nd Point on Image')
+                self.tracker = self.tracker + 1
 
-    def SetRotationValue(self, val):
-        self._slider_val = val
-        for callback in self._sliderObservers:
-            callback(self._slider_val)
+            elif self.tracker == 3:
+                # coordinates from 2nd spot on image
+                coordinates = self.viewpaneref._fixLoc
+                self.ptim2 = numpy.float32(coordinates)
 
-    def GetRotationValue(self):
-        return self._slider_val
+                # change button label for next point
+                self.Cali.SetLabel('Select Corresponding Point')
+                self.tracker = self.tracker + 1
 
-    def BindTo(self, callback):
-        self._sliderObservers.append(callback)
+            elif self.tracker == 4:
+                # coordinates from 2nd corresponding spot on live
+                coordinates = self.viewpaneref._fixLoc
+                self.ptli2 = numpy.float32(coordinates)
 
+                # change button label for next point
+                self.Cali.SetLabel('Select 3rd Point on Image')
+                self.tracker = self.tracker + 1
+
+            elif self.tracker == 5:
+                # coordinates from 3rd spot on image
+                coordinates = self.viewpaneref._fixLoc
+                self.ptim3 = numpy.float32(coordinates)
+
+                # change button label for next point
+                self.Cali.SetLabel('Select Corresponding Point')
+                self.tracker = self.tracker + 1
+
+            elif self.tracker == 6:
+                # coordinates from 3rd corresponding spot on live
+                coordinates = self.viewpaneref._fixLoc
+                self.ptli3 = numpy.float32(coordinates)
+
+                # change button label for next point
+                self.Cali.SetLabel('Calibrate')
+                self.tracker = self.tracker + 1
+
+            elif self.tracker == 7:
+                # Putting all the coordinates together
+                self.ptsim = numpy.float32([self.ptim1, self.ptim2, self.ptim3])
+                self.ptsli = numpy.float32([self.ptli1, self.ptli2, self.ptli3])
+
+                # The Affine Transformation
+                self.matrix = cv2.getAffineTransform(self.ptsim, self.ptsli)
+                self.result = cv2.warpAffine(self.img, self.matrix, (self.cols, self.rows))
+
+                # https://www.geeksforgeeks.org/python-opencv-cv2-imwrite-method/
+                # save the transformed image temporarily
+                filename = 'tempim.TIF'
+                os.chdir(self.header_dir)
+                cv2.imwrite(filename, self.result)
+                impath = self.header_dir + os.sep + filename
+
+                # https://wxpython.org/Phoenix/docs/html/wx.Image.html#wx.Image.LoadFile
+                # Load in the file we just saved so we can make it a bitmap
+                self.bkgrdim = wx.Bitmap(1, 1)
+                self.bkgrdim.LoadFile(impath, wx.BITMAP_TYPE_ANY)
+
+                # reset the background to the new transformed image
+                self.viewpaneref.set_bkgrd(self.bkgrdim)
+
+                # change button label
+                self.Cali.SetLabel('New Calibration')
+                self.tracker = 0
+
+                # delete the temporary file we made
+                os.remove(filename)
+
+    def on_open_background_image(self, evt=None):
+        dialog = wx.FileDialog(self, 'Select background image:', self.header_dir, self.filename,
+                               'Image files (*.jpg,*.jpeg,*.bmp,*.png,*.tif,*.tiff)| *.jpg;*.jpeg;*.bmp;*.png;*.tif;*.tiff|' +
+                               'JP(E)G images (*.jpg,*.jpeg)|*.jpg;*.jpeg|BMP images (*.bmp)|*.bmp' +
+                               '|PNG images (*.png)|*.png|TIF(F) images (*.tif,*.tiff)|*.tif;*.tiff', wx.FD_OPEN)
+        if dialog.ShowModal() == wx.ID_OK:
+            self.header_dir = dialog.GetDirectory()
+            self.filename = dialog.GetFilename()
+            dialog.Destroy()
+            impath = self.header_dir + os.sep + self.filename
+
+            self.bkgrdim = wx.Bitmap(1, 1)
+            self.bkgrdim.LoadFile(impath, wx.BITMAP_TYPE_ANY)
+            # JG affine transformation attempt
+            self.img = cv2.imread(impath)
+            self.rows, self.cols, self.ch = self.img.shape
+
+            self.viewpaneref.set_bkgrd(self.bkgrdim)
 
 class AutoAdvance(wx.Panel):
 
