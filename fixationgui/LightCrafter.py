@@ -70,6 +70,8 @@ class LightCrafterCanvas(wx.Window):
         self._location = wx.Point2D(self._center.x, self._center.y)
         self._pen = wx.Pen(wx.GREEN, self._fixsize, wx.PENSTYLE_SOLID)
         self._brush = wx.Brush(wx.GREEN, wx.BRUSHSTYLE_SOLID)
+        self._stimpen = wx.Pen(wx.GREEN, self._fixsize, wx.PENSTYLE_SOLID)
+        self._stimbrush = wx.Brush(wx.GREEN, wx.BRUSHSTYLE_SOLID)
         self.draw_target = True
 
 
@@ -169,35 +171,64 @@ class LightCrafterCanvas(wx.Window):
                 dc.DrawLine(self._location.x, by, self._location.x, ty)
 
             # Heather Stimulus only selected if piece of code is uncommented in fixgui keyboardpress f4
-            elif self._cursor is 6:
-                self.stimulus(dc, self._location.x, self._location.y, start, port)
+        if self._cursor is 6:
+            if self.draw_target:
 
-            # Heather Stimulus only selected if piece of code is uncommented in fixgui keyboardpress f4
-            elif self._cursor is 7:
-                # Index 0: Original cone stimulus: 550 nm (163, 255, 0)
-                # Index 1: Red cone peak spectral sensitivity: 560 nm (195, 255, 0)
-                # Index 2: Green cone peak spectral sensitivity: 530 nm (94, 255, 0)
-                # Index 3: Blue cone peak spectral sensitivity: 440 nm (0, 0, 255)
-                # Wavelength to rgb values generated from: https://academo.org/demos/wavelength-to-colour-relationship/
-                colors = [wx.Colour(red=163, green=255, blue=0), wx.Colour(red=195, green=255, blue=0),
-                          wx.Colour(red=94, green=255, blue=0), wx.Colour(red=0, green=0, blue=225)]
-                if wavelength == 560:
-                    color = colors[1]
-                elif wavelength == 530:
-                    color = colors[2]
-                elif wavelength == 440:
-                    color = colors[3]
-                else:
-                    color = colors[0]
-
-                self._pen.SetColour(color)
-                self._brush.SetColour(color)
+                # Draw the fixation shape
+                self._pen.SetWidth(self._fixsize)
                 dc.SetPen(self._pen)
                 dc.SetBrush(self._brush)
-                dc.DrawCircle(self._location.x, self._location.y, 75)
-                #print('DrawCircle @', time.perf_counter())
+                dc.DrawLine(0, self._location.y, self.thisSize.x, self._location.y)
+                dc.DrawLine(self._location.x, 0, self._location.x, self.thisSize.y)
 
-                self.flicker(port, frequency)
+            self.stimulus(dc, self.thisSize.x/2, self.thisSize.y/2, start, port)  # this line for drawing circle in center of screen
+            # self.stimulus(dc, self._location.x, self._location.y, start, port)  # this line for drawing circle where fixation target located
+
+
+            # Heather Stimulus only selected if piece of code is uncommented in fixgui keyboardpress f4
+        elif self._cursor is 7:
+            if self.draw_target:
+
+                # Draw the fixation shape
+                self._pen.SetWidth(self._fixsize)
+                dc.SetPen(self._pen)
+                dc.SetBrush(self._brush)
+                dc.DrawLine(0, self._location.y, self.thisSize.x, self._location.y)
+                dc.DrawLine(self._location.x, 0, self._location.x, self.thisSize.y)
+
+            # Index 0: Original cone stimulus: 550 nm (163, 255, 0)
+            # Index 1: Red cone peak spectral sensitivity: 560 nm (195, 255, 0)
+            # Index 2: Green cone peak spectral sensitivity: 530 nm (94, 255, 0)
+            # Index 3: Blue cone peak spectral sensitivity: 440 nm (0, 0, 255)
+            # Wavelength to rgb values generated from: https://academo.org/demos/wavelength-to-colour-relationship/
+            colors = [wx.Colour(red=163, green=255, blue=0), wx.Colour(red=195, green=255, blue=0),
+                      wx.Colour(red=94, green=255, blue=0), wx.Colour(red=0, green=0, blue=225)]
+            if wavelength == 560:
+                color = colors[1]
+            elif wavelength == 530:
+                color = colors[2]
+            elif wavelength == 440:
+                color = colors[3]
+            else:
+                color = colors[0]
+
+            self._stimpen.SetColour(color)
+            self._stimbrush.SetColour(color)
+            dc.SetPen(self._stimpen)
+            dc.SetBrush(self._stimbrush)
+            if self.draw_target:
+                dc.DrawCircle(self.thisSize.x/2, self.thisSize.y/2, 75)  # this line for drawing circle in center of screen
+            # dc.DrawCircle(self._location.x, self._location.y, 75)  # this line for drawing circle where fixation target located
+            else:
+                dc.DrawRectangle(0, 0, self.thisSize.x, self.thisSize.y)  # this makes the entire screen the wavelength
+            # print('DrawCircle @', time.perf_counter())
+            del dc  # need to get rid of the MemoryDC before Update() is called.
+            self.Refresh(eraseBackground=False)
+            self.Update()
+
+            self.flicker(port, frequency)
+            self.set_fixation_cursor(0)
+            return
 
         del dc  # need to get rid of the MemoryDC before Update() is called.
         self.Refresh(eraseBackground=False)
@@ -235,39 +266,51 @@ class LightCrafterCanvas(wx.Window):
             # adapted from javascript, most likely don't actually need self.i but I kept in in for now
             if self.i == 0:
                 if self.c == 0:
-                    self._pen.SetColour(colors[self.indexList[0]])
-                    self._brush.SetColour(colors[self.indexList[0]])
-                    dc.SetPen(self._pen)
-                    dc.SetBrush(self._brush)
+                    self._stimpen.SetColour(colors[self.indexList[0]])
+                    self._stimbrush.SetColour(colors[self.indexList[0]])
+                    dc.SetPen(self._stimpen)
+                    dc.SetBrush(self._stimbrush)
                     self.c = 1
-                    dc.DrawCircle(locationx, locationy, 75)
+                    if self.draw_target:
+                        dc.DrawCircle(locationx, locationy, 75)
+                    else:
+                        dc.DrawRectangle(0, 0, self.thisSize.x, self.thisSize.y)
 
             if self.i == 1:
                 if self.c == 1:
-                    self._pen.SetColour(colors[self.indexList[1]])
-                    self._brush.SetColour(colors[self.indexList[1]])
-                    dc.SetPen(self._pen)
-                    dc.SetBrush(self._brush)
+                    self._stimpen.SetColour(colors[self.indexList[1]])
+                    self._stimbrush.SetColour(colors[self.indexList[1]])
+                    dc.SetPen(self._stimpen)
+                    dc.SetBrush(self._stimbrush)
                     self.c = 2
-                    dc.DrawCircle(locationx, locationy, 75)
+                    if self.draw_target:
+                        dc.DrawCircle(locationx, locationy, 75)
+                    else:
+                        dc.DrawRectangle(0, 0, self.thisSize.x, self.thisSize.y)
 
             if self.i == 2:
                 if self.c == 2:
-                    self._pen.SetColour(colors[self.indexList[2]])
-                    self._brush.SetColour(colors[self.indexList[2]])
-                    dc.SetPen(self._pen)
-                    dc.SetBrush(self._brush)
+                    self._stimpen.SetColour(colors[self.indexList[2]])
+                    self._stimbrush.SetColour(colors[self.indexList[2]])
+                    dc.SetPen(self._stimpen)
+                    dc.SetBrush(self._stimbrush)
                     self.c = 3
-                    dc.DrawCircle(locationx, locationy, 75)
+                    if self.draw_target:
+                        dc.DrawCircle(locationx, locationy, 75)
+                    else:
+                        dc.DrawRectangle(0, 0, self.thisSize.x, self.thisSize.y)
 
             if self.i == 3:
                 if self.c == 3:
-                    self._pen.SetColour(colors[self.indexList[3]])
-                    self._brush.SetColour(colors[self.indexList[3]])
-                    dc.SetPen(self._pen)
-                    dc.SetBrush(self._brush)
+                    self._stimpen.SetColour(colors[self.indexList[3]])
+                    self._stimbrush.SetColour(colors[self.indexList[3]])
+                    dc.SetPen(self._stimpen)
+                    dc.SetBrush(self._stimbrush)
                     self.c = 0
-                    dc.DrawCircle(locationx, locationy, 75)
+                    if self.draw_target:
+                        dc.DrawCircle(locationx, locationy, 75)
+                    else:
+                        dc.DrawRectangle(0, 0, self.thisSize.x, self.thisSize.y)
 
             self.i = self.i + 1
             if self.i == 4:
@@ -296,6 +339,7 @@ class LightCrafterCanvas(wx.Window):
             # cancel the timer if done with the cycle; 1 cycle = going through all the wavelengths once
             if self.count >= 3:
                 t.cancel()
+                self.set_fixation_cursor(0)
             # keep track of how many times repaint has been called
             self.count = self.count + 1
 
