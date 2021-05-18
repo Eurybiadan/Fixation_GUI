@@ -37,6 +37,9 @@ class wxFixationFrame(wx.Frame):
         self.withSerial = False
 
         self.loadplanMode = 0
+        # if MEAO is 1 that means we are using Rob's system at Marquette so the cross hair location has to be rotated
+        # 90 degrees CCW so that it is still true with the gui - this value is sent through to LightCrafter
+        self.MEAO = 0
 
         # Initial Conditions
         self.curr_path = ''
@@ -215,6 +218,8 @@ class wxFixationFrame(wx.Frame):
         self.id_on_440_press = 10052
         self.id_on_30_press = 10053
         self.id_on_10_press = 10054
+        self.id_off_toggleMEAO = 10056
+        self.id_on_toggleMEAO = 1057
 
 
         # Creates Menu Bar
@@ -223,10 +228,13 @@ class wxFixationFrame(wx.Frame):
         protoMenu = wx.Menu()
         targetMenu = wx.Menu()
         FOVMenu = wx.Menu()
+        MEAOMenu = wx.Menu()
         menubar.Append(fileMenu, 'File')
         menubar.Append(protoMenu, 'Protocol')
         menubar.Append(targetMenu, 'Target')
+        menubar.Append(MEAOMenu, 'System')
         menubar.Append(FOVMenu, 'FOV')
+
 
         # Open a protocol
         protoMenu.Append(self.id_save_proto_loc, 'Set Protocol Save Location...\t')
@@ -246,8 +254,8 @@ class wxFixationFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_clear_protocol, id=self.id_clear_proto)
 
         # Open a background image
-        fileMenu.Append(wx.ID_OPEN, 'Open Background Image...\tCtrl+B')
-        self.Bind(wx.EVT_MENU, self.on_open_background_image, id=wx.ID_OPEN)
+        # fileMenu.Append(wx.ID_OPEN, 'Open Background Image...\tCtrl+B')
+        # self.Bind(wx.EVT_MENU, self.on_open_background_image, id=wx.ID_OPEN)
         #         self.Bind(wx.EVT_MENU,sel)
         fileMenu.Append(wx.ID_SAVE, 'Save Fixation Image...\tCtrl+I')
         self.Bind(wx.EVT_MENU, self.on_save_fixation_image, id=wx.ID_SAVE)
@@ -316,6 +324,13 @@ class wxFixationFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_FOV_toggle, self.off_toggleFOV)
         FOVMenu.AppendSubMenu(self.toggleMenuFOV, 'Update Savior FOV on list click?')
 
+        # Toggle MEAO configuration
+        self.toggleMEAO = wx.Menu()
+        self.off_toggleMEAO = self.toggleMEAO.AppendRadioItem(self.id_off_toggleMEAO, 'No')
+        self.Bind(wx.EVT_MENU, self.on_MEAO_toggle, self.off_toggleMEAO)
+        self.on_toggleMEAO = self.toggleMEAO.AppendRadioItem(self.id_on_toggleMEAO, 'Yes')
+        self.Bind(wx.EVT_MENU, self.on_MEAO_toggle, self.on_toggleMEAO)
+        MEAOMenu.AppendSubMenu(self.toggleMEAO, 'MEAO?')
 
         # Compounds the Menu Bar
         self.SetMenuBar(menubar)
@@ -366,6 +381,15 @@ class wxFixationFrame(wx.Frame):
             self.protocolpane.updateFOVtoggle(1)
         elif event.Id == self.id_off_toggleFOV:
             self.protocolpane.updateFOVtoggle(0)
+
+    def on_MEAO_toggle(self, event):
+        # if MEAO is 1 that means we are using Rob's system at Marquette so the cross hair location has to be rotated
+        # 90 degrees CCW so that it is still true with the gui - the value is set to 1/0 in the menubar of the gui
+        if event.Id == self.id_on_toggleMEAO:
+            self.MEAO = 1
+        elif event.Id == self.id_off_toggleMEAO:
+            self.MEAO = 0
+
 
     # Alignment
     def on_align_presss(self, event):
@@ -465,7 +489,9 @@ class wxFixationFrame(wx.Frame):
 
     def on_mouse_wheel(self, event):
         if self.viewpane.get_state() is 1 or self.viewpane.get_state() is 2:
-            self.viewpane.SetBkgrdScale(math.copysign(1.0, event.GetWheelRotation()) * .01)
+            print('okwheel')
+        # uncomment this if you want the zoom scroll
+        self.viewpane.SetBkgrdScale(math.copysign(1.0, event.GetWheelRotation()) * .01)
 
     # commented out because don't need old image loading feature -JG 5/03/2021
     # def on_button_press(self, evt):
@@ -492,7 +518,6 @@ class wxFixationFrame(wx.Frame):
     #         pass
 
     def update_fixation_location(self, degrees=None):
-
         # If you don't pass in degrees as an argument,
         # then assume that we're using whatever the current degrees are.
         if degrees is None:
@@ -508,7 +533,7 @@ class wxFixationFrame(wx.Frame):
 
         x, y = self.degrees_to_screenpix(degrees.x, degrees.y)
 
-        self.LCCanvas.set_fixation_location(wx.Point2D(x, y))
+        self.LCCanvas.set_fixation_location(wx.Point2D(x, y), self.MEAO)
 
     def set_major_increment(self, increment):
         self.MAJOR_INCREMENT = increment

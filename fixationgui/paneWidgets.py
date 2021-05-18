@@ -136,6 +136,7 @@ class CursorPanel(wx.Panel):
 
         self._circleButton = wx.BitmapButton(self, wx.ID_ANY, self._circle, style=wx.BU_AUTODRAW, name='Circle')
 
+        # This button stuff have been left in just in case we want another different fixation target - it can be changed to easily be that
         # Heather Stimulus
         # self._stim = wx.Bitmap(self._iconsize, self._iconsize)
         # dc.SelectObject(self._stim)
@@ -298,6 +299,7 @@ class CursorPanel(wx.Panel):
 
         self._circleButton.SetBitmapLabel(self._circle)
 
+        # left to be reused if we ever want a different fixation target shape
         # Stimulus for Heather
         # self._stim = wx.Bitmap(self._iconsize, self._iconsize)
         # dc.SelectObject(self._stim)
@@ -378,19 +380,17 @@ class PlanningPanel(wx.Panel):
         self.imagespace = wx.Panel(parent, wx.ID_ANY)
         self.viewpaneref = viewpaneref
         self.fxguiself = fxguiself
-        # below was done in the past when viewpaneref and fxguiself were listed in init before rootparent -JG
-        # janky that it gets the objects in the opposite order that I send them in, but hey it works -JG
-        # self.viewpaneref = fxguiself
-        # self.fxguiself = rootparent
         # default used for planning mode
         self.wxdata = 0
 
         labelFont = wx.Font(11, wx.SWISS, wx.NORMAL, wx.BOLD, False)
 
+        # label for FOV boxes area
         self.quicklabel = wx.StaticText(self, wx.ID_ANY, 'Field of View:', style=wx.ALIGN_CENTER)
         self.quicklabel.SetForegroundColour('white')
         self.quicklabel.SetFont(labelFont)
 
+        # label for plan area
         self.quicklabel2 = wx.StaticText(self, wx.ID_ANY, 'Plan:', style=wx.ALIGN_CENTER)
         self.quicklabel2.SetForegroundColour('white')
         self.quicklabel2.SetFont(labelFont)
@@ -403,6 +403,7 @@ class PlanningPanel(wx.Panel):
 
         buttonsize = (60, 35)
         buttonalignment = wx.ALIGN_CENTER
+        # FOV buttons - set up for AO 2.3 with FOV going from 0.5 to 2
         self.f05 = wx.Button(self, label='0.5x0.5', size=buttonsize)
         self.f05.SetBackgroundColour('medium gray')
         self.f05.SetForegroundColour('white')
@@ -438,11 +439,13 @@ class PlanningPanel(wx.Panel):
 
 
         # Anchor cursor as center
+        # mark button
         self.plan = wx.Button(self, label='Mark', size=(60, 35))
         self.plan.SetBackgroundColour('medium gray')
         self.plan.SetForegroundColour('white')
         self.buttonList.append(self.plan)
 
+        # remove button
         self.remove = wx.Button(self, label='Remove', size=(60, 35))
         self.remove.SetBackgroundColour('medium gray')
         self.remove.SetForegroundColour('white')
@@ -454,6 +457,7 @@ class PlanningPanel(wx.Panel):
 
         sizer = wx.GridBagSizer()
 
+        # positions for each of the FOV buttons and FOV label
         sizer.Add(self.quicklabel, (0, 0), (1, 4), buttonalignment)
         sizer.Add(self.f05, (1, 0), (1, 1), buttonalignment)
         sizer.Add(self.f075, (1, 1), (1, 1), buttonalignment)
@@ -464,6 +468,7 @@ class PlanningPanel(wx.Panel):
         sizer.Add(self.f175, (2, 2), (1, 1), buttonalignment)
         sizer.Add(self.f2, (2, 3), (1, 1), buttonalignment)
 
+        # positions for the plan and remove buttons and plan label
         sizer.Add(self.quicklabel2, (3, 0), (1, 4), buttonalignment)
         sizer.Add(self.plan, (4, 1), (1, 1), buttonalignment)
         sizer.Add(self.remove, (4, 2), (1, 1), buttonalignment)
@@ -479,6 +484,7 @@ class PlanningPanel(wx.Panel):
     def OnButton(self, evt):
         pressed = evt.GetEventObject()
 
+        # sends the fov to be set when the buttons are pressed
         if pressed is self.f05:
             fov = (0.5, 0.5)
             self.viewpaneref.set_fov(fov)
@@ -505,11 +511,13 @@ class PlanningPanel(wx.Panel):
             self.viewpaneref.set_fov(fov)
 
         if pressed is self.plan:
+            # set remove mode to 0 since the button hit was plan, then set planmode to 1 because we are using plan mode, then send the info to mark location
             removemode = 0
             planmode = 1
             self.fxguiself.mark_location(self.wxdata, removemode, planmode)
 
         if pressed is self.remove:
+            # set remove mode to 1 since the button hit was remove, then set planmode to 1 since we are using plan mode, then send the info to mark location
             removemode = 1
             planmode = 1
             self.fxguiself.mark_location(self.wxdata, removemode, planmode)
@@ -544,7 +552,8 @@ class ImInitPanel(wx.Panel):
         self.buttonList.append(self.AddImage)
 
         # Calibration & Select button
-        self.Cali = wx.Button(self, label='  Start Image Calibration  ', size=(-1, 30))
+        # extra white space around words to make the button longer to fit the longer text later on once button is pressed
+        self.Cali = wx.Button(self, label='            Start Image Calibration            ', size=(-1, 30))
         self.Cali.SetBackgroundColour('medium gray')
         self.Cali.SetForegroundColour('white')
         self.buttonList.append(self.Cali)
@@ -552,13 +561,9 @@ class ImInitPanel(wx.Panel):
         # Bind each button to a listener
         for button in self.buttonList:
             button.Bind(wx.EVT_BUTTON, self.OnButton)
-
         sizer = wx.GridBagSizer()
         sizer.Add(self.AddImage, (0, 0), (1, 0), buttonalignment)
         sizer.Add(self.Cali, (1, 0), (1, 0), buttonalignment)
-        # sizer.Add(self.zoom, (2, 0), (1, 0), buttonalignment)
-        # sizer.Add(self.pan, (3, 0), (1, 0), buttonalignment)
-        # sizer.Add(self.rotate, (4, 0), (1, 0), buttonalignment)
 
         box = wx.BoxSizer(wx.VERTICAL)  # To make sure it stays centered in the area it is given
         box.Add(sizer, 0, wx.ALIGN_CENTER)
@@ -569,10 +574,12 @@ class ImInitPanel(wx.Panel):
 
         pressed = evt.GetEventObject()
         if pressed == self.AddImage:
+            # call open background image
             self.on_open_background_image()
         if pressed == self.Cali:
+            # if we are calibrating the image
             if self.tracker == 0:
-                self.Cali.SetLabel('Select 1st Point on Image')
+                self.Cali.SetLabel('Select 1st Point on Live AO')
                 self.tracker = self.tracker + 1
                 # make sure the matrices are empty
                 self.ImageCoords = numpy.empty((0, 2), float)
@@ -581,52 +588,52 @@ class ImInitPanel(wx.Panel):
             elif self.tracker == 1:
                 # coordinates from 1st spot on image
                 coordinates = self.viewpaneref._fixLoc
-                self.ptim1 = numpy.float32(coordinates)
+                self.ptli1 = numpy.float32(coordinates)
 
                 # change button label for next point
-                self.Cali.SetLabel('Select Corresponding Point')
+                self.Cali.SetLabel('Select Corresponding Point on Image')
                 self.tracker = self.tracker + 1
 
             elif self.tracker == 2:
                 # coordinates from 1st corresponding spot on live
                 coordinates = self.viewpaneref._fixLoc
-                self.ptli1 = numpy.float32(coordinates)
+                self.ptim1 = numpy.float32(coordinates)
 
                 # change button label for next point
-                self.Cali.SetLabel('Select 2nd Point on Image')
+                self.Cali.SetLabel('Select 2nd Point on Live AO')
                 self.tracker = self.tracker + 1
 
             elif self.tracker == 3:
                 # coordinates from 2nd spot on image
                 coordinates = self.viewpaneref._fixLoc
-                self.ptim2 = numpy.float32(coordinates)
+                self.ptli2 = numpy.float32(coordinates)
 
                 # change button label for next point
-                self.Cali.SetLabel('Select Corresponding Point')
+                self.Cali.SetLabel('Select Corresponding Point on Image')
                 self.tracker = self.tracker + 1
 
             elif self.tracker == 4:
                 # coordinates from 2nd corresponding spot on live
                 coordinates = self.viewpaneref._fixLoc
-                self.ptli2 = numpy.float32(coordinates)
+                self.ptim2 = numpy.float32(coordinates)
 
                 # change button label for next point
-                self.Cali.SetLabel('Select 3rd Point on Image')
+                self.Cali.SetLabel('Select 3rd Point on Live AO')
                 self.tracker = self.tracker + 1
 
             elif self.tracker == 5:
                 # coordinates from 3rd spot on image
                 coordinates = self.viewpaneref._fixLoc
-                self.ptim3 = numpy.float32(coordinates)
+                self.ptli3 = numpy.float32(coordinates)
 
                 # change button label for next point
-                self.Cali.SetLabel('Select Corresponding Point')
+                self.Cali.SetLabel('Select Corresponding Point on Image')
                 self.tracker = self.tracker + 1
 
             elif self.tracker == 6:
                 # coordinates from 3rd corresponding spot on live
                 coordinates = self.viewpaneref._fixLoc
-                self.ptli3 = numpy.float32(coordinates)
+                self.ptim3 = numpy.float32(coordinates)
 
                 # change button label for next point
                 self.Cali.SetLabel('Calibrate')

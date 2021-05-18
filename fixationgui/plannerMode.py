@@ -8,7 +8,9 @@ from controlPanel import ControlPanel
 import controlPanel
 import wx.lib.agw.floatspin as FS
 
-
+# this creates everything that is created when running fixgui, except lightcrafter. It also sends the plan mode variable with the value 1 to initControlPanel
+# which then helps decide what items get created and what doesn't for the mode.
+# It has to be done this way because once you initialize/create the different panes/panels of the GUI you can't edit them midway through
 class PlannerMode(wxFixationFrame):
     """ plannerMode class """
 
@@ -44,6 +46,7 @@ class PlannerMode(wxFixationFrame):
 
         self.initProtocolPanel(self)
         self.initViewPane(self)
+        # variable to be sent to initControlPanel and through to indicate what will be turned on and off for this mode
         planmode = 1
         self.initControlPanel(self, planmode) #added to wxFixGUI
 
@@ -56,7 +59,7 @@ class PlannerMode(wxFixationFrame):
         self.Bind(wx.EVT_MOUSEWHEEL, self.on_mouse_wheel)
 
         # Bind to any changes in the rotation slider
-        self.control._iminitpane.BindTo(self.on_rotation_slider)
+        # self.control._iminitpane.BindTo(self.on_rotation_slider)
 
         horzsizer = wx.BoxSizer(wx.HORIZONTAL)
 

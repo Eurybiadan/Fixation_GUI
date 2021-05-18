@@ -34,8 +34,8 @@ class wxLightCrafterFrame(wx.Frame):
     def set_fixation_centerpoint(self, location):
         self.LCCanvas.set_fixation_centerpoint(location)
 
-    def set_fixation_location(self, location):
-        self.LCCanvas.set_fixation_location(location)
+    def set_fixation_location(self, location, MEAO=0):
+        self.LCCanvas.set_fixation_location(location, MEAO)
 
     def set_fixation_color(self, penColor, brushColor):
         self.LCCanvas.set_fixation_color(penColor, brushColor)
@@ -85,9 +85,15 @@ class LightCrafterCanvas(wx.Window):
         self._center.y = self._center.y + location.y
         self.set_fixation_location(wx.Point2D(0, 0))
 
-    def set_fixation_location(self, location):
-        self._location.x = self._center.x - location.x
-        self._location.y = self._center.y + location.y
+    def set_fixation_location(self, location, MEAO = 0):
+        # if MEAO is 1 that means we are using Rob's system at Marquette so the cross hair location has to be rotated
+        # 90 degrees CCW so that it is still true with the gui
+        if MEAO == 1:
+            self._location.x = self._center.x + location.y
+            self._location.y = self._center.y - location.x
+        else:
+            self._location.x = self._center.x - location.x
+            self._location.y = self._center.y + location.y
         self.repaint()
 
     def set_fixation_color(self, penColor, brushColor):

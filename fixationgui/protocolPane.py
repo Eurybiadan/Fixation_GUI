@@ -90,27 +90,28 @@ class ProtocolPane(wx.Panel):
 
         # The fov does not get updated here, it sends message to savior who then updates the fov
         # This capability can be toggled on and off from the FOV tab in the menubar
-        #if self.loadplanmode == 1:
-        if self.guiSendFOV == 1:
-            print('protocolpane message values:')
-            print(hex(id(self.myEvtRetMsg)))
-            print(hex(id(self.messageEvent)))
+        # if in plannermode don't want to do this next chunk, if any other mode we want to so we can update the FOV via savior
+        if self.planmode != 1:
+            if self.guiSendFOV == 1:
+                print('protocolpane message values:')
+                print(hex(id(self.myEvtRetMsg)))
+                print(hex(id(self.messageEvent)))
 
-            # if item on the list is selected
-            if listentry:
-                fovtokens = fov
-                width = float(fovtokens[0])
-                height = float(fovtokens[1])
-            # if auto advance button is pressed
-            else:
-                fovtokens = fov.split(self._degree_sign)
-                width = float(fovtokens[0])
-                height = fovtokens[1]
-                height = float(height[2:])
-            fovset = str((width, height))
-            # need to send width and height to savior.pyw
-            evt = self.messageEvent(self.myEvtRetMsg, -1, 4, fovset)
-            wx.PostEvent(self, evt)
+                # if item on the list is selected
+                if listentry:
+                    fovtokens = fov
+                    width = float(fovtokens[0])
+                    height = float(fovtokens[1])
+                # if auto advance button is pressed
+                else:
+                    fovtokens = fov.split(self._degree_sign)
+                    width = float(fovtokens[0])
+                    height = fovtokens[1]
+                    height = float(height[2:])
+                fovset = str((width, height))
+                # need to send width and height to savior.pyw
+                evt = self.messageEvent(self.myEvtRetMsg, -1, 4, fovset)
+                wx.PostEvent(self, evt)
 
 
         # Update the Location.

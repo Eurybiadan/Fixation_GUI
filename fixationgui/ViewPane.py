@@ -127,7 +127,9 @@ class ViewPane(wx.Window):
         self._Bkgrd = image
         self._CurrentBkgrd = image
         self._hasbkgrd = True
-        self.Repaint()
+        # changed it to updateBkgrd and commented out repaint so that if you zoomed and then calibrated you wouldn't lose the zoom - JG 5/12/2021
+        self.UpdateBkgrd()
+        #self.Repaint()
 
     def set_mouse_loc(self, posinpix, eyesign):
 
@@ -302,9 +304,9 @@ class ViewPane(wx.Window):
         # Convert it to an image to work on it
         im = self._Bkgrd.ConvertToImage()
 
-        if self._state > 0:  # State 1+ has the background panned/scaled
+        #if self._state > 0:  # State 1+ has the background panned/scaled
             # Scale
-            im.Rescale(self._Bkgrd.GetWidth() * self._scale, self._Bkgrd.GetHeight() * self._scale,
+        im.Rescale(self._Bkgrd.GetWidth() * self._scale, self._Bkgrd.GetHeight() * self._scale,
                        quality=wx.IMAGE_QUALITY_NORMAL)
             # Panning is done upon drawing it into the viewpane.
 
