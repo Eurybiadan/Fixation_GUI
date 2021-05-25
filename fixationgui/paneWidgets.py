@@ -540,16 +540,29 @@ class ImInitPanel(wx.Panel):
         self.tracker = 0
         self.ImageCoords = numpy.empty((0, 2), float)
         self.LiveCoords = numpy.empty((0, 2), float)
+        self.recenter = 0
 
         self.__deg_symbol = u'\N{DEGREE SIGN}'
 
         buttonalignment = wx.ALIGN_CENTER
+
+        labelFont = wx.Font(11, wx.SWISS, wx.NORMAL, wx.BOLD, False)
+
+        self.quicklabel = wx.StaticText(self, wx.ID_ANY, 'Image Alignment:', style=wx.ALIGN_CENTER)
+        self.quicklabel.SetForegroundColour('white')
+        self.quicklabel.SetFont(labelFont)
 
         # AddImage
         self.AddImage = wx.Button(self, label='Load Background Image', size=(-1, 30))
         self.AddImage.SetBackgroundColour('medium gray')
         self.AddImage.SetForegroundColour('white')
         self.buttonList.append(self.AddImage)
+
+        # Center Fovea
+        self.CenterFovea = wx.Button(self, label='Center Fovea', size=(-1, 30))
+        self.CenterFovea.SetBackgroundColour('medium gray')
+        self.CenterFovea.SetForegroundColour('white')
+        self.buttonList.append(self.CenterFovea)
 
         # Calibration & Select button
         # extra white space around words to make the button longer to fit the longer text later on once button is pressed
@@ -562,8 +575,10 @@ class ImInitPanel(wx.Panel):
         for button in self.buttonList:
             button.Bind(wx.EVT_BUTTON, self.OnButton)
         sizer = wx.GridBagSizer()
-        sizer.Add(self.AddImage, (0, 0), (1, 0), buttonalignment)
-        sizer.Add(self.Cali, (1, 0), (1, 0), buttonalignment)
+        sizer.Add(self.quicklabel, (0, 0), (1, 3), buttonalignment)
+        sizer.Add(self.AddImage, (1, 0), (1, 1), buttonalignment)
+        sizer.Add(self.CenterFovea, (1, 1), (1, 3), buttonalignment)
+        sizer.Add(self.Cali, (2, 0), (1, 4), buttonalignment)
 
         box = wx.BoxSizer(wx.VERTICAL)  # To make sure it stays centered in the area it is given
         box.Add(sizer, 0, wx.ALIGN_CENTER)
@@ -576,6 +591,53 @@ class ImInitPanel(wx.Panel):
         if pressed == self.AddImage:
             # call open background image
             self.on_open_background_image()
+        if pressed == self.CenterFovea:
+            height, width = self.img.shape[:2]
+            # get the coordinates of the fovea in the image
+            coordinates = self.viewpaneref._fixLoc
+            # this is if this is the first time the fovea is being centered
+            if self.recenter == 0:
+                xdiff = 256.5 - coordinates.x
+                ydiff = 256.5 - coordinates.y
+                # need to save the old differences in case we need to recenter the fovea
+                self.xdiffold = xdiff
+                self.ydiffold = ydiff
+                self.recenter = 1
+            # this is if we are centering the fovea more than once
+            else:
+                xdiffnew = 256.5 - coordinates.x
+                # add the differences together and save it to be the new old difference
+                xdiff = self.xdiffold + xdiffnew
+                self.xdiffold = xdiff
+                ydiffnew = 256.5 - coordinates.y
+                # add the differences together and save it to be the new old difference
+                ydiff = self.ydiffold + ydiffnew
+                self.ydiffold = ydiff
+
+            T = numpy.float32([[1, 0, xdiff], [0, 1, ydiff]])
+            # We use warpAffine to transform
+            self.result = cv2.warpAffine(self.img, T, (width, height))
+
+            # https://www.geeksforgeeks.org/python-opencv-cv2-imwrite-method/
+            # save the transformed image temporarily
+            filename = 'tempim.TIF'
+            os.chdir(self.header_dir)
+            cv2.imwrite(filename, self.result)
+            impath = self.header_dir + os.sep + filename
+
+            # https://wxpython.org/Phoenix/docs/html/wx.Image.html#wx.Image.LoadFile
+            # Load in the file we just saved so we can make it a bitmap
+            self.bkgrdim = wx.Bitmap(1, 1)
+            self.bkgrdim.LoadFile(impath, wx.BITMAP_TYPE_ANY)
+
+            # Update the image on the gui
+            self.viewpaneref.set_bkgrd(self.bkgrdim)
+
+            # delete the temporary file we made
+            os.remove(filename)
+
+
+
         if pressed == self.Cali:
             # if we are calibrating the image
             if self.tracker == 0:
@@ -589,6 +651,8 @@ class ImInitPanel(wx.Panel):
                 # coordinates from 1st spot on image
                 coordinates = self.viewpaneref._fixLoc
                 self.ptli1 = numpy.float32(coordinates)
+                # mark location on GUI
+                self.viewpaneref.Repaint(0, coordinates)
 
                 # change button label for next point
                 self.Cali.SetLabel('Select Corresponding Point on Image')
@@ -598,6 +662,8 @@ class ImInitPanel(wx.Panel):
                 # coordinates from 1st corresponding spot on live
                 coordinates = self.viewpaneref._fixLoc
                 self.ptim1 = numpy.float32(coordinates)
+                # mark location on GUI
+                self.viewpaneref.Repaint(0, coordinates)
 
                 # change button label for next point
                 self.Cali.SetLabel('Select 2nd Point on Live AO')
@@ -607,6 +673,8 @@ class ImInitPanel(wx.Panel):
                 # coordinates from 2nd spot on image
                 coordinates = self.viewpaneref._fixLoc
                 self.ptli2 = numpy.float32(coordinates)
+                # mark location on GUI
+                self.viewpaneref.Repaint(0, coordinates)
 
                 # change button label for next point
                 self.Cali.SetLabel('Select Corresponding Point on Image')
@@ -616,6 +684,8 @@ class ImInitPanel(wx.Panel):
                 # coordinates from 2nd corresponding spot on live
                 coordinates = self.viewpaneref._fixLoc
                 self.ptim2 = numpy.float32(coordinates)
+                # mark location on GUI
+                self.viewpaneref.Repaint(0, coordinates)
 
                 # change button label for next point
                 self.Cali.SetLabel('Select 3rd Point on Live AO')
@@ -625,6 +695,8 @@ class ImInitPanel(wx.Panel):
                 # coordinates from 3rd spot on image
                 coordinates = self.viewpaneref._fixLoc
                 self.ptli3 = numpy.float32(coordinates)
+                # mark location on GUI
+                self.viewpaneref.Repaint(0, coordinates)
 
                 # change button label for next point
                 self.Cali.SetLabel('Select Corresponding Point on Image')
@@ -634,6 +706,8 @@ class ImInitPanel(wx.Panel):
                 # coordinates from 3rd corresponding spot on live
                 coordinates = self.viewpaneref._fixLoc
                 self.ptim3 = numpy.float32(coordinates)
+                # mark location on GUI
+                self.viewpaneref.Repaint(0, coordinates)
 
                 # change button label for next point
                 self.Cali.SetLabel('Calibrate')
@@ -645,7 +719,7 @@ class ImInitPanel(wx.Panel):
                 self.ptsli = numpy.float32([self.ptli1, self.ptli2, self.ptli3])
 
                 # The Affine Transformation
-                self.matrix = cv2.getAffineTransform(self.ptsim, self.ptsli)
+                self.matrix = cv2.getAffineTransform(self.ptsli, self.ptsim)
                 self.result = cv2.warpAffine(self.img, self.matrix, (self.cols, self.rows))
 
                 # https://www.geeksforgeeks.org/python-opencv-cv2-imwrite-method/
@@ -661,6 +735,7 @@ class ImInitPanel(wx.Panel):
                 self.bkgrdim.LoadFile(impath, wx.BITMAP_TYPE_ANY)
 
                 # reset the background to the new transformed image
+                self.viewpaneref.clear_calicoords()
                 self.viewpaneref.set_bkgrd(self.bkgrdim)
 
                 # change button label

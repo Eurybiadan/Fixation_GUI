@@ -43,6 +43,7 @@ class ViewPane(wx.Window):
         # Initial Previously Marked Locations - stored as a list, each tuple containg the FOV and the location, so (HFOV,VFOV,wx.POINT2D(X,Y))
         self.marked_loc =[]
         self.marked_loc_p =[]
+        self.mark_calicoords = []
         self.hfovplanned = None
         # vfovplanned set to 0.1 to avoid None error when using loadplanned mode.
         # hfovplanned is the one that is checked against None so it should not have an effect
@@ -330,13 +331,16 @@ class ViewPane(wx.Window):
     def pane_to_file(self, filename):
         self._Buffer.SaveFile(filename, wx.BITMAP_TYPE_BMP)
 
-    def Repaint(self, *args):
+    def Repaint(self, markedloc=0, calicoords=0):
+        # NOTE: potentially need to redo the args thing to be better - edit - I don't think it should be removed
         # Create a drawing context, and aim what we do with it at the buffer
         dc = wx.MemoryDC()
         dc.SelectObject(self._Buffer)
         # Draw on the buffer
-        if args:
-            self.marked_loc_p = args[1]
+        if markedloc != 0:
+            self.marked_loc_p = markedloc
+        if calicoords != 0:
+            self.mark_calicoords.append(calicoords)
         self.Paint(dc)
         # Finalize. We have to remove the drawing context from the buffer
         # *before* we move the newly drawn stuff to the bitmap!
@@ -389,7 +393,22 @@ class ViewPane(wx.Window):
             gc.DrawRectangle(mloc.x - (self._pixperdeg * mwidth / 2.0) - .5,
                              mloc.y - (self._pixperdeg * mheight / 2.0) - .5, self._pixperdeg * mwidth,
                              self._pixperdeg * mheight)
+        for mark in self.mark_calicoords:
+            mloc = mark
+            if ((self.mark_calicoords[0].x == mloc.x) and (self.mark_calicoords[0].y == mloc.y)) or (
+                            (self.mark_calicoords[1].x == mloc.x) and (self.mark_calicoords[1].y == mloc.y)):
+                gc.SetPen(wx.Pen(wx.Colour(red=0, green=255, blue=0), 2, wx.SOLID))
+            elif ((self.mark_calicoords[2].x == mloc.x) and (self.mark_calicoords[2].y == mloc.y)) or (
+                            (self.mark_calicoords[3].x == mloc.x) and (self.mark_calicoords[3].y == mloc.y)):
+                gc.SetPen(wx.Pen(wx.Colour(red=0, green=0, blue=255), 2, wx.SOLID))
+            elif ((self.mark_calicoords[4].x == mloc.x) and (self.mark_calicoords[4].y == mloc.y)) or (
+                            (self.mark_calicoords[5].x == mloc.x) and (self.mark_calicoords[5].y == mloc.y)):
+                gc.SetPen(wx.Pen(wx.Colour(red=255, green=0, blue=0), 2, wx.SOLID))
+            gc.DrawRectangle(mloc.x - (1 / 2.0) - .5, mloc.y - (1 / 2.0) - .5, 2,
+                             2)
 
+    def clear_calicoords(self):
+        self.mark_calicoords = []
 
     def removePast(self, width, height, loch, locv, index):
 
@@ -486,9 +505,17 @@ class ViewPane(wx.Window):
             gc.DrawRectangle(self._pananchor.x - (fovwidth / 2.0) - .5, self._pananchor.y - (fovheight / 2.0) - .5,
                              fovwidth, fovheight)
 
+        # if calicoords != 0:
+        #     gc.SetBrush(wx.Brush(wx.WHITE, wx.TRANSPARENT))
+        #     gc.SetPen(wx.Pen(wx.WHITE, 2, wx.SOLID))
+        #     gc.DrawRectangle(self._fixLoc.x - (1 / 2.0) - .5, self._fixLoc.y - (1 / 2.0) - .5, 1,
+        #                      1)
+
+
         # Draws Current fixation box
         gc.SetBrush(wx.Brush(wx.WHITE, wx.TRANSPARENT))
         gc.SetPen(wx.Pen(wx.WHITE, 2, wx.SOLID))
+
 
         # Since the Window is fixed at 513x513, the "_center is the _center row/column of pixels at 256.5,256.5
         # This means there are 256 pixels to the left of the _center, and 256 pixels to the right. This can change if overriden by the user.

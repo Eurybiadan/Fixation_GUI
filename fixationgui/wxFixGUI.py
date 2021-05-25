@@ -324,7 +324,8 @@ class wxFixationFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_FOV_toggle, self.off_toggleFOV)
         FOVMenu.AppendSubMenu(self.toggleMenuFOV, 'Update Savior FOV on list click?')
 
-        # Toggle MEAO configuration
+        # Toggle MEAO system configuration
+        # hopefully can expand on this to switch between AOIP-> Human, Animal-> squirrel/shrew, and MEAO
         self.toggleMEAO = wx.Menu()
         self.off_toggleMEAO = self.toggleMEAO.AppendRadioItem(self.id_off_toggleMEAO, 'No')
         self.Bind(wx.EVT_MENU, self.on_MEAO_toggle, self.off_toggleMEAO)
@@ -673,7 +674,7 @@ class wxFixationFrame(wx.Frame):
                 else:
                     pcrash_list = self.protocolpane.load_protocol(self.protopath_pcrash)
                 if pcrash_list:
-                    self.viewpane.Repaint(self, pcrash_list)
+                    self.viewpane.Repaint(self, 0, pcrash_list)
                 self.curr_path = self.protopath_pcrash
                 self.locfileobjname = self.protopath_pcrash
         else:
@@ -687,7 +688,7 @@ class wxFixationFrame(wx.Frame):
             else:
                 pcrash_list = self.protocolpane.load_protocol(self.locfileobjname)
             if pcrash_list:
-                self.viewpane.Repaint(self, pcrash_list)
+                self.viewpane.Repaint(self, 0, pcrash_list)
 
 
     def on_clear_protocol(self, evt=None):
