@@ -636,8 +636,6 @@ class ImInitPanel(wx.Panel):
             # delete the temporary file we made
             os.remove(filename)
 
-
-
         if pressed == self.Cali:
             # if we are calibrating the image
             if self.tracker == 0:
@@ -758,11 +756,32 @@ class ImInitPanel(wx.Panel):
 
             self.bkgrdim = wx.Bitmap(1, 1)
             self.bkgrdim.LoadFile(impath, wx.BITMAP_TYPE_ANY)
-            # JG affine transformation attempt
+            # JG need for transformations
             self.img = cv2.imread(impath)
             self.rows, self.cols, self.ch = self.img.shape
 
-            self.viewpaneref.set_bkgrd(self.bkgrdim)
+            # determining dimensions to resize the image based on current aspect ratio
+            ratio = self.rows/self.cols
+            # if the ratio is over 1, the height is greater than width so we need to make width at least 513 and then fit the height to keep aspect ratio
+            if ratio > 1:
+                width = 513
+                height = int(ratio * width)
+            # height should be at least 513 to fill the entire grid- - width will be larger but determined by the actual aspect ratio
+            else:
+                height = 513
+                width = int(height/ratio)
+
+            # Scale the bitmap
+            image = wx.ImageFromBitmap(self.bkgrdim)
+            image = image.Scale(width, height, wx.IMAGE_QUALITY_HIGH)
+            result = wx.BitmapFromImage(image)
+            self.viewpaneref.set_bkgrd(result)
+
+            # scale the image
+            self.img = cv2.resize(self.img, (width, height))
+
+
+            #self.viewpaneref.set_bkgrd(self.bkgrdim)
 
 class AutoAdvance(wx.Panel):
 
