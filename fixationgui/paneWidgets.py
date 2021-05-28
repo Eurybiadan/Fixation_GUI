@@ -618,13 +618,15 @@ class ImInitPanel(wx.Panel):
             T = numpy.float32([[1, 0, xdiff], [0, 1, ydiff]])
             # We use warpAffine to transform
             self.result = cv2.warpAffine(self.img, T, (width, height))
+            # added this line in to make sure the calibrations start with the correct image if the fovea was already centered
+            self.img = self.result
 
             # https://www.geeksforgeeks.org/python-opencv-cv2-imwrite-method/
             # save the transformed image temporarily
-            filename = 'tempim.TIF'
+            self.filenamefov = 'tempimfovea.TIF'
             os.chdir(self.header_dir)
-            cv2.imwrite(filename, self.result)
-            impath = self.header_dir + os.sep + filename
+            cv2.imwrite(self.filenamefov, self.result)
+            impath = self.header_dir + os.sep + self.filenamefov
 
             # https://wxpython.org/Phoenix/docs/html/wx.Image.html#wx.Image.LoadFile
             # Load in the file we just saved so we can make it a bitmap
@@ -635,7 +637,7 @@ class ImInitPanel(wx.Panel):
             self.viewpaneref.set_bkgrd(self.bkgrdim)
 
             # delete the temporary file we made
-            os.remove(filename)
+            os.remove(self.filenamefov)
 
         if pressed == self.Cali:
             # if we are calibrating the image
@@ -740,6 +742,7 @@ class ImInitPanel(wx.Panel):
                 self.bkgrdim = wx.Bitmap(1, 1)
                 self.bkgrdim.LoadFile(impath, wx.BITMAP_TYPE_ANY)
 
+
                 # reset the background to the new transformed image
                 self.viewpaneref.clear_calicoords()
                 self.viewpaneref.set_bkgrd(self.bkgrdim)
@@ -773,23 +776,24 @@ class ImInitPanel(wx.Panel):
             # if the ratio is over 1, the height is greater than width so we need to make width at least 513 and then fit the height to keep aspect ratio
             if ratio > 1:
                 width = 513
+                self.cols = width
                 height = int(ratio * width)
+                self.rows = height
             # height should be at least 513 to fill the entire grid- - width will be larger but determined by the actual aspect ratio
             else:
                 height = 513
+                self.rows = height
                 width = int(height/ratio)
+                self.cols = width
 
             # Scale the bitmap
             image = wx.ImageFromBitmap(self.bkgrdim)
             image = image.Scale(width, height, wx.IMAGE_QUALITY_HIGH)
-            result = wx.BitmapFromImage(image)
-            self.viewpaneref.set_bkgrd(result)
+            self.bkgrdim = wx.BitmapFromImage(image)
+            self.viewpaneref.set_bkgrd(self.bkgrdim)
 
             # scale the image
             self.img = cv2.resize(self.img, (width, height))
-
-
-            #self.viewpaneref.set_bkgrd(self.bkgrdim)
 
 class AutoAdvance(wx.Panel):
 
