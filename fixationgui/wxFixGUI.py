@@ -54,6 +54,7 @@ class wxFixationFrame(wx.Frame):
         self.flicker_stimulus = 0
         self.wavelength = 550
         self.frequency = 10
+        self.FixStat = 0
 
         self._locationfname = None
         self._locationpath = None
@@ -533,8 +534,14 @@ class wxFixationFrame(wx.Frame):
         self.control.horzcontrol.SetValue(degrees.x)
 
         x, y = self.degrees_to_screenpix(degrees.x, degrees.y)
+        if self.FixStat == 0:
+            self.LCCanvas.set_fixation_location(wx.Point2D(x, y), self.MEAO)
 
-        self.LCCanvas.set_fixation_location(wx.Point2D(x, y), self.MEAO)
+    def setFixStat(self):
+        self.FixStat = 1
+
+    def resetFixStat(self):
+        self.FixStat = 0
 
     def set_major_increment(self, increment):
         self.MAJOR_INCREMENT = increment

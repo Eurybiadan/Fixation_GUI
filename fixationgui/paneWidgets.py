@@ -528,7 +528,7 @@ class ImInitPanel(wx.Panel):
     classdocs
     '''
 
-    def __init__(self, parent, viewpaneref, id=wx.ID_ANY, pos=wx.DefaultPosition, size=(-1, -1), style=wx.SIMPLE_BORDER,
+    def __init__(self, parent, rootparent, viewpaneref, id=wx.ID_ANY, pos=wx.DefaultPosition, size=(-1, -1), style=wx.SIMPLE_BORDER,
                  name='Image Initialization Panel', port=None):
         wx.Panel.__init__(self, parent, id, pos, size, style, name)
 
@@ -541,6 +541,7 @@ class ImInitPanel(wx.Panel):
         self.ImageCoords = numpy.empty((0, 2), float)
         self.LiveCoords = numpy.empty((0, 2), float)
         self.recenter = 0
+        self.rootparent = rootparent
 
         self.__deg_symbol = u'\N{DEGREE SIGN}'
 
@@ -655,6 +656,8 @@ class ImInitPanel(wx.Panel):
                 # change button label for next point
                 self.Cali.SetLabel('Select Corresponding Point on Image')
                 self.tracker = self.tracker + 1
+                #here we need to tell it to stay in place
+                self.rootparent.setFixStat()
 
             elif self.tracker == 2:
                 # coordinates from 1st corresponding spot on live
@@ -666,6 +669,7 @@ class ImInitPanel(wx.Panel):
                 # change button label for next point
                 self.Cali.SetLabel('Select 2nd Point on Live AO')
                 self.tracker = self.tracker + 1
+                self.rootparent.resetFixStat()
 
             elif self.tracker == 3:
                 # coordinates from 2nd spot on image
@@ -677,6 +681,7 @@ class ImInitPanel(wx.Panel):
                 # change button label for next point
                 self.Cali.SetLabel('Select Corresponding Point on Image')
                 self.tracker = self.tracker + 1
+                self.rootparent.setFixStat()
 
             elif self.tracker == 4:
                 # coordinates from 2nd corresponding spot on live
@@ -688,6 +693,7 @@ class ImInitPanel(wx.Panel):
                 # change button label for next point
                 self.Cali.SetLabel('Select 3rd Point on Live AO')
                 self.tracker = self.tracker + 1
+                self.rootparent.resetFixStat()
 
             elif self.tracker == 5:
                 # coordinates from 3rd spot on image
@@ -699,6 +705,7 @@ class ImInitPanel(wx.Panel):
                 # change button label for next point
                 self.Cali.SetLabel('Select Corresponding Point on Image')
                 self.tracker = self.tracker + 1
+                self.rootparent.setFixStat()
 
             elif self.tracker == 6:
                 # coordinates from 3rd corresponding spot on live
@@ -710,6 +717,7 @@ class ImInitPanel(wx.Panel):
                 # change button label for next point
                 self.Cali.SetLabel('Calibrate')
                 self.tracker = self.tracker + 1
+                self.rootparent.resetFixStat()
 
             elif self.tracker == 7:
                 # Putting all the coordinates together
