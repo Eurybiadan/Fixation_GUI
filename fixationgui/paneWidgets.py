@@ -653,7 +653,7 @@ class ImInitPanel(wx.Panel):
                 coordinates = self.viewpaneref._fixLoc
                 self.ptli1 = numpy.float32(coordinates)
                 # mark location on GUI
-                self.viewpaneref.Repaint(0, coordinates)
+                self.viewpaneref.Repaint(coordinates)
 
                 # change button label for next point
                 self.Cali.SetLabel('Select Corresponding Point on Image')
@@ -666,7 +666,7 @@ class ImInitPanel(wx.Panel):
                 coordinates = self.viewpaneref._fixLoc
                 self.ptim1 = numpy.float32(coordinates)
                 # mark location on GUI
-                self.viewpaneref.Repaint(0, coordinates)
+                self.viewpaneref.Repaint(coordinates)
 
                 # change button label for next point
                 self.Cali.SetLabel('Select 2nd Point on Live AO')
@@ -678,7 +678,7 @@ class ImInitPanel(wx.Panel):
                 coordinates = self.viewpaneref._fixLoc
                 self.ptli2 = numpy.float32(coordinates)
                 # mark location on GUI
-                self.viewpaneref.Repaint(0, coordinates)
+                self.viewpaneref.Repaint(coordinates)
 
                 # change button label for next point
                 self.Cali.SetLabel('Select Corresponding Point on Image')
@@ -690,7 +690,7 @@ class ImInitPanel(wx.Panel):
                 coordinates = self.viewpaneref._fixLoc
                 self.ptim2 = numpy.float32(coordinates)
                 # mark location on GUI
-                self.viewpaneref.Repaint(0, coordinates)
+                self.viewpaneref.Repaint(coordinates)
 
                 # change button label for next point
                 self.Cali.SetLabel('Select 3rd Point on Live AO')
@@ -702,7 +702,7 @@ class ImInitPanel(wx.Panel):
                 coordinates = self.viewpaneref._fixLoc
                 self.ptli3 = numpy.float32(coordinates)
                 # mark location on GUI
-                self.viewpaneref.Repaint(0, coordinates)
+                self.viewpaneref.Repaint(coordinates)
 
                 # change button label for next point
                 self.Cali.SetLabel('Select Corresponding Point on Image')
@@ -714,7 +714,7 @@ class ImInitPanel(wx.Panel):
                 coordinates = self.viewpaneref._fixLoc
                 self.ptim3 = numpy.float32(coordinates)
                 # mark location on GUI
-                self.viewpaneref.Repaint(0, coordinates)
+                self.viewpaneref.Repaint(coordinates)
 
                 # change button label for next point
                 self.Cali.SetLabel('Calibrate')

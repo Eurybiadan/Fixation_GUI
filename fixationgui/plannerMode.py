@@ -30,6 +30,7 @@ class PlannerMode(wxFixationFrame):
         # if MEAO is 1 that means we are using Rob's system at Marquette so the cross hair location has to be rotated
         # 90 degrees CCW so that it is still true with the gui - this value is sent through to LightCrafter
         self.MEAO = 0
+        self.FixStat = 0
 
         self._locationfname = None
         self._locationpath = None

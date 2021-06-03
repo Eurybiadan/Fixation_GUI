@@ -681,7 +681,7 @@ class wxFixationFrame(wx.Frame):
                 else:
                     pcrash_list = self.protocolpane.load_protocol(self.protopath_pcrash)
                 if pcrash_list:
-                    self.viewpane.Repaint(self, 0, pcrash_list)
+                    self.viewpane.Repaint(0, pcrash_list)
                 self.curr_path = self.protopath_pcrash
                 self.locfileobjname = self.protopath_pcrash
         else:
@@ -695,7 +695,7 @@ class wxFixationFrame(wx.Frame):
             else:
                 pcrash_list = self.protocolpane.load_protocol(self.locfileobjname)
             if pcrash_list:
-                self.viewpane.Repaint(self, 0, pcrash_list)
+                self.viewpane.Repaint(0, pcrash_list)
 
 
     def on_clear_protocol(self, evt=None):

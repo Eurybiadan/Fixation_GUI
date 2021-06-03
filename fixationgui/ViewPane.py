@@ -331,16 +331,16 @@ class ViewPane(wx.Window):
     def pane_to_file(self, filename):
         self._Buffer.SaveFile(filename, wx.BITMAP_TYPE_BMP)
 
-    def Repaint(self, markedloc=0, calicoords=0):
+    def Repaint(self, calicoords=0, *args):
         # NOTE: potentially need to redo the args thing to be better - edit - I don't think it should be removed
         # Create a drawing context, and aim what we do with it at the buffer
         dc = wx.MemoryDC()
         dc.SelectObject(self._Buffer)
-        # Draw on the buffer
-        if markedloc != 0:
-            self.marked_loc_p = markedloc
+        self.calicoordsexist = calicoords
         if calicoords != 0:
             self.mark_calicoords.append(calicoords)
+        if args:
+            self.marked_loc_p = args[0]
         self.Paint(dc)
         # Finalize. We have to remove the drawing context from the buffer
         # *before* we move the newly drawn stuff to the bitmap!
