@@ -208,6 +208,8 @@ class wxFixationFrame(wx.Frame):
         # Heather Stimulus
         self.id_stimulus = 10008
         self.id_flicker_stimulus = 10020
+        self.id_normal = 10060
+        self.id_test = 10061
         # FOV toggle sending from gui to savior
         self.id_on_toggleFOV = 10009
         self.id_off_toggleFOV = 10010
@@ -288,10 +290,12 @@ class wxFixationFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_grid_press, self.on_grid)
         targetMenu.AppendSubMenu(self.gridMenu, 'Grid')
         # # Heather Stimulus
-        targetMenu.Append(self.id_stimulus, 'Set and Test Stimulus\t')
+        targetMenu.Append(self.id_stimulus, 'Set Stimulus\t')
         self.Bind(wx.EVT_MENU, self.on_run_stimulus, id=self.id_stimulus)
-        targetMenu.Append(self.id_flicker_stimulus, 'Set and Test Flicker\t')
+        targetMenu.Append(self.id_flicker_stimulus, 'Set Flicker\t')
         self.Bind(wx.EVT_MENU, self.on_run_flicker_stimulus, id=self.id_flicker_stimulus)
+        targetMenu.Append(self.id_test, 'Test Stimulus/Flicker\t')
+        self.Bind(wx.EVT_MENU, self.on_test, id=self.id_flicker_stimulus)
 
         # Flicker options
         self.FlickerOptionsMenu = wx.Menu()
@@ -316,6 +320,9 @@ class wxFixationFrame(wx.Frame):
         targetMenu.AppendSubMenu(self.FlickerOptionsMenu, 'Flicker Options')
         self.FlickerOptionsMenu.AppendSubMenu(self.WavelengthOptionsMenu, 'Set Wavelength')
         self.FlickerOptionsMenu.AppendSubMenu(self.FrequencyOptionsMenu, 'Set Frequency')
+
+        targetMenu.Append(self.id_normal, 'Reset to Normal Imaging\t')
+        self.Bind(wx.EVT_MENU, self.on_normal, id=self.id_normal)
 
         # Toggle FOV sending from fixation on/off
         self.toggleMenuFOV = wx.Menu()
@@ -411,7 +418,7 @@ class wxFixationFrame(wx.Frame):
             self.com = dlg.GetValue()
         dlg.Destroy()
         print('COM Port is: ', int(self.com))
-        self.LCCanvas.set_fixation_cursor(6, 1, self.com)
+        # self.LCCanvas.set_fixation_cursor(6, 1, self.com)
         self.stimulus = 1
         self.flicker_stimulus = 0
 
@@ -421,8 +428,18 @@ class wxFixationFrame(wx.Frame):
             self.com = dlg.GetValue()
         dlg.Destroy()
         print('COM Port is: ', int(self.com))
-        self.LCCanvas.set_fixation_cursor(7, 1, self.com, self.wavelength, self.frequency)
+        # self.LCCanvas.set_fixation_cursor(7, 1, self.com, self.wavelength, self.frequency)
         self.flicker_stimulus = 1
+        self.stimulus = 0
+
+    def on_test(self, event):
+        if self.stimulus == 1:
+            self.LCCanvas.set_fixation_cursor(6, 1, self.com)
+        if self.flicker_stimulus == 1:
+            self.LCCanvas.set_fixation_cursor(7, 1, self.com, self.wavelength, self.frequency)
+
+    def on_normal(self, event):
+        self.flicker_stimulus = 0
         self.stimulus = 0
 
     def on_wavelength(self, event):
