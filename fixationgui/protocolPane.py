@@ -13,13 +13,14 @@ import csv
 import re
 import string
 
-
+from easygui import multenterbox
 
 
 class ProtocolPane(wx.Panel):
     def __init__(self, parent, id=-1, pos=wx.DefaultPosition, size=wx.DefaultSize, style=wx.SIMPLE_BORDER, name=''):
 
         super(ProtocolPane, self).__init__(parent, id, pos, size, style, name)
+        self.Ntype = 0  # default for Regular AO; 1 is VA
         self.i = 0
         self.SetBackgroundColour('black')
         self._parent = parent
@@ -35,7 +36,9 @@ class ProtocolPane(wx.Panel):
         self.list.InsertColumn(2, 'FOV', format=wx.LIST_FORMAT_CENTER, width=75)
         self.list.InsertColumn(3, 'Eye', format=wx.LIST_FORMAT_CENTER, width=30)
 
-        self.list.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_listitem_selected)
+        # changed from selected to right click to avoid issues with the item activated
+        self.list.Bind(wx.EVT_LIST_ITEM_RIGHT_CLICK, self.on_listitem_selected)
+        self.list.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_activated)
         print("Bound dat list.")
         vbox2 = wx.BoxSizer(wx.VERTICAL)
 
@@ -46,6 +49,7 @@ class ProtocolPane(wx.Panel):
 
         # Initialize the data structure which will hold the protocol
         self._protocol = list()
+        self._protocolNotes = list()
     # JG 2/5
         # Initial Previously Marked Locations - stored as a list, each tuple containg the FOV and the location, so (HFOV,VFOV,wx.POINT2D(X,Y))
         self.marked_loc = []
@@ -146,6 +150,98 @@ class ProtocolPane(wx.Panel):
             vertval = float(vert[:-1].strip()) * vertsign
 
             self._parent.update_fixation_location(wx.Point2D(horzval, vertval))
+
+    def on_activated(self, listevt, notactivated=0):
+        from datetime import datetime
+        import easygui as eg
+        if notactivated:
+            index = 0
+        else:
+            index = listevt.GetIndex()
+        print(index)
+        protoVidNum = self.list.GetItemText(index, 0)
+        # protocolItem = self._protocol[index]
+        # protoVidNum = dict.get(protocolItem, 'videoNumber')
+        protoVidNum = int(protoVidNum)
+        print(protoVidNum)
+        if index < len(self._protocol)-1:
+            protocolNotesItem = self._protocolNotes[protoVidNum - 1]
+            if self.Ntype == 0:
+                self.pFocus = dict.get(protocolNotesItem, 'Focus')
+                self.pPMTconf = dict.get(protocolNotesItem, 'PMTconf')
+                self.pPMTdir = dict.get(protocolNotesItem, 'PMTdir')
+                self.pPMTref = dict.get(protocolNotesItem, 'PMTref')
+                self.pPMTvis = dict.get(protocolNotesItem, 'PMTvis')
+            else:
+                self.pFocus = dict.get(protocolNotesItem, 'Focus')
+                self.pPMTconf = dict.get(protocolNotesItem, 'PMTconf')
+
+        msg = "Notes"
+        title = "Additional Information"
+        if self.Ntype == 0:
+            fieldNames = ["Notes", "Focus", "PMT Conf", "PMT Dir", "PMT Ref", "PMT Vis"]
+        else:
+            fieldNames = ["Time", "Notes", "MAR Guess", "# of Trials", "Converged?", "Converged @?", "Focus", "Conf PMT"]
+        fieldValues = []  # we start with blanks for the values
+        if len(self._protocolNotes) != 0:
+            if protoVidNum < len(self._protocolNotes):
+                protocolCurrNotes = self._protocolNotes[protoVidNum]
+                if len(protocolCurrNotes) == 0:
+                    if index < len(self._protocol)-1:
+                        if self.Ntype == 0:
+                            fieldValues = ["", self.pFocus, self.pPMTconf, self.pPMTdir, self.pPMTref, self.pPMTvis]
+                        else:
+                            fieldValues = ["", "", "", "", "", "", self.pFocus, self.pPMTconf]
+                else:
+                    if self.Ntype == 0:
+                        self.cNotes = dict.get(protocolCurrNotes, 'Notes')
+                        self.cFocus = dict.get(protocolCurrNotes, 'Focus')
+                        self.cPMTconf = dict.get(protocolCurrNotes, 'PMTconf')
+                        self.cPMTdir = dict.get(protocolCurrNotes, 'PMTdir')
+                        self.cPMTref = dict.get(protocolCurrNotes, 'PMTref')
+                        self.cPMTvis = dict.get(protocolCurrNotes, 'PMTvis')
+                        fieldValues = [self.cNotes, self.cFocus, self.cPMTconf, self.cPMTdir, self.cPMTref, self.cPMTvis]
+                        fieldValues = eg.multenterbox(msg, title, fieldNames, fieldValues)
+                        self._protocolNotes[protoVidNum] = dict(Notes=fieldValues[0], Focus=fieldValues[1], PMTconf=fieldValues[2], PMTdir=fieldValues[3], PMTref=fieldValues[4], PMTvis=fieldValues[5])
+                    else:
+                        self.cTime = dict.get(protocolCurrNotes, 'Time')
+                        self.cNotes = dict.get(protocolCurrNotes, 'Notes')
+                        self.cMAR = dict.get(protocolCurrNotes, 'MAR')
+                        self.cTrials = dict.get(protocolCurrNotes, 'numTrial')
+                        self.cConverged = dict.get(protocolCurrNotes, 'conv')
+                        self.cConvAt = dict.get(protocolCurrNotes, 'convAt')
+                        self.cFocus = dict.get(protocolCurrNotes, 'Focus')
+                        self.cPMTconf = dict.get(protocolCurrNotes, 'PMTconf')
+                        fieldValues = [self.cTime, self.cNotes, self.cMAR, self.cTrials, self.cConverged, self.cConvAt, self.cFocus, self.cPMTconf]
+                        fieldValues = eg.multenterbox(msg, title, fieldNames, fieldValues)
+                        self._protocolNotes[protoVidNum] = dict(Time=fieldValues[0], Notes=fieldValues[1], MAR=fieldValues[2], numTrial=fieldValues[3], conv=fieldValues[4], convAt=fieldValues[5],
+                                                                Focus=fieldValues[6], PMTconf=fieldValues[7])
+                    print("Reply was:", fieldValues)
+                    return
+        if index < len(self._protocol) - 1:
+            if self.Ntype == 0:
+                fieldValues = ["", self.pFocus, self.pPMTconf, self.pPMTdir, self.pPMTref, self.pPMTvis]
+            else:
+                t = datetime.now().strftime('%H:%M:%S')
+                fieldValues = [t, '', '', '', '', '', self.pFocus, self.pPMTconf]
+        if self.Ntype == 1:
+            t = datetime.now().strftime('%H:%M:%S')
+            fieldValues = [t, '', '', '', '', '', '', '']
+        fieldValues = eg.multenterbox(msg, title, fieldNames, fieldValues)
+        print("Reply was:", fieldValues)
+
+        if self.Ntype == 0:
+            newNotesEntry = dict(Notes=fieldValues[0], Focus=fieldValues[1], PMTconf=fieldValues[2], PMTdir=fieldValues[3], PMTref=fieldValues[4], PMTvis=fieldValues[5])
+        else:
+            newNotesEntry = dict(Time=fieldValues[0], Notes=fieldValues[1], MAR=fieldValues[2],
+                                                    numTrial=fieldValues[3], conv=fieldValues[4], convAt=fieldValues[5],
+                                                    Focus=fieldValues[6], PMTconf=fieldValues[7])
+        self._protocolNotes.append(newNotesEntry)
+        print(newNotesEntry)
+
+    def notesType(self, type):
+        self.Ntype = type
+
 
     def load_protocol(self, path, loadplanmode=0):
         self.loadplanmode = loadplanmode
@@ -350,6 +446,7 @@ class ProtocolPane(wx.Panel):
                 newentry['fov'][1]) + self._degree_sign)
             self.list.SetItem(ind, 3, newentry['eye'])
             self.list.SetItemBackgroundColour(ind, (0, 0, 0))
+            self.on_activated(0, 1)
 
         return 0
 

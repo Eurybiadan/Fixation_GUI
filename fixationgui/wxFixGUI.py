@@ -223,6 +223,8 @@ class wxFixationFrame(wx.Frame):
         self.id_on_10_press = 10054
         self.id_off_toggleMEAO = 10056
         self.id_on_toggleMEAO = 1057
+        self.id_regNotes = 10062
+        self.id_VANotes = 10063
 
 
         # Creates Menu Bar
@@ -232,11 +234,13 @@ class wxFixationFrame(wx.Frame):
         targetMenu = wx.Menu()
         FOVMenu = wx.Menu()
         MEAOMenu = wx.Menu()
+        NotesMenu = wx.Menu()
         menubar.Append(fileMenu, 'File')
         menubar.Append(protoMenu, 'Protocol')
         menubar.Append(targetMenu, 'Target')
         menubar.Append(MEAOMenu, 'System')
         menubar.Append(FOVMenu, 'FOV')
+        menubar.Append(NotesMenu, 'Notes')
 
 
         # Open a protocol
@@ -341,6 +345,15 @@ class wxFixationFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_MEAO_toggle, self.on_toggleMEAO)
         MEAOMenu.AppendSubMenu(self.toggleMEAO, 'MEAO?')
 
+        # Toggle Notes regular or VA
+        self.notes = wx.Menu()
+        self.regularAO = self.notes.AppendRadioItem(self.id_regNotes, 'Regular AO')
+        self.Bind(wx.EVT_MENU, self.on_notes_toggle, self.regularAO)
+        self.VAAO = self.notes.AppendRadioItem(self.id_VANotes, 'Visual Acuity AO')
+        self.Bind(wx.EVT_MENU, self.on_notes_toggle, self.VAAO)
+        NotesMenu.AppendSubMenu(self.notes, 'Type')
+
+
         # Compounds the Menu Bar
         self.SetMenuBar(menubar)
 
@@ -398,6 +411,13 @@ class wxFixationFrame(wx.Frame):
             self.MEAO = 1
         elif event.Id == self.id_off_toggleMEAO:
             self.MEAO = 0
+
+    def on_notes_toggle(self, event):
+        if event.Id == self.id_regNotes:
+            self.protocolpane.notesType(0)
+        elif event.Id == self.id_VANotes:
+            self.protocolpane.notesType(1)
+
 
 
     # Alignment
