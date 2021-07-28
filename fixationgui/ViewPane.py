@@ -395,15 +395,17 @@ class ViewPane(wx.Window):
                              self._pixperdeg * mheight)
         for mark in self.mark_calicoords:
             mloc = mark
+            # these if statements can be utilized to make the different sets of calibration coordinates different colors
+            # currently set to all being green
             if ((self.mark_calicoords[0].x == mloc.x) and (self.mark_calicoords[0].y == mloc.y)) or (
                             (self.mark_calicoords[1].x == mloc.x) and (self.mark_calicoords[1].y == mloc.y)):
                 gc.SetPen(wx.Pen(wx.Colour(red=0, green=255, blue=0), 2, wx.SOLID))
             elif ((self.mark_calicoords[2].x == mloc.x) and (self.mark_calicoords[2].y == mloc.y)) or (
                             (self.mark_calicoords[3].x == mloc.x) and (self.mark_calicoords[3].y == mloc.y)):
-                gc.SetPen(wx.Pen(wx.Colour(red=0, green=0, blue=255), 2, wx.SOLID))
+                gc.SetPen(wx.Pen(wx.Colour(red=0, green=255, blue=0), 2, wx.SOLID))
             elif ((self.mark_calicoords[4].x == mloc.x) and (self.mark_calicoords[4].y == mloc.y)) or (
                             (self.mark_calicoords[5].x == mloc.x) and (self.mark_calicoords[5].y == mloc.y)):
-                gc.SetPen(wx.Pen(wx.Colour(red=255, green=0, blue=0), 2, wx.SOLID))
+                gc.SetPen(wx.Pen(wx.Colour(red=0, green=255, blue=0), 2, wx.SOLID))
             gc.DrawRectangle(mloc.x - (1 / 2.0) - .5, mloc.y - (1 / 2.0) - .5, 2,
                              2)
 
