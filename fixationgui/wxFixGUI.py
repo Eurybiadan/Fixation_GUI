@@ -15,6 +15,7 @@ import socket
 import threading
 
 
+
 myEVT_MESSAGE = wx.NewEventType()
 EVT_MESSAGE = wx.PyEventBinder(myEVT_MESSAGE, 1)
 
@@ -225,6 +226,7 @@ class wxFixationFrame(wx.Frame):
         self.id_on_toggleMEAO = 1057
         self.id_regNotes = 10062
         self.id_VANotes = 10063
+        self.id_save_notes_loc = 10064
 
 
         # Creates Menu Bar
@@ -237,10 +239,11 @@ class wxFixationFrame(wx.Frame):
         NotesMenu = wx.Menu()
         menubar.Append(fileMenu, 'File')
         menubar.Append(protoMenu, 'Protocol')
+        menubar.Append(NotesMenu, 'Notes')
         menubar.Append(targetMenu, 'Target')
         menubar.Append(MEAOMenu, 'System')
         menubar.Append(FOVMenu, 'FOV')
-        menubar.Append(NotesMenu, 'Notes')
+
 
 
         # Open a protocol
@@ -346,12 +349,14 @@ class wxFixationFrame(wx.Frame):
         MEAOMenu.AppendSubMenu(self.toggleMEAO, 'MEAO?')
 
         # Toggle Notes regular or VA
-        self.notes = wx.Menu()
-        self.regularAO = self.notes.AppendRadioItem(self.id_regNotes, 'Regular AO')
-        self.Bind(wx.EVT_MENU, self.on_notes_toggle, self.regularAO)
-        self.VAAO = self.notes.AppendRadioItem(self.id_VANotes, 'Visual Acuity AO')
-        self.Bind(wx.EVT_MENU, self.on_notes_toggle, self.VAAO)
-        NotesMenu.AppendSubMenu(self.notes, 'Type')
+        # self.notes = wx.Menu()
+        NotesMenu.Append(self.id_save_notes_loc, 'Set Notes Save Location...\t')
+        self.Bind(wx.EVT_MENU, self.on_set_save_notes_location, id=self.id_save_notes_loc)
+        # self.regularAO = self.notes.AppendRadioItem(self.id_regNotes, 'Regular AO')
+        # self.Bind(wx.EVT_MENU, self.on_notes_toggle, self.regularAO)
+        # self.VAAO = self.notes.AppendRadioItem(self.id_VANotes, 'Visual Acuity AO')
+        # self.Bind(wx.EVT_MENU, self.on_notes_toggle, self.VAAO)
+        # NotesMenu.AppendSubMenu(self.notes, 'Type')
 
 
         # Compounds the Menu Bar
@@ -600,6 +605,9 @@ class wxFixationFrame(wx.Frame):
             dialog.Destroy()
 
             self.viewpane.pane_to_file(locationpath + os.sep + locationfname)
+
+    def on_set_save_notes_location(self, evt=None):
+        self.protocolpane.savepdfas()
 
     def on_set_save_protocol_location(self, evt=None, loadplanMode=0):
 
@@ -1000,7 +1008,8 @@ class wxFixationFrame(wx.Frame):
 
         self._locfileobj.close()
 
-    # Saves The Aligned ViewPane
+
+        # Saves The Aligned ViewPane
     def save_viewpane(self, event):
         context = wx.ClientDC(self.imagespace)
         memory = wx.MemoryDC()

@@ -5,16 +5,25 @@
 @author Robert F Cooper
 
 '''
+import os
 from decimal import Decimal
 
 import numpy as np
 import wx
 import csv
 import re
+import pdfrw
 import string
 
 from easygui import multenterbox
 
+
+ANNOT_KEY = '/Annots'
+ANNOT_FIELD_KEY = '/T'
+ANNOT_VAL_KEY = '/V'
+ANNOT_RECT_KEY = '/Rect'
+SUBTYPE_KEY = '/Subtype'
+WIDGET_SUBTYPE_KEY = '/Widget'
 
 class ProtocolPane(wx.Panel):
     def __init__(self, parent, id=-1, pos=wx.DefaultPosition, size=wx.DefaultSize, style=wx.SIMPLE_BORDER, name=''):
@@ -58,6 +67,8 @@ class ProtocolPane(wx.Panel):
         self.loadplanmode = 0
         # by default the gui will send FOV values to savior and update FOV when list items are selected
         self.guiSendFOV = 1
+        self.pdfcall = 0
+        self.locSaved = 0
 
     def loadMessageEvtObjects(self, messageEvent, myEvtRetMsg):
 
@@ -160,6 +171,9 @@ class ProtocolPane(wx.Panel):
             index = listevt.GetIndex()
         print(index)
         protoVidNum = self.list.GetItemText(index, 0)
+        protoLoc = self.list.GetItemText(index, 1)
+        protoFOV = self.list.GetItemText(index, 2)
+        protoEye = self.list.GetItemText(index, 3)
         # protocolItem = self._protocol[index]
         # protoVidNum = dict.get(protocolItem, 'videoNumber')
         protoVidNum = int(protoVidNum)
@@ -216,17 +230,19 @@ class ProtocolPane(wx.Panel):
                         fieldValues = eg.multenterbox(msg, title, fieldNames, fieldValues)
                         self._protocolNotes[protoVidNum] = dict(Time=fieldValues[0], Notes=fieldValues[1], MAR=fieldValues[2], numTrial=fieldValues[3], conv=fieldValues[4], convAt=fieldValues[5],
                                                                 Focus=fieldValues[6], PMTconf=fieldValues[7])
+                    self.pdf(protoVidNum, protoLoc, protoFOV, protoEye, self._protocolNotes[protoVidNum])
                     print("Reply was:", fieldValues)
                     return
         if index < len(self._protocol) - 1:
             if self.Ntype == 0:
                 fieldValues = ["", self.pFocus, self.pPMTconf, self.pPMTdir, self.pPMTref, self.pPMTvis]
             else:
-                t = datetime.now().strftime('%H:%M:%S')
-                fieldValues = [t, '', '', '', '', '', self.pFocus, self.pPMTconf]
+                # t = datetime.now().strftime('%H:%M:%S')
+                fieldValues = ['', '', '', '', '', '', self.pFocus, self.pPMTconf]
         if self.Ntype == 1:
-            t = datetime.now().strftime('%H:%M:%S')
-            fieldValues = [t, '', '', '', '', '', '', '']
+            if len(self._protocolNotes) == 0:
+                # t = datetime.now().strftime('%H:%M:%S')
+                fieldValues = ['', '', '', '', '', '', '', '']
         fieldValues = eg.multenterbox(msg, title, fieldNames, fieldValues)
         print("Reply was:", fieldValues)
 
@@ -237,7 +253,102 @@ class ProtocolPane(wx.Panel):
                                                     numTrial=fieldValues[3], conv=fieldValues[4], convAt=fieldValues[5],
                                                     Focus=fieldValues[6], PMTconf=fieldValues[7])
         self._protocolNotes.append(newNotesEntry)
+        self.pdf(protoVidNum, protoLoc, protoFOV, protoEye, newNotesEntry)
         print(newNotesEntry)
+
+    def pdf(self, vidNum, protoLoc, protoFOV, protoEye, entry):
+        if self.pdfcall == 1:
+            pdf_template = self._Noteslocationpath
+        else:
+            pdf_template = "AOSLO_Electronic_Notes_Template_v1.pdf"
+            if self.locSaved == 0:
+                self.savepdfas()
+            self.pdfcall = 1
+        pdf_output = self._Noteslocationpath
+        template_pdf = pdfrw.PdfReader(pdf_template)
+
+        for page in template_pdf.pages:
+            annotations = page[ANNOT_KEY]
+            for annotation in annotations:
+                if annotation[SUBTYPE_KEY] == WIDGET_SUBTYPE_KEY:
+                    if annotation[ANNOT_FIELD_KEY]:
+                        key = annotation[ANNOT_FIELD_KEY][1:-1]
+                        print(key)
+
+        eye = str(vidNum)
+        FOV = 'FOV ' + str(vidNum)
+        locNotes = 'Location  Notes' + str(vidNum)
+        focus = 'Focus ' + str(vidNum)
+        conf = 'Conf' + str(vidNum)
+        dir = 'Dir' + str(vidNum)
+        ref = 'Ref' + str(vidNum)
+        vis = 'Vis' + str(vidNum)
+
+
+# probably need a for loop here to change the data_dict/call fill_pdf multiple times
+        data_dict = {
+            eye: protoEye,
+            FOV: protoFOV,
+            locNotes: protoLoc + '; ' + entry.get('Notes'),
+            focus: entry.get('Focus'),
+            conf: entry.get('PMTconf'),
+            dir: entry.get('PMTdir'),
+            ref: entry.get('PMTref'),
+            vis: entry.get('PMTvis')
+        }
+
+        self.fill_pdf(pdf_template, pdf_output, data_dict)
+
+    def savepdfas(self):
+        dialog = wx.FileDialog(self, 'Save Notes As:', "", "", 'PDF|*.pdf', wx.FD_SAVE)
+        if dialog.ShowModal() == wx.ID_OK:
+            self._Noteslocationpath = dialog.GetDirectory()
+            self._Noteslocationfname = dialog.GetFilename()
+
+            result = wx.ID_YES
+
+            if os.path.isfile(self._Noteslocationpath + os.sep + self._Noteslocationfname):
+                md = wx.MessageDialog(self, "Notes file already exists! Overwrite?",
+                                      "Notes file already exists!",
+                                      wx.ICON_QUESTION | wx.YES_NO | wx.CANCEL)
+                result = md.ShowModal()
+
+                if result == wx.ID_YES:
+                    self._Noteslocationpath = self._Noteslocationpath + os.sep + self._Noteslocationfname
+                    dialog.Destroy()
+                    self.locSaved = 1
+                    return
+                else:
+                    return
+
+            if result == wx.ID_YES:
+                self._Noteslocationpath = self._Noteslocationpath + os.sep + self._Noteslocationfname
+                dialog.Destroy()
+                self.locSaved = 1
+                return
+            else:
+                print('Woah Nelly, something went wrong')
+
+    def fill_pdf(self, input_pdf_path, output_pdf_path, data_dict):
+        template_pdf = pdfrw.PdfReader(input_pdf_path)
+        for page in template_pdf.pages:
+            annotations = page[ANNOT_KEY]
+            for annotation in annotations:
+                if annotation[SUBTYPE_KEY] == WIDGET_SUBTYPE_KEY:
+                    if annotation[ANNOT_FIELD_KEY]:
+                        key = annotation[ANNOT_FIELD_KEY][1:-1]
+                        if key in data_dict.keys():
+                            if type(data_dict[key]) == bool:
+                                if data_dict[key] == True:
+                                    annotation.update(pdfrw.PdfDict(
+                                        AS=pdfrw.PdfName('Yes')))
+                            else:
+                                annotation.update(
+                                    pdfrw.PdfDict(V='{}'.format(data_dict[key]))
+                                )
+                                annotation.update(pdfrw.PdfDict(AP=''))
+        template_pdf.Root.AcroForm.update(pdfrw.PdfDict(NeedAppearances=pdfrw.PdfObject('true')))
+        pdfrw.PdfWriter().write(output_pdf_path, template_pdf)
 
     def notesType(self, type):
         self.Ntype = type
