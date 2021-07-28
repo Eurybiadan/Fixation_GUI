@@ -273,7 +273,7 @@ class ProtocolPane(wx.Panel):
                 if annotation[SUBTYPE_KEY] == WIDGET_SUBTYPE_KEY:
                     if annotation[ANNOT_FIELD_KEY]:
                         key = annotation[ANNOT_FIELD_KEY][1:-1]
-                        print(key)
+                        # print(key)
 
         eye = str(vidNum)
         FOV = 'FOV ' + str(vidNum)
@@ -284,8 +284,6 @@ class ProtocolPane(wx.Panel):
         ref = 'Ref' + str(vidNum)
         vis = 'Vis' + str(vidNum)
 
-
-# probably need a for loop here to change the data_dict/call fill_pdf multiple times
         data_dict = {
             eye: protoEye,
             FOV: protoFOV,
