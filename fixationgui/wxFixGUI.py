@@ -299,10 +299,12 @@ class wxFixationFrame(wx.Frame):
         # # Heather Stimulus
         targetMenu.Append(self.id_stimulus, 'Set Stimulus\t')
         self.Bind(wx.EVT_MENU, self.on_run_stimulus, id=self.id_stimulus)
+
         targetMenu.Append(self.id_flicker_stimulus, 'Set Flicker\t')
         self.Bind(wx.EVT_MENU, self.on_run_flicker_stimulus, id=self.id_flicker_stimulus)
+
         targetMenu.Append(self.id_test, 'Test Stimulus/Flicker\t')
-        self.Bind(wx.EVT_MENU, self.on_test, id=self.id_flicker_stimulus)
+        self.Bind(wx.EVT_MENU, self.on_test, id=self.id_test)
 
         # Flicker options
         self.FlickerOptionsMenu = wx.Menu()
