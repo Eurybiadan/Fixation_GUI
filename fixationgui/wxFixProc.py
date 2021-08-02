@@ -4,6 +4,7 @@ from multiprocessing import Queue
 import subprocess
 import sys, os, socket, platform
 import time
+import datetime
 
 
 class FixGUIServer:
@@ -55,8 +56,9 @@ class QueueWhisperer(asyncore.dispatcher):
     def handle_read(self):
         # reads things sent from gui to savior?
         recvmsg = self.recv(32).decode("utf-8")
-        # print("read in fixproc")
-        # print("Recieved: " + recvmsg)
+        print("read in fixproc")
+        print("Recieved: " + recvmsg)
+        print(datetime.datetime.now())
         self._recvQueue.put(recvmsg)
 
     def handle_write(self):

@@ -8,6 +8,7 @@ from threading import Timer
 import serial
 import wx
 from math import floor
+import datetime
 
 
 # Sets Up The Class For The Program And Creates The Window
@@ -243,6 +244,7 @@ class LightCrafterCanvas(wx.Window):
         # s.run(False)
 
     def stimulus(self, dc, locationx, locationy, start, port):
+
         with serial.Serial() as ser:
             # test color array w/ arbitrary wavelengths that are easy to tell the difference between
             # colors = [wx.Colour(red=163, green=255, blue=0), wx.Colour(red=255, green=0, blue=0), wx.Colour(red=0, green=255, blue=0), wx.Colour(red=0, green=0, blue=225)]
@@ -266,6 +268,7 @@ class LightCrafterCanvas(wx.Window):
             ser.open()
 
             # messages to send to the driver
+            # time.sleep(5)
             Open = struct.pack('!B', 64)
             Close = struct.pack('!B', 65)
 
@@ -328,7 +331,7 @@ class LightCrafterCanvas(wx.Window):
 
             # sleep to make sure there the color is fully switched before opening
             time.sleep(0.01)
-            # print('Open @', time.perf_counter())
+            print('Open stimulus @', datetime.datetime.now())
             ser.write(Open)
 
             # display the color through the open shutter for 1 second
@@ -373,6 +376,8 @@ class LightCrafterCanvas(wx.Window):
             ser.open()
 
             # messages to send to the driver
+            # time.sleep(5)
+            print('open flicker @: ', datetime.datetime.now())
             Open = struct.pack('!B', 64)
             Close = struct.pack('!B', 65)
 

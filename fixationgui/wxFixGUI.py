@@ -25,6 +25,12 @@ EVT_RETURN_MESSAGE = wx.PyEventBinder(myEVT_RETURN_MESSAGE, 2)
 
 # Sets Up The Class For The Program And Creates The Window
 class wxFixationFrame(wx.Frame):
+    # added to see the paths on savior computer
+    import sys
+    sys.path.append('C:\\Users\\jgrieshop\\Documents\\GitHub\\Fixation_GUI\\venv37\\Lib\\site-packages\\pdfrw')
+    sys.path.append('C:\\Users\\jgrieshop\\Documents\\GitHub\\Fixation_GUI\\venv37\\Lib\\site-packages\\easygui')
+    for path in sys.path:
+        print(path)
     # The number of ppd of the screen we'll be projecting to (e.g. Lightcrafter, Projector, etc).
     SCREEN_PPD = 20
 
@@ -781,21 +787,18 @@ class wxFixationFrame(wx.Frame):
         return x, y
 
     def on_keyboard_press(self, event):
+        import datetime
         # Allows For Arrow Control Of The Cursor
-
         if event.GetKeyCode() == wx.WXK_F4:
             evt = MessageEvent(myEVT_RETURN_MESSAGE, -1, 4, "F4")
-            # print('fixgui message values:')
-            # print(hex(id(myEVT_RETURN_MESSAGE)))
-            # print(hex(id(MessageEvent)))
+            print('fixgui message values:')
+            print(hex(id(myEVT_RETURN_MESSAGE)))
+            print(hex(id(MessageEvent)))
+            print(datetime.datetime.now())
             wx.PostEvent(self, evt)
 
-            # Heather Stimulus
-            if self.stimulus is 1:
-                self.LCCanvas.set_fixation_cursor(6, 1, self.com)
-            if self.flicker_stimulus is 1:
-                self.LCCanvas.set_fixation_cursor(7, 1, self.com, self.wavelength, self.frequency)
-
+        t = threading.Timer(3, self.call_stimulus)
+        t.start()
         # elif event.GetKeyCode() == wx.WXK_NUMPAD_SUBTRACT:
         #     self.zoom_out(self)
 
@@ -803,6 +806,16 @@ class wxFixationFrame(wx.Frame):
             self.on_image_alignment(event)
         elif self.viewpane.align_on is False:
             self.on_move_fixation(event)
+
+    def call_stimulus(self):
+        import datetime
+        # Heather Stimulus
+        if self.stimulus is 1:
+            print(datetime.datetime.now())
+            self.LCCanvas.set_fixation_cursor(6, 1, self.com)
+        if self.flicker_stimulus is 1:
+            print(datetime.datetime.now())
+            self.LCCanvas.set_fixation_cursor(7, 1, self.com, self.wavelength, self.frequency)
 
     def on_image_alignment(self, event):
         if event.ControlDown():  # The image can only be moved if Control is being held down!
