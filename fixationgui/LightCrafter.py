@@ -207,11 +207,14 @@ class LightCrafterCanvas(wx.Window):
             # Index 1: Red cone peak spectral sensitivity: 560 nm (195, 255, 0)
             # Index 2: Green cone peak spectral sensitivity: 530 nm (94, 255, 0)
             # Index 3: Blue cone peak spectral sensitivity: 440 nm (0, 0, 255)
+            # Index 4: 450 nm cone stimulus for ARVO: (0, 70, 255)
             # Wavelength to rgb values generated from: https://academo.org/demos/wavelength-to-colour-relationship/
             colors = [wx.Colour(red=163, green=255, blue=0), wx.Colour(red=195, green=255, blue=0),
-                      wx.Colour(red=94, green=255, blue=0), wx.Colour(red=0, green=0, blue=225)]
+                      wx.Colour(red=94, green=255, blue=0), wx.Colour(red=0, green=0, blue=225), wx.Colour(red=0, green=70, blue=225)]
             if wavelength == 560:
                 color = colors[1]
+            elif wavelength == 450:
+                color = colors[4]
             elif wavelength == 530:
                 color = colors[2]
             elif wavelength == 440:
@@ -223,11 +226,11 @@ class LightCrafterCanvas(wx.Window):
             self._stimbrush.SetColour(color)
             dc.SetPen(self._stimpen)
             dc.SetBrush(self._stimbrush)
-            if self.draw_target:
-                dc.DrawCircle(self.thisSize.x/2, self.thisSize.y/2, 75)  # this line for drawing circle in center of screen
+            # if self.draw_target:
+            dc.DrawCircle(self.thisSize.x/2, self.thisSize.y/2, 30)  # this line for drawing circle in center of screen #75 was original number
             # dc.DrawCircle(self._location.x, self._location.y, 75)  # this line for drawing circle where fixation target located
-            else:
-                dc.DrawRectangle(0, 0, self.thisSize.x, self.thisSize.y)  # this makes the entire screen the wavelength
+            # else:
+                # dc.DrawRectangle(0, 0, self.thisSize.x, self.thisSize.y)  # this makes the entire screen the wavelength
             # print('DrawCircle @', time.perf_counter())
             del dc  # need to get rid of the MemoryDC before Update() is called.
             self.Refresh(eraseBackground=False)
@@ -383,12 +386,12 @@ class LightCrafterCanvas(wx.Window):
 
             i = 0
             for i in range(iterations):
+                # print('Closed @', time.perf_counter())
+                ser.write(Close)
+                time.sleep(closedTime)
                 #print('Open @', time.perf_counter())
                 ser.write(Open)
                 time.sleep(openTime)  # careful with this, adds to redraw timer time
-                #print('Closed @', time.perf_counter())
-                ser.write(Close)
-                time.sleep(closedTime)
                 i = i + 1
 
             ser.close()

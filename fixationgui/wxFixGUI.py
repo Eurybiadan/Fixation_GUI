@@ -47,6 +47,7 @@ class wxFixationFrame(wx.Frame):
         # if MEAO is 1 that means we are using Rob's system at Marquette so the cross hair location has to be rotated
         # 90 degrees CCW so that it is still true with the gui - this value is sent through to LightCrafter
         self.MEAO = 0
+        self.stimulus = 0
 
         # Initial Conditions
         self.curr_path = ''
@@ -223,6 +224,7 @@ class wxFixationFrame(wx.Frame):
         self.id_wavelength = 10020
         self.id_frequency = 10030
         self.id_on_550_press = 10040
+        self.id_on_450_press = 10045
         self.id_on_560_press = 10050
         self.id_on_530_press = 10051
         self.id_on_440_press = 10052
@@ -303,10 +305,10 @@ class wxFixationFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_grid_press, self.on_grid)
         targetMenu.AppendSubMenu(self.gridMenu, 'Grid')
         # # Heather Stimulus
-        targetMenu.Append(self.id_stimulus, 'Set Stimulus\t')
+        targetMenu.Append(self.id_stimulus, 'Set Flicker\t')
         self.Bind(wx.EVT_MENU, self.on_run_stimulus, id=self.id_stimulus)
 
-        targetMenu.Append(self.id_flicker_stimulus, 'Set Flicker\t')
+        targetMenu.Append(self.id_flicker_stimulus, 'Set Stimulus\t')
         self.Bind(wx.EVT_MENU, self.on_run_flicker_stimulus, id=self.id_flicker_stimulus)
 
         targetMenu.Append(self.id_test, 'Test Stimulus/Flicker\t')
@@ -316,8 +318,10 @@ class wxFixationFrame(wx.Frame):
         self.FlickerOptionsMenu = wx.Menu()
         # wavelengths
         self.WavelengthOptionsMenu = wx.Menu()
-        self.on_550_press = self.WavelengthOptionsMenu.AppendRadioItem(self.id_on_550_press, '550nm (original)')
+        self.on_550_press = self.WavelengthOptionsMenu.AppendRadioItem(self.id_on_550_press, '550nm (ARVO)')
         self.Bind(wx.EVT_MENU, self.on_wavelength, self.on_550_press)
+        self.on_450_press = self.WavelengthOptionsMenu.AppendRadioItem(self.id_on_450_press, '450nm (ARVO)')
+        self.Bind(wx.EVT_MENU, self.on_wavelength, self.on_450_press)
         self.on_560_press = self.WavelengthOptionsMenu.AppendRadioItem(self.id_on_560_press, '560nm (red)')
         self.Bind(wx.EVT_MENU, self.on_wavelength, self.on_560_press)
         self.on_530_press = self.WavelengthOptionsMenu.AppendRadioItem(self.id_on_530_press, '530nm (green)')
@@ -332,7 +336,7 @@ class wxFixationFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_frequency, self.on_30_press)
 
 
-        targetMenu.AppendSubMenu(self.FlickerOptionsMenu, 'Flicker Options')
+        targetMenu.AppendSubMenu(self.FlickerOptionsMenu, 'Stimulus Options')
         self.FlickerOptionsMenu.AppendSubMenu(self.WavelengthOptionsMenu, 'Set Wavelength')
         self.FlickerOptionsMenu.AppendSubMenu(self.FrequencyOptionsMenu, 'Set Frequency')
 
@@ -481,6 +485,10 @@ class wxFixationFrame(wx.Frame):
             self.wavelength = 550
             # self.LCCanvas.set_fixation_cursor(7, 1, self.com, self.wavelength, self.frequency)
             # print('wavelength 550')
+        elif event.Id == self.id_on_450_press:
+            self.wavelength = 450
+            # self.LCCanvas.set_fixation_cursor(7, 1, self.com, self.wavelength, self.frequency)
+            # print('wavelength 450')
         elif event.Id == self.id_on_560_press:
             self.wavelength = 560
             # self.LCCanvas.set_fixation_cursor(7, 1, self.com, self.wavelength, self.frequency)

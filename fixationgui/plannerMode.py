@@ -31,6 +31,8 @@ class PlannerMode(wxFixationFrame):
         # 90 degrees CCW so that it is still true with the gui - this value is sent through to LightCrafter
         self.MEAO = 0
         self.FixStat = 0
+        self.stimulus = 0
+        self.flicker_stimulus = 0
 
         self._locationfname = None
         self._locationpath = None

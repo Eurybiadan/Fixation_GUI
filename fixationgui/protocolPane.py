@@ -165,6 +165,9 @@ class ProtocolPane(wx.Panel):
     def on_activated(self, listevt, notactivated=0):
         from datetime import datetime
         import easygui as eg
+        return  # added to skip the notes code below to avoid problems while this function does not work -JG 09/22/2021
+        if self.planmode == 1:
+            return
         if notactivated:
             index = 0
         else:
@@ -215,7 +218,8 @@ class ProtocolPane(wx.Panel):
                         self.cPMTref = dict.get(protocolCurrNotes, 'PMTref')
                         self.cPMTvis = dict.get(protocolCurrNotes, 'PMTvis')
                         fieldValues = [self.cNotes, self.cFocus, self.cPMTconf, self.cPMTdir, self.cPMTref, self.cPMTvis]
-                        fieldValues = eg.multenterbox(msg, title, fieldNames, fieldValues)
+                        MyFrame(wx)
+                        #fieldValues = eg.multenterbox(msg, title, fieldNames, fieldValues)
                         self._protocolNotes[protoVidNum] = dict(Notes=fieldValues[0], Focus=fieldValues[1], PMTconf=fieldValues[2], PMTdir=fieldValues[3], PMTref=fieldValues[4], PMTvis=fieldValues[5])
                     else:
                         self.cTime = dict.get(protocolCurrNotes, 'Time')
@@ -227,7 +231,8 @@ class ProtocolPane(wx.Panel):
                         self.cFocus = dict.get(protocolCurrNotes, 'Focus')
                         self.cPMTconf = dict.get(protocolCurrNotes, 'PMTconf')
                         fieldValues = [self.cTime, self.cNotes, self.cMAR, self.cTrials, self.cConverged, self.cConvAt, self.cFocus, self.cPMTconf]
-                        fieldValues = eg.multenterbox(msg, title, fieldNames, fieldValues)
+                        MyFrame(wx)
+                        #fieldValues = eg.multenterbox(msg, title, fieldNames, fieldValues)
                         self._protocolNotes[protoVidNum] = dict(Time=fieldValues[0], Notes=fieldValues[1], MAR=fieldValues[2], numTrial=fieldValues[3], conv=fieldValues[4], convAt=fieldValues[5],
                                                                 Focus=fieldValues[6], PMTconf=fieldValues[7])
                     self.pdf(protoVidNum, protoLoc, protoFOV, protoEye, self._protocolNotes[protoVidNum])
@@ -243,7 +248,10 @@ class ProtocolPane(wx.Panel):
             if len(self._protocolNotes) == 0:
                 # t = datetime.now().strftime('%H:%M:%S')
                 fieldValues = ['', '', '', '', '', '', '', '']
-        fieldValues = eg.multenterbox(msg, title, fieldNames, fieldValues)
+        # dlg = wx.TextEntryDialog(self, 'Notes:', 'Focus:', 'PMT:', 'Additional Information')
+        self.MyframeRef = MyFrame(None)
+        fieldValues = MyFrame(self.MyframeRef)
+        #fieldValues = eg.multenterbox(msg, title, fieldNames, fieldValues)
         print("Reply was:", fieldValues)
 
         if self.Ntype == 0:
@@ -563,4 +571,44 @@ class ProtocolPane(wx.Panel):
         self.guiSendFOV = fovtoggle
 
 
+class MyFrame(wx.Dialog):
+    def __init__(self, parent):
+        wx.Dialog.__init__(self, parent, -1, "Additional Information",size=(475,400))
+        self.panel = wx.Panel(self, wx.ID_ANY)
+        sizer = wx.BoxSizer(wx.VERTICAL)
 
+    def popup(self):
+
+        self.lblTitle = wx.StaticText(self.panel, label="Notes", pos=(240, 25))
+
+        self.lblNotes = wx.StaticText(self.panel, label="Notes", pos=(40, 60))
+        self.notes = wx.TextCtrl(self.panel, value="", pos=(110, 60), size=(300, -1))
+        self.lblFocus = wx.StaticText(self.panel, label="Focus", pos=(40, 100))
+        self.focus = wx.TextCtrl(self.panel, value="", pos=(110, 100), size=(300, -1))
+        self.lblConf = wx.StaticText(self.panel, label="PMT Conf", pos=(40, 140))
+        self.conf = wx.TextCtrl(self.panel, value="", pos=(110, 140), size=(300, -1))
+        self.lblDir = wx.StaticText(self.panel, label="PMT Dir", pos=(40, 180))
+        self.dir = wx.TextCtrl(self.panel, value="", pos=(110, 180), size=(300, -1))
+        self.lblRef = wx.StaticText(self.panel, label="PMT Ref", pos=(40, 220))
+        self.ref = wx.TextCtrl(self.panel, value="", pos=(110, 220), size=(300, -1))
+        self.lblVis = wx.StaticText(self.panel, label="PMT Vis", pos=(40, 260))
+        self.vis = wx.TextCtrl(self.panel, value="", pos=(110, 260), size=(300, -1))
+        self.saveButton = wx.Button(self.panel, label="Okay", pos=(310, 300), size=(100, -1))
+        self.closeButton = wx.Button(self.panel, label="Cancel", pos=(110, 300), size=(100, -1))
+        self.saveButton.Bind(wx.EVT_BUTTON, self.SaveConnString)
+        self.closeButton.Bind(wx.EVT_BUTTON, self.OnQuit)
+        self.Bind(wx.EVT_CLOSE, self.OnQuit)
+        self.Show()
+
+    def OnQuit(self, event):
+        self.Destroy()
+
+    def SaveConnString(self, event):
+        self.result_notes = self.notes.GetValue()
+        self.result_focus = self.focus.GetValue()
+        self.result_conf = self.conf.GetValue()
+        self.result_dir = self.dir.GetValue()
+        self.result_ref = self.ref.GetValue()
+        self.result_vis = self.vis.GetValue()
+        self.Destroy()
+        print(self.result_notes)
