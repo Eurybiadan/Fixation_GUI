@@ -58,6 +58,7 @@ class ProtocolPane(wx.Panel):
 
         # Initialize the data structure which will hold the protocol
         self._protocol = list()
+        self._plannedProtocol = list()
         self._protocolNotes = list()
     # JG 2/5
         # Initial Previously Marked Locations - stored as a list, each tuple containg the FOV and the location, so (HFOV,VFOV,wx.POINT2D(X,Y))
@@ -69,13 +70,16 @@ class ProtocolPane(wx.Panel):
         self.guiSendFOV = 1
         self.pdfcall = 0
         self.locSaved = 0
+        self.plannedList = 0
+        self.ind = 0
 
     def loadMessageEvtObjects(self, messageEvent, myEvtRetMsg):
 
         self.messageEvent = messageEvent
         self.myEvtRetMsg = myEvtRetMsg
 
-    def on_listitem_selected(self, listevt, listentry=0):
+    def on_listitem_selected(self, listevt, listentry=0, index=0):
+        self.ind = index
 
         if listentry:
             eye = dict.get(listentry, 'eye')
@@ -361,6 +365,7 @@ class ProtocolPane(wx.Panel):
 
 
     def load_protocol(self, path, loadplanmode=0):
+        self.plannedList = 0
         self.loadplanmode = loadplanmode
         with open(path, 'r') as csvfile:
             header = next(csvfile, None)
@@ -427,7 +432,9 @@ class ProtocolPane(wx.Panel):
 
                     # if not exists:
 
-                    self._protocol.append(newentry)
+                    #self._protocol.append(newentry)
+                    self._plannedProtocol.append(newentry)
+                    self.plannedList = self.plannedList + 1
 
             self.update_protocol_list()
             return self.marked_loc
@@ -448,6 +455,16 @@ class ProtocolPane(wx.Panel):
         self._parent.set_vertical_fov(0.1)
 
     def update_protocol_list(self):
+
+        for item in self._plannedProtocol:
+            ind = self.list.GetItemCount()
+
+            self.list.InsertItem(ind, str(item['videoNumber']))
+            self.list.SetItem(ind, 1, item['loc'][0] + ', ' + item['loc'][1])
+            self.list.SetItem(ind, 2,
+                              str(item['fov'][0]) + self._degree_sign + 'x ' + str(item['fov'][1]) + self._degree_sign)
+            self.list.SetItem(ind, 3, item['eye'])
+            self.list.SetItemBackgroundColour(ind, (0, 102, 102))
 
         for item in self._protocol:
             ind = self.list.GetItemCount()
@@ -514,7 +531,7 @@ class ProtocolPane(wx.Panel):
             ind = 0
             # checks new locations to be recorded against ones that are in the planned protocol
             # needed to reformat the numbers so they have the correct amount of decimal places to match
-            for item in self._protocol:
+            for item in self._plannedProtocol:
                 fovitem = dict.get(item, 'fov')
                 fovx = '{:.2f}'.format(round(float(fovitem[0]), 2))
                 fovy = '{:.2f}'.format(round(float(fovitem[1]), 2))
@@ -522,7 +539,7 @@ class ProtocolPane(wx.Panel):
 
                 locitem = dict.get(item, 'loc')
                 locxsplit = locitem[0].split(' ')
-                locx = '{:.2f}'.format(round(float(locxsplit[0]), 2))
+                locx = '{:.2f}'.format(round(float(locxsplit[0]), 2))  # this line
                 if locx != '0.00':
                     locx = locx + locxsplit[1]
                 locysplit = locitem[1].split(' ')
@@ -541,13 +558,12 @@ class ProtocolPane(wx.Panel):
 
                 if fovitem == curfovitem and item['eye'] == seleye and locitem == locationitem and item['videoNumber'] == '-1':
                     item['videoNumber'] = vidnum
-                    itemtext = self.list.GetItemText(ind, 0)
-                    self.list.SetItem(ind, 0, str(int(vidnum)))
-                    self.list.SetItemBackgroundColour(ind, (0, 0, 0))
+                    itemtext = self.list.GetItemText(self.ind, 0)
+                    self.list.SetItem(self.ind, 0, str(int(vidnum)))
+                    self.list.SetItemBackgroundColour(self.ind, (0, 0, 0))
                     exist = True
                     break
-                else:
-                    ind += 1
+
 
         if not exist:
             newentry = dict(num=1, videoNumber=vidnum,

@@ -6,8 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="10265a4d-0c1d-4a65-8747-ae54663009dc" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fixationgui/LightCrafter.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/LightCrafter.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fixationgui/plannerMode.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/plannerMode.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fixationgui/paneWidgets.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/paneWidgets.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fixationgui/protocolPane.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/protocolPane.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fixationgui/wxFixGUI.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/wxFixGUI.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fixationgui/wxFixProc.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/wxFixProc.py" afterDir="false" />
@@ -295,8 +294,8 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.wxFixGUI" />
         <item itemvalue="Python.plannerMode" />
+        <item itemvalue="Python.wxFixGUI" />
         <item itemvalue="Python.testImage" />
         <item itemvalue="Python.protocolPane" />
         <item itemvalue="Python.wxSaviorBottomPanel" />
@@ -378,9 +377,9 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fixationgui/wxFixGUI.py</url>
-          <line>530</line>
-          <option name="timeStamp" value="63" />
+          <url>file://$PROJECT_DIR$/fixationgui/protocolPane.py</url>
+          <line>559</line>
+          <option name="timeStamp" value="85" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
@@ -393,15 +392,7 @@
     </breakpoint-manager>
     <watches-manager>
       <configuration name="PythonConfigurationType">
-        <watch expression="self.HOST" language="Python" />
-        <watch expression="myEVT_RETURN_MESSAGE" language="Python" />
-        <watch expression="self._recvQueue" language="Python" />
-        <watch expression="sendQueue" language="Python" />
-        <watch expression="self.curr_path" language="Python" />
-        <watch expression="self._locfileobj" language="Python" />
-        <watch expression="self.i" language="Python" />
-        <watch expression="self.c" language="Python" />
-        <watch expression="start" language="Python" />
+        <watch expression="item" language="Python" />
       </configuration>
     </watches-manager>
   </component>

@@ -807,6 +807,8 @@ class AutoAdvance(wx.Panel):
 
         self.protocolref = protocolref
         self.protocolref.i = 0
+        self.count = 0
+        self.firstTime = 0
         self.messageEvent = MessageEvent
         self.myEvtRetMsg = myEVT_RETURN_MESSAGE
         self.buttonList = []
@@ -838,6 +840,7 @@ class AutoAdvance(wx.Panel):
         protocolref.loadMessageEvtObjects(self.messageEvent, self.myEvtRetMsg)
 
     def OnButton(self, evt):
+        self.protocolref.i = self.protocolref.list.GetItemCount() - self.protocolref.plannedList + self.count
         # if we aren't in load planed mode button has no functionality
         if self.protocolref.loadplanmode == 0:
             return
@@ -847,20 +850,20 @@ class AutoAdvance(wx.Panel):
             # check to make sure the index won't go out of bounds
             if self.protocolref.i >= ind:
                 return
-            item = self.protocolref._protocol[self.protocolref.i]
-            self.protocolref.on_listitem_selected(0, item)
+            item = self.protocolref._plannedProtocol[self.count]
+            self.protocolref.on_listitem_selected(0, item, self.protocolref.i)
             # sets the current auto advance selected color
             self.protocolref.list.SetItemBackgroundColour(self.protocolref.i, (74, 0, 0))
             # setting the list item colors after the auto advance has passed
-            if self.protocolref.i > 0:
+            if self.count > (self.protocolref.list.GetItemCount() - self.protocolref.plannedList):
                 # get the previous item on the list
-                previtem = self.protocolref._protocol[self.protocolref.i - 1]
+                previtem = self.protocolref._plannedProtocol[self.count - 1]
                 # if imaged there, set color to black, else set back to loaded in blue color
                 if int(previtem['videoNumber']) >= 0:
                     self.protocolref.list.SetItemBackgroundColour(self.protocolref.i-1, (0, 0, 0))
                 else:
                     self.protocolref.list.SetItemBackgroundColour(self.protocolref.i-1, (0, 102, 102))
-            self.protocolref.i = self.protocolref.i+1
+            self.count = self.count + 1
 
 
 

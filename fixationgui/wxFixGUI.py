@@ -642,6 +642,7 @@ class wxFixationFrame(wx.Frame):
                     self._locfileobj.close()
                     self.locfileobjname = self._locationpath + os.sep + self._locationfname
                     return
+        # JG 10/4/21 Issue with self.curr_path.name above when you set location before opening planned. Below in line 747 sets it equal to protopath_pcrash which doesn't have name attribute
 
         # If no path exists, then prompt for the location before continuing...
         dialog = wx.FileDialog(self, 'Save Location List As:', "", "", 'CSV (Comma delimited)|*.csv', wx.FD_SAVE)
