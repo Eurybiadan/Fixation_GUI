@@ -73,6 +73,7 @@ class ProtocolPane(wx.Panel):
         self.plannedList = 0
         self.ind = 0
 
+
     def loadMessageEvtObjects(self, messageEvent, myEvtRetMsg):
 
         self.messageEvent = messageEvent
@@ -167,106 +168,11 @@ class ProtocolPane(wx.Panel):
             self._parent.update_fixation_location(wx.Point2D(horzval, vertval))
 
     def on_activated(self, listevt, notactivated=0):
-        from datetime import datetime
-        import easygui as eg
-        return  # added to skip the notes code below to avoid problems while this function does not work -JG 09/22/2021
         if self.planmode == 1:
             return
-        if notactivated:
-            index = 0
-        else:
-            index = listevt.GetIndex()
-        print(index)
-        protoVidNum = self.list.GetItemText(index, 0)
-        protoLoc = self.list.GetItemText(index, 1)
-        protoFOV = self.list.GetItemText(index, 2)
-        protoEye = self.list.GetItemText(index, 3)
-        # protocolItem = self._protocol[index]
-        # protoVidNum = dict.get(protocolItem, 'videoNumber')
-        protoVidNum = int(protoVidNum)
-        print(protoVidNum)
-        if index < len(self._protocol)-1:
-            protocolNotesItem = self._protocolNotes[protoVidNum - 1]
-            if self.Ntype == 0:
-                self.pFocus = dict.get(protocolNotesItem, 'Focus')
-                self.pPMTconf = dict.get(protocolNotesItem, 'PMTconf')
-                self.pPMTdir = dict.get(protocolNotesItem, 'PMTdir')
-                self.pPMTref = dict.get(protocolNotesItem, 'PMTref')
-                self.pPMTvis = dict.get(protocolNotesItem, 'PMTvis')
-            else:
-                self.pFocus = dict.get(protocolNotesItem, 'Focus')
-                self.pPMTconf = dict.get(protocolNotesItem, 'PMTconf')
+        self.object_notes = Notes(self)  # this is what we will use as 'self' to call notes pop up box - need a new one each time otherwise it will say it was deleted
+        Notes.popup(self.object_notes, self, listevt, notactivated)
 
-        msg = "Notes"
-        title = "Additional Information"
-        if self.Ntype == 0:
-            fieldNames = ["Notes", "Focus", "PMT Conf", "PMT Dir", "PMT Ref", "PMT Vis"]
-        else:
-            fieldNames = ["Time", "Notes", "MAR Guess", "# of Trials", "Converged?", "Converged @?", "Focus", "Conf PMT"]
-        fieldValues = []  # we start with blanks for the values
-        if len(self._protocolNotes) != 0:
-            if protoVidNum < len(self._protocolNotes):
-                protocolCurrNotes = self._protocolNotes[protoVidNum]
-                if len(protocolCurrNotes) == 0:
-                    if index < len(self._protocol)-1:
-                        if self.Ntype == 0:
-                            fieldValues = ["", self.pFocus, self.pPMTconf, self.pPMTdir, self.pPMTref, self.pPMTvis]
-                        else:
-                            fieldValues = ["", "", "", "", "", "", self.pFocus, self.pPMTconf]
-                else:
-                    if self.Ntype == 0:
-                        self.cNotes = dict.get(protocolCurrNotes, 'Notes')
-                        self.cFocus = dict.get(protocolCurrNotes, 'Focus')
-                        self.cPMTconf = dict.get(protocolCurrNotes, 'PMTconf')
-                        self.cPMTdir = dict.get(protocolCurrNotes, 'PMTdir')
-                        self.cPMTref = dict.get(protocolCurrNotes, 'PMTref')
-                        self.cPMTvis = dict.get(protocolCurrNotes, 'PMTvis')
-                        fieldValues = [self.cNotes, self.cFocus, self.cPMTconf, self.cPMTdir, self.cPMTref, self.cPMTvis]
-                        MyFrame(wx)
-                        #fieldValues = eg.multenterbox(msg, title, fieldNames, fieldValues)
-                        self._protocolNotes[protoVidNum] = dict(Notes=fieldValues[0], Focus=fieldValues[1], PMTconf=fieldValues[2], PMTdir=fieldValues[3], PMTref=fieldValues[4], PMTvis=fieldValues[5])
-                    else:
-                        self.cTime = dict.get(protocolCurrNotes, 'Time')
-                        self.cNotes = dict.get(protocolCurrNotes, 'Notes')
-                        self.cMAR = dict.get(protocolCurrNotes, 'MAR')
-                        self.cTrials = dict.get(protocolCurrNotes, 'numTrial')
-                        self.cConverged = dict.get(protocolCurrNotes, 'conv')
-                        self.cConvAt = dict.get(protocolCurrNotes, 'convAt')
-                        self.cFocus = dict.get(protocolCurrNotes, 'Focus')
-                        self.cPMTconf = dict.get(protocolCurrNotes, 'PMTconf')
-                        fieldValues = [self.cTime, self.cNotes, self.cMAR, self.cTrials, self.cConverged, self.cConvAt, self.cFocus, self.cPMTconf]
-                        MyFrame(wx)
-                        #fieldValues = eg.multenterbox(msg, title, fieldNames, fieldValues)
-                        self._protocolNotes[protoVidNum] = dict(Time=fieldValues[0], Notes=fieldValues[1], MAR=fieldValues[2], numTrial=fieldValues[3], conv=fieldValues[4], convAt=fieldValues[5],
-                                                                Focus=fieldValues[6], PMTconf=fieldValues[7])
-                    self.pdf(protoVidNum, protoLoc, protoFOV, protoEye, self._protocolNotes[protoVidNum])
-                    print("Reply was:", fieldValues)
-                    return
-        if index < len(self._protocol) - 1:
-            if self.Ntype == 0:
-                fieldValues = ["", self.pFocus, self.pPMTconf, self.pPMTdir, self.pPMTref, self.pPMTvis]
-            else:
-                # t = datetime.now().strftime('%H:%M:%S')
-                fieldValues = ['', '', '', '', '', '', self.pFocus, self.pPMTconf]
-        if self.Ntype == 1:
-            if len(self._protocolNotes) == 0:
-                # t = datetime.now().strftime('%H:%M:%S')
-                fieldValues = ['', '', '', '', '', '', '', '']
-        # dlg = wx.TextEntryDialog(self, 'Notes:', 'Focus:', 'PMT:', 'Additional Information')
-        self.MyframeRef = MyFrame(None)
-        fieldValues = MyFrame(self.MyframeRef)
-        #fieldValues = eg.multenterbox(msg, title, fieldNames, fieldValues)
-        print("Reply was:", fieldValues)
-
-        if self.Ntype == 0:
-            newNotesEntry = dict(Notes=fieldValues[0], Focus=fieldValues[1], PMTconf=fieldValues[2], PMTdir=fieldValues[3], PMTref=fieldValues[4], PMTvis=fieldValues[5])
-        else:
-            newNotesEntry = dict(Time=fieldValues[0], Notes=fieldValues[1], MAR=fieldValues[2],
-                                                    numTrial=fieldValues[3], conv=fieldValues[4], convAt=fieldValues[5],
-                                                    Focus=fieldValues[6], PMTconf=fieldValues[7])
-        self._protocolNotes.append(newNotesEntry)
-        self.pdf(protoVidNum, protoLoc, protoFOV, protoEye, newNotesEntry)
-        print(newNotesEntry)
 
     def pdf(self, vidNum, protoLoc, protoFOV, protoEye, entry):
         if self.pdfcall == 1:
@@ -587,28 +493,101 @@ class ProtocolPane(wx.Panel):
         self.guiSendFOV = fovtoggle
 
 
-class MyFrame(wx.Dialog):
-    def __init__(self, parent):
+class Notes(wx.Dialog):
+    def __init__(self, parent):  # we will need a reference to the class above to make it all work
         wx.Dialog.__init__(self, parent, -1, "Additional Information",size=(475,400))
         self.panel = wx.Panel(self, wx.ID_ANY)
         sizer = wx.BoxSizer(wx.VERTICAL)
+        self.mod = 0
 
-    def popup(self):
+    def popup(self, protocolref,listevt, notactivated):
+        self.protocolref = protocolref
+        self.listevt = listevt
+        self.notactivated = notactivated
 
+        if self.notactivated:
+            self.index = 0  # will also need another condition of if not activated but part of a planned proto, then index will need to be self.ind - JG 10/5/21
+        else:
+            self.index = self.listevt.GetIndex()
+        print(self.index)
+        self.protoVidNum = self.protocolref.list.GetItemText(self.index, 0)
+        self.protoLoc = self.protocolref.list.GetItemText(self.index, 1)
+        self.protoFOV = self.protocolref.list.GetItemText(self.index, 2)
+        self.protoEye = self.protocolref.list.GetItemText(self.index, 3)
+        # protocolItem = self._protocol[index]
+        # protoVidNum = dict.get(protocolItem, 'videoNumber')
+        self.protoVidNum = int(self.protoVidNum)
+        print(self.protoVidNum)
+        if self.index < len(self.protocolref._protocol)-1:
+            protocolNotesItem = self.protocolref._protocolNotes[self.protoVidNum - 1]
+            self.pFocus = dict.get(protocolNotesItem, 'Focus')
+            self.pPMTconf = dict.get(protocolNotesItem, 'PMTconf')
+            self.pPMTdir = dict.get(protocolNotesItem, 'PMTdir')
+            self.pPMTref = dict.get(protocolNotesItem, 'PMTref')
+            self.pPMTvis = dict.get(protocolNotesItem, 'PMTvis')
+
+        if len(self.protocolref._protocolNotes) != 0:
+            if self.protoVidNum < len(self.protocolref._protocolNotes):
+                protocolCurrNotes = self.protocolref._protocolNotes[self.protoVidNum]
+                if len(protocolCurrNotes) == 0:
+                    if self.index < len(self.protocolref._protocol)-1:
+                        self.Notes = ""
+                        self.Focus = self.pFocus
+                        self.PMTconf = self.pPMTconf
+                        self.PMTdir = self.pPMTdir
+                        self.PMTref = self.pPMTref
+                        self.PMTvis = self.pPMTvis
+                else:
+                    self.cNotes = dict.get(protocolCurrNotes, 'Notes')
+                    self.cFocus = dict.get(protocolCurrNotes, 'Focus')
+                    self.cPMTconf = dict.get(protocolCurrNotes, 'PMTconf')
+                    self.cPMTdir = dict.get(protocolCurrNotes, 'PMTdir')
+                    self.cPMTref = dict.get(protocolCurrNotes, 'PMTref')
+                    self.cPMTvis = dict.get(protocolCurrNotes, 'PMTvis')
+
+                    self.Notes = self.cNotes
+                    self.Focus = self.cFocus
+                    self.PMTconf = self.cPMTconf
+                    self.PMTdir = self.cPMTdir
+                    self.PMTref = self.cPMTref
+                    self.PMTvis = self.cPMTvis
+
+                    self.mod = 1
+                    self.NotesBox()
+                    return
+
+        if self.index < len(self.protocolref._protocol) - 1:
+            self.Notes = ""
+            self.Focus = self.pFocus
+            self.PMTconf = self.pPMTconf
+            self.PMTdir = self.pPMTdir
+            self.PMTref = self.pPMTref
+            self.PMTvis = self.pPMTvis
+
+        if len(self.protocolref._protocolNotes) == 0:
+            self.Notes = ""
+            self.Focus = ""
+            self.PMTconf = ""
+            self.PMTdir = ""
+            self.PMTref = ""
+            self.PMTvis = ""
+
+        self.NotesBox()
+
+    def NotesBox(self):
         self.lblTitle = wx.StaticText(self.panel, label="Notes", pos=(240, 25))
-
         self.lblNotes = wx.StaticText(self.panel, label="Notes", pos=(40, 60))
-        self.notes = wx.TextCtrl(self.panel, value="", pos=(110, 60), size=(300, -1))
+        self.notes = wx.TextCtrl(self.panel, value=self.Notes, pos=(110, 60), size=(300, -1))
         self.lblFocus = wx.StaticText(self.panel, label="Focus", pos=(40, 100))
-        self.focus = wx.TextCtrl(self.panel, value="", pos=(110, 100), size=(300, -1))
+        self.focus = wx.TextCtrl(self.panel, value=self.Focus, pos=(110, 100), size=(300, -1))
         self.lblConf = wx.StaticText(self.panel, label="PMT Conf", pos=(40, 140))
-        self.conf = wx.TextCtrl(self.panel, value="", pos=(110, 140), size=(300, -1))
+        self.conf = wx.TextCtrl(self.panel, value=self.PMTconf, pos=(110, 140), size=(300, -1))
         self.lblDir = wx.StaticText(self.panel, label="PMT Dir", pos=(40, 180))
-        self.dir = wx.TextCtrl(self.panel, value="", pos=(110, 180), size=(300, -1))
+        self.dir = wx.TextCtrl(self.panel, value=self.PMTdir, pos=(110, 180), size=(300, -1))
         self.lblRef = wx.StaticText(self.panel, label="PMT Ref", pos=(40, 220))
-        self.ref = wx.TextCtrl(self.panel, value="", pos=(110, 220), size=(300, -1))
+        self.ref = wx.TextCtrl(self.panel, value=self.PMTref, pos=(110, 220), size=(300, -1))
         self.lblVis = wx.StaticText(self.panel, label="PMT Vis", pos=(40, 260))
-        self.vis = wx.TextCtrl(self.panel, value="", pos=(110, 260), size=(300, -1))
+        self.vis = wx.TextCtrl(self.panel, value=self.PMTvis, pos=(110, 260), size=(300, -1))
         self.saveButton = wx.Button(self.panel, label="Okay", pos=(310, 300), size=(100, -1))
         self.closeButton = wx.Button(self.panel, label="Cancel", pos=(110, 300), size=(100, -1))
         self.saveButton.Bind(wx.EVT_BUTTON, self.SaveConnString)
@@ -627,4 +606,17 @@ class MyFrame(wx.Dialog):
         self.result_ref = self.ref.GetValue()
         self.result_vis = self.vis.GetValue()
         self.Destroy()
-        print(self.result_notes)
+
+        if self.mod:
+            self.protocolref._protocolNotes[self.protoVidNum] = dict(Notes=self.result_notes, Focus=self.result_focus, PMTconf=self.result_conf, PMTdir=self.result_dir, PMTref=self.result_ref, PMTvis=self.result_vis)
+            print(self.protocolref._protocolNotes[self.protoVidNum])
+            self.protocolref.pdf(self.protoVidNum, self.protoLoc, self.protoFOV, self.protoEye, self.protocolref._protocolNotes[self.protoVidNum])
+            self.mod = 0
+            return
+
+        newNotesEntry = dict(Notes=self.result_notes, Focus=self.result_focus, PMTconf=self.result_conf, PMTdir=self.result_dir, PMTref=self.result_ref, PMTvis=self.result_vis)
+        self.protocolref._protocolNotes.append(newNotesEntry)
+        print(newNotesEntry)
+        self.protocolref.pdf(self.protoVidNum, self.protoLoc, self.protoFOV, self.protoEye, self.protocolref._protocolNotes[self.protoVidNum])
+
+
