@@ -586,6 +586,8 @@ class Notes(wx.Dialog):
         self.vis = wx.TextCtrl(self.panel, value=self.PMTvis, pos=(110, 260), size=(300, -1))
         self.saveButton = wx.Button(self.panel, label="Okay", pos=(310, 300), size=(100, -1))
         self.closeButton = wx.Button(self.panel, label="Cancel", pos=(110, 300), size=(100, -1))
+        self.saveButton.SetDefault()
+        self.Bind(wx.EVT_CHAR_HOOK, self.onKeyPress)
         self.saveButton.Bind(wx.EVT_BUTTON, self.SaveConnString)
         self.closeButton.Bind(wx.EVT_BUTTON, self.OnQuit)
         self.Bind(wx.EVT_CLOSE, self.OnQuit)
@@ -593,6 +595,35 @@ class Notes(wx.Dialog):
 
     def OnQuit(self, event):
         self.Destroy()
+
+    def onKeyPress(self, event):
+        keyCode = event.GetKeyCode()
+        if keyCode == wx.WXK_DOWN:
+            i = wx.Window.FindFocus()
+            if i == self.notes:
+                self.focus.SetFocus()
+            if i == self.focus:
+                self.conf.SetFocus()
+            if i == self.conf:
+                self.dir.SetFocus()
+            if i == self.dir:
+                self.ref.SetFocus()
+            if i == self.ref:
+                self.vis.SetFocus()
+        elif keyCode == wx.WXK_UP:
+            i = wx.Window.FindFocus()
+            if i == self.focus:
+                self.notes.SetFocus()
+            if i == self.conf:
+                self.focus.SetFocus()
+            if i == self.dir:
+                self.conf.SetFocus()
+            if i == self.ref:
+                self.dir.SetFocus()
+            if i == self.vis:
+                self.ref.SetFocus()
+        else:
+            event.Skip()
 
     def SaveConnString(self, event):
         self.result_notes = self.notes.GetValue()
