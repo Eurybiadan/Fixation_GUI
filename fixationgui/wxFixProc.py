@@ -98,8 +98,8 @@ if __name__ == '__main__':
     # before planned
     testQ.put((FOV, 1.25, 1.25))
     testQ.put((VIDNUM, '0001'))
-    # time.sleep(10)
-    # # planned
+    time.sleep(2)
+    # planned
     # testQ.put((FOV, 1.25, 1.25))
     # testQ.put((VIDNUM, '0002'))
     # time.sleep(10)

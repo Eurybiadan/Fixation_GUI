@@ -491,7 +491,9 @@ class ProtocolPane(wx.Panel):
 
 class Notes(wx.Dialog):
     def __init__(self, parent):  # we will need a reference to the class above to make it all work
-        wx.Dialog.__init__(self, parent, -1, "Additional Information",size=(475,400))
+        no_sys_menu = wx.CAPTION
+        wx.Dialog.__init__(self, parent, -1, "Additional Information",size=(475,400), style=no_sys_menu)
+
         self.panel = wx.Panel(self, wx.ID_ANY)
         sizer = wx.BoxSizer(wx.VERTICAL)
         self.mod = 0
@@ -585,12 +587,12 @@ class Notes(wx.Dialog):
         self.lblVis = wx.StaticText(self.panel, label="PMT Vis", pos=(40, 260))
         self.vis = wx.TextCtrl(self.panel, value=self.PMTvis, pos=(110, 260), size=(300, -1))
         self.saveButton = wx.Button(self.panel, label="Okay", pos=(310, 300), size=(100, -1))
-        self.closeButton = wx.Button(self.panel, label="Cancel", pos=(110, 300), size=(100, -1))
+        #self.closeButton = wx.Button(self.panel, label="Cancel", pos=(110, 300), size=(100, -1))
         self.saveButton.SetDefault()
         self.Bind(wx.EVT_CHAR_HOOK, self.onKeyPress)
         self.saveButton.Bind(wx.EVT_BUTTON, self.SaveConnString)
-        self.closeButton.Bind(wx.EVT_BUTTON, self.OnQuit)
-        self.Bind(wx.EVT_CLOSE, self.OnQuit)
+        #self.closeButton.Bind(wx.EVT_BUTTON, self.OnQuit)
+        #self.Bind(wx.EVT_CLOSE, self.OnQuit)
         self.Show()
 
     def OnQuit(self, event):
