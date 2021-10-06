@@ -25,12 +25,6 @@ EVT_RETURN_MESSAGE = wx.PyEventBinder(myEVT_RETURN_MESSAGE, 2)
 
 # Sets Up The Class For The Program And Creates The Window
 class wxFixationFrame(wx.Frame):
-    # added to see the paths on savior computer
-    import sys
-    sys.path.append('C:\\Users\\jgrieshop\\Documents\\GitHub\\Fixation_GUI\\venv37\\Lib\\site-packages\\pdfrw')
-    sys.path.append('C:\\Users\\jgrieshop\\Documents\\GitHub\\Fixation_GUI\\venv37\\Lib\\site-packages\\easygui')
-    for path in sys.path:
-        print(path)
     # The number of ppd of the screen we'll be projecting to (e.g. Lightcrafter, Projector, etc).
     SCREEN_PPD = 20
 
@@ -232,8 +226,8 @@ class wxFixationFrame(wx.Frame):
         self.id_on_10_press = 10054
         self.id_off_toggleMEAO = 10056
         self.id_on_toggleMEAO = 1057
-        self.id_regNotes = 10062
-        self.id_VANotes = 10063
+        self.id_enabled = 10062
+        self.id_disabled = 10063
         self.id_save_notes_loc = 10064
 
 
@@ -360,15 +354,15 @@ class wxFixationFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_MEAO_toggle, self.on_toggleMEAO)
         MEAOMenu.AppendSubMenu(self.toggleMEAO, 'MEAO?')
 
-        # Toggle Notes regular or VA
-        # self.notes = wx.Menu()
+        # Toggle Notes enabled or disabled
+        self.notes = wx.Menu()
         NotesMenu.Append(self.id_save_notes_loc, 'Set Notes Save Location...\t')
         self.Bind(wx.EVT_MENU, self.on_set_save_notes_location, id=self.id_save_notes_loc)
-        # self.regularAO = self.notes.AppendRadioItem(self.id_regNotes, 'Regular AO')
-        # self.Bind(wx.EVT_MENU, self.on_notes_toggle, self.regularAO)
-        # self.VAAO = self.notes.AppendRadioItem(self.id_VANotes, 'Visual Acuity AO')
-        # self.Bind(wx.EVT_MENU, self.on_notes_toggle, self.VAAO)
-        # NotesMenu.AppendSubMenu(self.notes, 'Type')
+        self.enabled = self.notes.AppendRadioItem(self.id_enabled, 'Yes')
+        self.Bind(wx.EVT_MENU, self.on_notes_toggle, self.enabled)
+        self.disabled = self.notes.AppendRadioItem(self.id_disabled, 'No')
+        self.Bind(wx.EVT_MENU, self.on_notes_toggle, self.disabled)
+        NotesMenu.AppendSubMenu(self.notes, 'Enabled')
 
 
         # Compounds the Menu Bar
@@ -430,10 +424,10 @@ class wxFixationFrame(wx.Frame):
             self.MEAO = 0
 
     def on_notes_toggle(self, event):
-        if event.Id == self.id_regNotes:
-            self.protocolpane.notesType(0)
-        elif event.Id == self.id_VANotes:
-            self.protocolpane.notesType(1)
+        if event.Id == self.id_enabled:
+            self.protocolpane.notesEnabled(1)
+        elif event.Id == self.id_disabled:
+            self.protocolpane.notesEnabled(0)
 
 
 

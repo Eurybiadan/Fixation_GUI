@@ -6,16 +6,11 @@
 
 '''
 import os
-from decimal import Decimal
 
-import numpy as np
 import wx
 import csv
 import re
 import pdfrw
-import string
-
-from easygui import multenterbox
 
 
 ANNOT_KEY = '/Annots'
@@ -72,6 +67,7 @@ class ProtocolPane(wx.Panel):
         self.locSaved = 0
         self.plannedList = 0
         self.ind = 0
+        self.enabled = 1  # notes are enabled by default
 
 
     def loadMessageEvtObjects(self, messageEvent, myEvtRetMsg):
@@ -168,7 +164,7 @@ class ProtocolPane(wx.Panel):
             self._parent.update_fixation_location(wx.Point2D(horzval, vertval))
 
     def on_activated(self, listevt, notactivated=0):
-        if self.planmode == 1:
+        if self.planmode == 1 or self.enabled == 0:
             return
         self.object_notes = Notes(self)  # this is what we will use as 'self' to call notes pop up box - need a new one each time otherwise it will say it was deleted
         Notes.popup(self.object_notes, self, listevt, notactivated)
@@ -266,8 +262,8 @@ class ProtocolPane(wx.Panel):
         template_pdf.Root.AcroForm.update(pdfrw.PdfDict(NeedAppearances=pdfrw.PdfObject('true')))
         pdfrw.PdfWriter().write(output_pdf_path, template_pdf)
 
-    def notesType(self, type):
-        self.Ntype = type
+    def notesEnabled(self, value):
+        self.enabled = value
 
 
     def load_protocol(self, path, loadplanmode=0):

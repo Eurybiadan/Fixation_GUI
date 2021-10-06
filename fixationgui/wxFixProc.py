@@ -93,7 +93,7 @@ if __name__ == '__main__':
     FOV = 1
 
     server = FixGUIServer(testQ, recvQ)
-    time.sleep(10)
+    time.sleep(15)
     print("Starting test packets...")
     # before planned
     testQ.put((FOV, 1.25, 1.25))
