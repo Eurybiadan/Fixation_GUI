@@ -26,6 +26,7 @@ class ProtocolPane(wx.Panel):
         super(ProtocolPane, self).__init__(parent, id, pos, size, style, name)
         self.Ntype = 0  # default for Regular AO; 1 is VA
         self.i = 0
+        self.count = 0
         self.SetBackgroundColour('black')
         self._parent = parent
         self.pattern = re.compile("[ntsiNTIS]")
@@ -68,6 +69,7 @@ class ProtocolPane(wx.Panel):
         self.plannedList = 0
         self.ind = 0
         self.enabled = 1  # notes are enabled by default
+        self.popupEN = 1  # popup is enabled by default
 
 
     def loadMessageEvtObjects(self, messageEvent, myEvtRetMsg):
@@ -166,8 +168,13 @@ class ProtocolPane(wx.Panel):
     def on_activated(self, listevt, notactivated=0):
         if self.planmode == 1 or self.enabled == 0:
             return
+        # if hasattr(self, 'object_notes'):  # this gets rid of extra pop ups and stuff but it doesn't let you edit the entries later
+        #     # Notes.OnQuit(self.object_notes, 1)
+        #     self.object_notes = Notes(self)  # this is what we will use as 'self' to call notes pop up box - need a new one each time otherwise it will say it was deleted
+        #     Notes.popup(self.object_notes, self, listevt, notactivated, 1)
         self.object_notes = Notes(self)  # this is what we will use as 'self' to call notes pop up box - need a new one each time otherwise it will say it was deleted
-        Notes.popup(self.object_notes, self, listevt, notactivated)
+        Notes.popup(self.object_notes, self, listevt, notactivated, self.count, self.popupEN)
+        self.count = 1
 
 
     def pdf(self, vidNum, protoLoc, protoFOV, protoEye, entry):
@@ -264,6 +271,9 @@ class ProtocolPane(wx.Panel):
 
     def notesEnabled(self, value):
         self.enabled = value
+
+    def popupEnabled(self, value):
+        self.popupEN = value
 
 
     def load_protocol(self, path, loadplanmode=0):
@@ -498,16 +508,31 @@ class Notes(wx.Dialog):
         sizer = wx.BoxSizer(wx.VERTICAL)
         self.mod = 0
 
-    def popup(self, protocolref,listevt, notactivated):
+    def popup(self, protocolref, listevt, notactivated, count, popupEN, delete=0):
+        self.popup = popupEN
+        if notactivated:
+            if count:
+                if protocolref.selfArray[0]:
+                    protocolref.selfArray[0].Destroy()
+                    protocolref.selfArray = [self]
+                else:
+                    protocolref.selfArray = [self]
+            else:
+                protocolref.selfArray = [self]
         self.protocolref = protocolref
         self.listevt = listevt
         self.notactivated = notactivated
+        self.delete = delete
+
+        # if self.delete:
+        #     self.Destroy()
+        #     self.popup(self.protocolref, self.listevt, self.notactivated, 0)
 
         if self.notactivated:
             self.index = 0  # will also need another condition of if not activated but part of a planned proto, then index will need to be self.ind - JG 10/5/21
         else:
             self.index = self.listevt.GetIndex()
-        print(self.index)
+        # print(self.index)
         self.protoVidNum = self.protocolref.list.GetItemText(self.index, 0)
         self.protoLoc = self.protocolref.list.GetItemText(self.index, 1)
         self.protoFOV = self.protocolref.list.GetItemText(self.index, 2)
@@ -551,6 +576,13 @@ class Notes(wx.Dialog):
                     self.PMTvis = self.cPMTvis
 
                     self.mod = 1
+                    # if self.popup == 0:
+                    #     if self.notactivated:
+                    #         self.NoteEntryInit = 1
+                    #         self.SaveConnString(1)
+                    #     else:
+                    #         self.NoteEntryInit = 0
+                    # else:
                     self.NotesBox()
                     return
 
@@ -570,6 +602,13 @@ class Notes(wx.Dialog):
             self.PMTref = ""
             self.PMTvis = ""
 
+        # if self.popup == 0:
+        #     if self.notactivated:
+        #         self.NoteEntryInit = 1
+        #         self.SaveConnString(1)
+        #     else:
+        #         self.NoteEntryInit = 0
+        # else:
         self.NotesBox()
 
     def NotesBox(self):
@@ -590,10 +629,18 @@ class Notes(wx.Dialog):
         #self.closeButton = wx.Button(self.panel, label="Cancel", pos=(110, 300), size=(100, -1))
         self.saveButton.SetDefault()
         self.Bind(wx.EVT_CHAR_HOOK, self.onKeyPress)
+        if self.notactivated:
+            self.NoteEntryInit = 1
+            self.SaveConnString(1)
+        else:
+            self.NoteEntryInit = 0
         self.saveButton.Bind(wx.EVT_BUTTON, self.SaveConnString)
         #self.closeButton.Bind(wx.EVT_BUTTON, self.OnQuit)
         #self.Bind(wx.EVT_CLOSE, self.OnQuit)
-        self.Show()
+        if self.popup == 1 or self.notactivated == 0:
+            self.Show()
+
+
 
     def OnQuit(self, event):
         self.Destroy()
@@ -634,9 +681,10 @@ class Notes(wx.Dialog):
         self.result_dir = self.dir.GetValue()
         self.result_ref = self.ref.GetValue()
         self.result_vis = self.vis.GetValue()
-        self.Destroy()
+        if self.NoteEntryInit == 0:
+            self.Destroy()
 
-        if self.mod:
+        if self.mod or self.NoteEntryInit == 0:
             self.protocolref._protocolNotes[self.protoVidNum] = dict(Notes=self.result_notes, Focus=self.result_focus, PMTconf=self.result_conf, PMTdir=self.result_dir, PMTref=self.result_ref, PMTvis=self.result_vis)
             print(self.protocolref._protocolNotes[self.protoVidNum])
             self.protocolref.pdf(self.protoVidNum, self.protoLoc, self.protoFOV, self.protoEye, self.protocolref._protocolNotes[self.protoVidNum])
@@ -647,5 +695,6 @@ class Notes(wx.Dialog):
         self.protocolref._protocolNotes.append(newNotesEntry)
         print(newNotesEntry)
         self.protocolref.pdf(self.protoVidNum, self.protoLoc, self.protoFOV, self.protoEye, self.protocolref._protocolNotes[self.protoVidNum])
+        self.NoteEntryInit = 0
 
 

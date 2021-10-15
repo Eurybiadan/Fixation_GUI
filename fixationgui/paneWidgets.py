@@ -597,23 +597,23 @@ class ImInitPanel(wx.Panel):
             # get the coordinates of the fovea in the image
             coordinates = self.viewpaneref._fixLoc
             # this is if this is the first time the fovea is being centered
-            if self.recenter == 0:
-                xdiff = 256.5 - coordinates.x
-                ydiff = 256.5 - coordinates.y
-                # need to save the old differences in case we need to recenter the fovea
-                self.xdiffold = xdiff
-                self.ydiffold = ydiff
-                self.recenter = 1
-            # this is if we are centering the fovea more than once
-            else:
-                xdiffnew = 256.5 - coordinates.x
-                # add the differences together and save it to be the new old difference
-                xdiff = self.xdiffold + xdiffnew
-                self.xdiffold = xdiff
-                ydiffnew = 256.5 - coordinates.y
-                # add the differences together and save it to be the new old difference
-                ydiff = self.ydiffold + ydiffnew
-                self.ydiffold = ydiff
+            # if self.recenter == 0: # commented out because it didn't work -JG 10/14/21
+            xdiff = 256.5 - coordinates.x
+            ydiff = 256.5 - coordinates.y
+            # need to save the old differences in case we need to recenter the fovea
+            self.xdiffold = xdiff
+            self.ydiffold = ydiff
+            self.recenter = 1
+            # this is if we are centering the fovea more than once # commented out because it didn't work -JG 10/14/21
+            # else:
+            #     xdiffnew = 256.5 - coordinates.x
+            #     # add the differences together and save it to be the new old difference
+            #     xdiff = self.xdiffold + xdiffnew
+            #     self.xdiffold = xdiff
+            #     ydiffnew = 256.5 - coordinates.y
+            #     # add the differences together and save it to be the new old difference
+            #     ydiff = self.ydiffold + ydiffnew
+            #     self.ydiffold = ydiff
 
             T = numpy.float32([[1, 0, xdiff], [0, 1, ydiff]])
             # We use warpAffine to transform

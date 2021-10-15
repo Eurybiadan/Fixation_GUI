@@ -228,6 +228,8 @@ class wxFixationFrame(wx.Frame):
         self.id_on_toggleMEAO = 1057
         self.id_enabled = 10062
         self.id_disabled = 10063
+        self.id_Popup = 10013
+        self.id_noPopup = 10014
         self.id_save_notes_loc = 10064
 
 
@@ -354,16 +356,25 @@ class wxFixationFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_MEAO_toggle, self.on_toggleMEAO)
         MEAOMenu.AppendSubMenu(self.toggleMEAO, 'MEAO?')
 
-        # Toggle Notes enabled or disabled
+        # Notes Tab
         self.notes = wx.Menu()
         NotesMenu.Append(self.id_save_notes_loc, 'Set Notes Save Location...\t')
+
+        # Toggle pop up box enabled or disabled
+        self.popup = wx.Menu()
+        self.on_popup_togl = self.popup.AppendRadioItem(self.id_Popup, 'Yes')
+        self.Bind(wx.EVT_MENU, self.on_popup_toggle, self.on_popup_togl)
+        self.off_popup_toggl = self.popup.AppendRadioItem(self.id_noPopup, 'No')
+        self.Bind(wx.EVT_MENU, self.on_popup_toggle, self.off_popup_toggl)
+        NotesMenu.AppendSubMenu(self.popup, 'Pop-up Box Enabled?')
+
+        # Toggle Electronic Notes enabled or disabled
         self.Bind(wx.EVT_MENU, self.on_set_save_notes_location, id=self.id_save_notes_loc)
         self.enabled = self.notes.AppendRadioItem(self.id_enabled, 'Yes')
         self.Bind(wx.EVT_MENU, self.on_notes_toggle, self.enabled)
         self.disabled = self.notes.AppendRadioItem(self.id_disabled, 'No')
         self.Bind(wx.EVT_MENU, self.on_notes_toggle, self.disabled)
-        NotesMenu.AppendSubMenu(self.notes, 'Enabled')
-
+        NotesMenu.AppendSubMenu(self.notes, 'Record Electronic Notes?')
 
         # Compounds the Menu Bar
         self.SetMenuBar(menubar)
@@ -428,6 +439,12 @@ class wxFixationFrame(wx.Frame):
             self.protocolpane.notesEnabled(1)
         elif event.Id == self.id_disabled:
             self.protocolpane.notesEnabled(0)
+
+    def on_popup_toggle(self, event):
+        if event.Id == self.id_Popup:
+            self.protocolpane.popupEnabled(1)
+        elif event.Id == self.id_noPopup:
+            self.protocolpane.popupEnabled(0)
 
 
 

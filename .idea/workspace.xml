@@ -6,7 +6,9 @@
   <component name="ChangeListManager">
     <list default="true" id="10265a4d-0c1d-4a65-8747-ae54663009dc" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fixationgui/paneWidgets.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/paneWidgets.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fixationgui/protocolPane.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/protocolPane.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fixationgui/wxFixGUI.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/wxFixGUI.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fixationgui/wxFixProc.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/wxFixProc.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -163,9 +165,9 @@
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
-      <option name="SDK_HOME" value="" />
+      <option name="SDK_HOME" value="C:\Users\jgrieshop\Documents\GitHub\Fixation_GUI\venv37\Scripts\python.exe" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/fixationgui" />
-      <option name="IS_MODULE_SDK" value="true" />
+      <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/fixationgui/plannerMode.py" />
@@ -292,8 +294,8 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.plannerMode" />
         <item itemvalue="Python.wxFixGUI" />
+        <item itemvalue="Python.plannerMode" />
         <item itemvalue="Python.testImage" />
         <item itemvalue="Python.protocolPane" />
         <item itemvalue="Python.wxSaviorBottomPanel" />
@@ -373,6 +375,23 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/fixationgui/protocolPane.py</url>
+          <line>170</line>
+          <option name="timeStamp" value="105" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/fixationgui/paneWidgets.py</url>
+          <line>627</line>
+          <option name="timeStamp" value="111" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/fixationgui/wxFixGUI.py</url>
+          <line>443</line>
+          <option name="timeStamp" value="113" />
+        </line-breakpoint>
+      </breakpoints>
       <default-breakpoints>
         <breakpoint type="python-exception">
           <properties notifyOnTerminate="true" exception="BaseException">
@@ -383,9 +402,12 @@
     </breakpoint-manager>
     <watches-manager>
       <configuration name="PythonConfigurationType">
-        <watch expression="item" language="Python" />
-        <watch expression="self.protocolref._protocol" language="Python" />
-        <watch expression="self.protocolref._protocolNotes" language="Python" />
+        <watch expression="protocolref.selfArray" language="Python" />
+        <watch expression="ydiff" language="Python" />
+        <watch expression="ydiffnew" language="Python" />
+        <watch expression="xdiffnew" language="Python" />
+        <watch expression="xdiff" language="Python" />
+        <watch expression="self.xdiffold" language="Python" />
       </configuration>
     </watches-manager>
   </component>
