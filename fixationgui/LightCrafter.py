@@ -188,7 +188,7 @@ class LightCrafterCanvas(wx.Window):
                 dc.DrawLine(0, self._location.y, self.thisSize.x, self._location.y)
                 dc.DrawLine(self._location.x, 0, self._location.x, self.thisSize.y)
 
-            self.stimulus(dc, self.thisSize.x/2, self.thisSize.y/2, start, port)  # this line for drawing circle in center of screen
+            self.flicker(dc, self.thisSize.x/2, self.thisSize.y/2, start, port)  # this line for drawing circle in center of screen
             # self.stimulus(dc, self._location.x, self._location.y, start, port)  # this line for drawing circle where fixation target located
 
 
@@ -236,9 +236,13 @@ class LightCrafterCanvas(wx.Window):
             self.Refresh(eraseBackground=False)
             self.Update()
 
-            self.flicker(port, frequency)
+            self.stimulus(port, frequency)
             self.set_fixation_cursor(0)
             return
+
+        elif self._cursor is 8:  # animal stimulus - set to open shutter after 20 frames (1.33 sec) then close after 1 second
+            self.animal_stimulus(port)
+            self.set_fixation_cursor(2)
 
         del dc  # need to get rid of the MemoryDC before Update() is called.
         self.Refresh(eraseBackground=False)
@@ -246,7 +250,7 @@ class LightCrafterCanvas(wx.Window):
         # s.enter(2, 1, self.repaint)
         # s.run(False)
 
-    def stimulus(self, dc, locationx, locationy, start, port):
+    def flicker(self, dc, locationx, locationy, start, port):
 
         with serial.Serial() as ser:
             # test color array w/ arbitrary wavelengths that are easy to tell the difference between
@@ -355,7 +359,7 @@ class LightCrafterCanvas(wx.Window):
             # keep track of how many times repaint has been called
             self.count = self.count + 1
 
-    def flicker(self, port, frequency=10):  # edited to just deal with clock- no drawing JG 4/20
+    def stimulus(self, port, frequency=10):  # edited to just deal with clock- no drawing JG 4/20
         with serial.Serial() as ser:
 
             # default values
@@ -395,6 +399,31 @@ class LightCrafterCanvas(wx.Window):
                 i = i + 1
 
             ser.close()
+
+    def animal_stimulus(self, port):  # this will wait 20 frames (1.33 sec), open for one sec, then close
+        with serial.Serial() as ser:
+
+            # set the com port to the number the user specified
+            comPort = 'COM' + str(port)
+            # print('comPort is: ', comPort)
+
+            ser.baudrate = 9600
+            ser.port = comPort
+            ser.open()
+
+            # messages to send to the driver
+            Open = struct.pack('!B', 64)
+            Close = struct.pack('!B', 65)
+            delayTime = 1.33
+            openTime = 1
+
+            time.sleep(delayTime)
+            ser.write(Open)
+            time.sleep(openTime)
+            ser.write(Close)
+
+            ser.close()
+
 
 # Shows The Window
 if __name__ == '__main__':

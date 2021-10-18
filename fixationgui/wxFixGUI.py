@@ -54,6 +54,7 @@ class wxFixationFrame(wx.Frame):
         self._eyesign = -1
         self.stimulus = 0
         self.flicker_stimulus = 0
+        self.animal_stim = 0
         self.wavelength = 550
         self.frequency = 10
         self.FixStat = 0
@@ -231,6 +232,8 @@ class wxFixationFrame(wx.Frame):
         self.id_Popup = 10013
         self.id_noPopup = 10014
         self.id_save_notes_loc = 10064
+        self.id_animal_stim = 10065
+
 
 
         # Creates Menu Bar
@@ -301,17 +304,14 @@ class wxFixationFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_grid_press, self.on_grid)
         targetMenu.AppendSubMenu(self.gridMenu, 'Grid')
         # # Heather Stimulus
-        targetMenu.Append(self.id_stimulus, 'Set Flicker\t')
+        # targetMenu.Append(self.id_flicker_stimulus, 'Set Flicker\t')  # this was a proof of concept from earlier - JG
+        # self.Bind(wx.EVT_MENU, self.on_run_flicker_stimulus, id=self.id_flicker_stimulus)
+
+        targetMenu.Append(self.id_stimulus, 'Set AO2 Stimulus\t')
         self.Bind(wx.EVT_MENU, self.on_run_stimulus, id=self.id_stimulus)
 
-        targetMenu.Append(self.id_flicker_stimulus, 'Set Stimulus\t')
-        self.Bind(wx.EVT_MENU, self.on_run_flicker_stimulus, id=self.id_flicker_stimulus)
-
-        targetMenu.Append(self.id_test, 'Test Stimulus/Flicker\t')
-        self.Bind(wx.EVT_MENU, self.on_test, id=self.id_test)
-
-        # Flicker options
-        self.FlickerOptionsMenu = wx.Menu()
+        # Stimulus options
+        self.AO2StimulusOptionsMenu = wx.Menu()
         # wavelengths
         self.WavelengthOptionsMenu = wx.Menu()
         self.on_550_press = self.WavelengthOptionsMenu.AppendRadioItem(self.id_on_550_press, '550nm (ARVO)')
@@ -331,10 +331,17 @@ class wxFixationFrame(wx.Frame):
         self.on_30_press = self.FrequencyOptionsMenu.AppendRadioItem(self.id_on_30_press, '30Hz')
         self.Bind(wx.EVT_MENU, self.on_frequency, self.on_30_press)
 
+        targetMenu.AppendSubMenu(self.AO2StimulusOptionsMenu, 'AO2 Stimulus Options')
+        self.AO2StimulusOptionsMenu.AppendSubMenu(self.WavelengthOptionsMenu, 'Set Wavelength')
+        self.AO2StimulusOptionsMenu.AppendSubMenu(self.FrequencyOptionsMenu, 'Set Frequency')
 
-        targetMenu.AppendSubMenu(self.FlickerOptionsMenu, 'Stimulus Options')
-        self.FlickerOptionsMenu.AppendSubMenu(self.WavelengthOptionsMenu, 'Set Wavelength')
-        self.FlickerOptionsMenu.AppendSubMenu(self.FrequencyOptionsMenu, 'Set Frequency')
+        targetMenu.Append(self.id_animal_stim, 'Set Animal Stimulus\t')
+        self.Bind(wx.EVT_MENU, self.on_run_animal_stimulus, id=self.id_animal_stim)
+
+        targetMenu.Append(self.id_test, 'Test Stimulus\t')  # 'Test Stimulus/Flicker\t')
+        self.Bind(wx.EVT_MENU, self.on_test, id=self.id_test)
+
+
 
         targetMenu.Append(self.id_normal, 'Reset to Normal Imaging\t')
         self.Bind(wx.EVT_MENU, self.on_normal, id=self.id_normal)
@@ -460,16 +467,6 @@ class wxFixationFrame(wx.Frame):
         elif event.Id == self.id_off_grid:
             self.LCCanvas.set_fixation_cursor(self.prev_cursor)
 
-    def on_run_stimulus(self, event):
-        dlg = wx.TextEntryDialog(self, 'Which COM port? (enter number only):', 'Specify Port')
-        if dlg.ShowModal() == wx.ID_OK:
-            self.com = dlg.GetValue()
-        dlg.Destroy()
-        print('COM Port is: ', int(self.com))
-        # self.LCCanvas.set_fixation_cursor(6, 1, self.com)
-        self.stimulus = 1
-        self.flicker_stimulus = 0
-
     def on_run_flicker_stimulus(self, event):
         dlg = wx.TextEntryDialog(self, 'Which COM port? (enter number only):', 'Specify Port')
         if dlg.ShowModal() == wx.ID_OK:
@@ -479,12 +476,37 @@ class wxFixationFrame(wx.Frame):
         # self.LCCanvas.set_fixation_cursor(7, 1, self.com, self.wavelength, self.frequency)
         self.flicker_stimulus = 1
         self.stimulus = 0
+        self.animal_stim = 0
+
+    def on_run_stimulus(self, event):
+        dlg = wx.TextEntryDialog(self, 'Which COM port? (enter number only):', 'Specify Port')
+        if dlg.ShowModal() == wx.ID_OK:
+            self.com = dlg.GetValue()
+        dlg.Destroy()
+        print('COM Port is: ', int(self.com))
+        # self.LCCanvas.set_fixation_cursor(6, 1, self.com, self.wavelength, self.frequency)
+        self.stimulus = 1
+        self.flicker_stimulus = 0
+        self.animal_stim = 0
+
+    def on_run_animal_stimulus(self, event):
+        dlg = wx.TextEntryDialog(self, 'Which COM port? (enter number only):', 'Specify Port')
+        if dlg.ShowModal() == wx.ID_OK:
+            self.com = dlg.GetValue()
+        dlg.Destroy()
+        print('COM Port is: ', int(self.com))
+        # self.LCCanvas.set_fixation_cursor(8, 1, self.com)
+        self.animal_stim = 1
+        self.flicker_stimulus = 0
+        self.stimulus = 0
 
     def on_test(self, event):
         if self.stimulus == 1:
-            self.LCCanvas.set_fixation_cursor(6, 1, self.com)
-        if self.flicker_stimulus == 1:
             self.LCCanvas.set_fixation_cursor(7, 1, self.com, self.wavelength, self.frequency)
+        if self.flicker_stimulus == 1:
+            self.LCCanvas.set_fixation_cursor(6, 1, self.com)
+        if self.animal_stim == 1:
+            self.LCCanvas.set_fixation_cursor(8, 1, self.com)
 
     def on_normal(self, event):
         self.flicker_stimulus = 0
@@ -836,6 +858,9 @@ class wxFixationFrame(wx.Frame):
         if self.flicker_stimulus is 1:
             print(datetime.datetime.now())
             self.LCCanvas.set_fixation_cursor(7, 1, self.com, self.wavelength, self.frequency)
+        if self.animal_stim is 1:
+            print(datetime.datetime.now())
+            self.LCCanvas.set_fixation_cursor(8, 1, self.com)
 
     def on_image_alignment(self, event):
         if event.ControlDown():  # The image can only be moved if Control is being held down!
