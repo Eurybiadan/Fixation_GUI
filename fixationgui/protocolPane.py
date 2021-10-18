@@ -6,6 +6,7 @@
 
 '''
 import os
+from datetime import date
 
 import wx
 import csv
@@ -168,25 +169,28 @@ class ProtocolPane(wx.Panel):
     def on_activated(self, listevt, notactivated=0):
         if self.planmode == 1 or self.enabled == 0:
             return
-        # if hasattr(self, 'object_notes'):  # this gets rid of extra pop ups and stuff but it doesn't let you edit the entries later
-        #     # Notes.OnQuit(self.object_notes, 1)
-        #     self.object_notes = Notes(self)  # this is what we will use as 'self' to call notes pop up box - need a new one each time otherwise it will say it was deleted
-        #     Notes.popup(self.object_notes, self, listevt, notactivated, 1)
         self.object_notes = Notes(self)  # this is what we will use as 'self' to call notes pop up box - need a new one each time otherwise it will say it was deleted
         Notes.popup(self.object_notes, self, listevt, notactivated, self.count, self.popupEN)
         self.count = 1
 
 
-    def pdf(self, vidNum, protoLoc, protoFOV, protoEye, entry):
+    def pdf(self, vidNum=0, protoLoc=0, protoFOV=0, protoEye=0, entry=0, init=0):
         if self.pdfcall == 1:
             pdf_template = self._Noteslocationpath
         else:
             pdf_template = "AOSLO_Electronic_Notes_Template_v1.pdf"
-            if self.locSaved == 0:
+            if self.locSaved == 0 and init == 0:
                 self.savepdfas()
             self.pdfcall = 1
         pdf_output = self._Noteslocationpath
         template_pdf = pdfrw.PdfReader(pdf_template)
+
+        if init:  # this is to save the pdf in the correct folder once you saved location for it
+            data_dict = {
+                date: date.today()  # doesn't work because the date key for some reason doesn't read, but still need this var so good to have here. Put below for loop below and didn't work etiher
+            }
+            self.fill_pdf(pdf_template, pdf_output, data_dict)
+            return
 
         for page in template_pdf.pages:
             annotations = page[ANNOT_KEY]
@@ -194,7 +198,9 @@ class ProtocolPane(wx.Panel):
                 if annotation[SUBTYPE_KEY] == WIDGET_SUBTYPE_KEY:
                     if annotation[ANNOT_FIELD_KEY]:
                         key = annotation[ANNOT_FIELD_KEY][1:-1]
-                        # print(key)
+                        #print(key)
+
+
 
         eye = str(vidNum)
         FOV = 'FOV ' + str(vidNum)
@@ -236,6 +242,7 @@ class ProtocolPane(wx.Panel):
                     self._Noteslocationpath = self._Noteslocationpath + os.sep + self._Noteslocationfname
                     dialog.Destroy()
                     self.locSaved = 1
+                    self.pdf(init=1)  # add date save here
                     return
                 else:
                     return
@@ -244,6 +251,7 @@ class ProtocolPane(wx.Panel):
                 self._Noteslocationpath = self._Noteslocationpath + os.sep + self._Noteslocationfname
                 dialog.Destroy()
                 self.locSaved = 1
+                self.pdf(init=1)  # add date save here
                 return
             else:
                 print('Woah Nelly, something went wrong')
