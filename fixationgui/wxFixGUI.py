@@ -511,6 +511,7 @@ class wxFixationFrame(wx.Frame):
     def on_normal(self, event):
         self.flicker_stimulus = 0
         self.stimulus = 0
+        self.animal_stim = 0
 
     def on_wavelength(self, event):
         if event.Id == self.id_on_550_press:
