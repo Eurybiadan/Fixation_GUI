@@ -284,10 +284,10 @@ class wxFixationFrame(wx.Frame):
 
         # Toggle on/off
         self.toggleMenu = wx.Menu()
-        self.on_toggle = self.toggleMenu.AppendRadioItem(self.id_on_toggle, 'Yes')
-        self.Bind(wx.EVT_MENU, self.on_toggle_press, self.on_toggle)
         self.off_toggle = self.toggleMenu.AppendRadioItem(self.id_off_toggle, 'No')
         self.Bind(wx.EVT_MENU, self.on_toggle_press, self.off_toggle)
+        self.on_toggle = self.toggleMenu.AppendRadioItem(self.id_on_toggle, 'Yes')
+        self.Bind(wx.EVT_MENU, self.on_toggle_press, self.on_toggle)
         targetMenu.AppendSubMenu(self.toggleMenu,'Visible')
         # Alignment
         self.alignMenu = wx.Menu()

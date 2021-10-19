@@ -96,7 +96,7 @@ class ControlPanel(wx.Panel):
 
         """ Initialization Buttons """
         # Quick Buttons panel
-        self._quickpane = paneWidgets.QuickLocationsPanel(self, parent)
+        self._quickpane = paneWidgets.QuickLocationsPanel(self, parent, protocolref)
 
         # Image initialization pane
         self._iminitpane = paneWidgets.ImInitPanel(self, parent, viewpaneref)

@@ -71,6 +71,7 @@ class ProtocolPane(wx.Panel):
         self.ind = 0
         self.enabled = 1  # notes are enabled by default
         self.popupEN = 1  # popup is enabled by default
+        self.quickLocClicked = 0
 
 
     def loadMessageEvtObjects(self, messageEvent, myEvtRetMsg):
@@ -170,8 +171,20 @@ class ProtocolPane(wx.Panel):
         if self.planmode == 1 or self.enabled == 0:
             return
         self.object_notes = Notes(self)  # this is what we will use as 'self' to call notes pop up box - need a new one each time otherwise it will say it was deleted
+        if self.quickLocClicked:
+            Notes.popup(self.object_notes, self, listevt, notactivated, self.count, self.popupEN, self.quickLocVal)
+            self.count = 1
+            # self.quickLocClicked = 0
+            return
         Notes.popup(self.object_notes, self, listevt, notactivated, self.count, self.popupEN)
         self.count = 1
+
+    def quickLoc(self, button):
+        # while button is not 'CTR':
+        self.quickLocClicked = 1
+        self.quickLocVal = button
+        if button == 'CTR':
+            self.quickLocClicked = 0
 
 
     def pdf(self, vidNum=0, protoLoc=0, protoFOV=0, protoEye=0, entry=0, init=0):
@@ -516,8 +529,9 @@ class Notes(wx.Dialog):
         sizer = wx.BoxSizer(wx.VERTICAL)
         self.mod = 0
 
-    def popup(self, protocolref, listevt, notactivated, count, popupEN, delete=0):
+    def popup(self, protocolref, listevt, notactivated, count, popupEN, quickLocValue=0, delete=0):
         self.popup = popupEN
+        self.quickLoc = quickLocValue
         if notactivated:
             if count:
                 if protocolref.selfArray[0]:
@@ -531,10 +545,6 @@ class Notes(wx.Dialog):
         self.listevt = listevt
         self.notactivated = notactivated
         self.delete = delete
-
-        # if self.delete:
-        #     self.Destroy()
-        #     self.popup(self.protocolref, self.listevt, self.notactivated, 0)
 
         if self.notactivated:
             self.index = 0  # will also need another condition of if not activated but part of a planned proto, then index will need to be self.ind - JG 10/5/21
@@ -562,7 +572,10 @@ class Notes(wx.Dialog):
                 protocolCurrNotes = self.protocolref._protocolNotes[self.protoVidNum]
                 if len(protocolCurrNotes) == 0:
                     if self.index < len(self.protocolref._protocol)-1:
-                        self.Notes = ""
+                        if protocolref.quickLocClicked:
+                            self.Notes = self.quickLoc
+                        else:
+                            self.Notes = ""
                         self.Focus = self.pFocus
                         self.PMTconf = self.pPMTconf
                         self.PMTdir = self.pPMTdir
@@ -595,7 +608,10 @@ class Notes(wx.Dialog):
                     return
 
         if self.index < len(self.protocolref._protocol) - 1:
-            self.Notes = ""
+            if protocolref.quickLocClicked:
+                self.Notes = self.quickLoc
+            else:
+                self.Notes = ""
             self.Focus = self.pFocus
             self.PMTconf = self.pPMTconf
             self.PMTdir = self.pPMTdir
@@ -603,7 +619,10 @@ class Notes(wx.Dialog):
             self.PMTvis = self.pPMTvis
 
         if len(self.protocolref._protocolNotes) == 0:
-            self.Notes = ""
+            if protocolref.quickLocClicked:
+                self.Notes = self.quickLoc
+            else:
+                self.Notes = ""
             self.Focus = ""
             self.PMTconf = ""
             self.PMTdir = ""

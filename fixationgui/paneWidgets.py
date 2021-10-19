@@ -943,11 +943,12 @@ class QuickLocationsPanel(wx.Panel):
     classdocs
     '''
 
-    def __init__(self, parent, rootparent, id=wx.ID_ANY, pos=wx.DefaultPosition, size=(-1, -1), style=wx.SIMPLE_BORDER,
+    def __init__(self, parent, rootparent, protocolref, id=wx.ID_ANY, pos=wx.DefaultPosition, size=(-1, -1), style=wx.SIMPLE_BORDER,
                  name='Quick Locations Panel', port=None):
         super(QuickLocationsPanel, self).__init__(parent, id, pos, size, style, name)
         self.SetBackgroundColour('black')
         self._rootparent = rootparent
+        self._protocolref = protocolref
 
         self.__deg_symbol = u'\N{DEGREE SIGN}'
 
@@ -993,10 +994,10 @@ class QuickLocationsPanel(wx.Panel):
         self.MLE.SetBackgroundColour('medium gray')
         self.MLE.SetForegroundColour('white')
         self.buttonList.append(self.MLE)
-        self.MID = wx.Button(self, label='MID', size=buttonsize)
-        self.MID.SetBackgroundColour('medium gray')
-        self.MID.SetForegroundColour('white')
-        self.buttonList.append(self.MID)
+        self.CTR = wx.Button(self, label='CTR', size=buttonsize)
+        self.CTR.SetBackgroundColour('medium gray')
+        self.CTR.SetForegroundColour('white')
+        self.buttonList.append(self.CTR)
 
         # Bind each button to a listener
         for button in self.buttonList:
@@ -1008,7 +1009,7 @@ class QuickLocationsPanel(wx.Panel):
         sizer.Add(self.MTE, (1, 1), (1, 1), buttonalignment)
         sizer.Add(self.TRC, (1, 2), (1, 1), buttonalignment)
         sizer.Add(self.MLE, (2, 0), (1, 1), buttonalignment)
-        sizer.Add(self.MID, (2, 1), (1, 1), buttonalignment)
+        sizer.Add(self.CTR, (2, 1), (1, 1), buttonalignment)
         sizer.Add(self.MRE, (2, 2), (1, 1), buttonalignment)
         sizer.Add(self.BLC, (3, 0), (1, 1), buttonalignment)
         sizer.Add(self.MBE, (3, 1), (1, 1), buttonalignment)
@@ -1029,19 +1030,28 @@ class QuickLocationsPanel(wx.Panel):
             if pressed is button:
                 if button.GetLabelText() == 'TLC':
                     self._rootparent.update_fixation_location(wx.Point2D(-h_fov/2, v_fov/2))
+                    self._protocolref.quickLoc(button.GetLabelText())
                 elif button.GetLabelText() == 'MTE':
                     self._rootparent.update_fixation_location(wx.Point2D(0, v_fov / 2))
+                    self._protocolref.quickLoc(button.GetLabelText())
                 elif button.GetLabelText() == 'TRC':
                     self._rootparent.update_fixation_location(wx.Point2D(h_fov/2, v_fov/2))
+                    self._protocolref.quickLoc(button.GetLabelText())
                 elif button.GetLabelText() == 'MRE':
                     self._rootparent.update_fixation_location(wx.Point2D(h_fov / 2, 0))
+                    self._protocolref.quickLoc(button.GetLabelText())
                 elif button.GetLabelText() == 'BRC':
                     self._rootparent.update_fixation_location(wx.Point2D(h_fov/2, -v_fov/2))
+                    self._protocolref.quickLoc(button.GetLabelText())
                 elif button.GetLabelText() == 'MBE':
                     self._rootparent.update_fixation_location(wx.Point2D(0, -v_fov/2))
+                    self._protocolref.quickLoc(button.GetLabelText())
                 elif button.GetLabelText() == 'BLC':
                     self._rootparent.update_fixation_location(wx.Point2D(-h_fov/2, -v_fov/2))
+                    self._protocolref.quickLoc(button.GetLabelText())
                 elif button.GetLabelText() == 'MLE':
                     self._rootparent.update_fixation_location(wx.Point2D(-h_fov/2, 0))
-                elif button.GetLabelText() == 'MID':
+                    self._protocolref.quickLoc(button.GetLabelText())
+                elif button.GetLabelText() == 'CTR':
                     self._rootparent.update_fixation_location(wx.Point2D(0, 0))
+                    self._protocolref.quickLoc(button.GetLabelText())

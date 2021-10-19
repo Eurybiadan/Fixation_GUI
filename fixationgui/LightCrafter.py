@@ -73,7 +73,8 @@ class LightCrafterCanvas(wx.Window):
         self._brush = wx.Brush(wx.GREEN, wx.BRUSHSTYLE_SOLID)
         self._stimpen = wx.Pen(wx.GREEN, self._fixsize, wx.PENSTYLE_SOLID)
         self._stimbrush = wx.Brush(wx.GREEN, wx.BRUSHSTYLE_SOLID)
-        self.draw_target = True
+        # self.draw_target = True
+        self.draw_target = False  #changed to be off by default JG 10/19/2021
 
 
         self.on_size(None)
@@ -242,7 +243,6 @@ class LightCrafterCanvas(wx.Window):
 
         elif self._cursor is 8:  # animal stimulus - set to open shutter after 20 frames (1.33 sec) then close after 1 second
             self.animal_stimulus(port)
-            self.set_fixation_cursor(2)
 
         del dc  # need to get rid of the MemoryDC before Update() is called.
         self.Refresh(eraseBackground=False)
@@ -401,6 +401,7 @@ class LightCrafterCanvas(wx.Window):
             ser.close()
 
     def animal_stimulus(self, port):  # this will wait 20 frames (1.33 sec), open for one sec, then close
+
         with serial.Serial() as ser:
 
             # set the com port to the number the user specified
@@ -409,7 +410,7 @@ class LightCrafterCanvas(wx.Window):
 
             ser.baudrate = 9600
             ser.port = comPort
-            ser.open()
+            #ser.open()
 
             # messages to send to the driver
             Open = struct.pack('!B', 64)
@@ -418,11 +419,13 @@ class LightCrafterCanvas(wx.Window):
             openTime = 1
 
             time.sleep(delayTime)
-            ser.write(Open)
+            #ser.write(Open)
+            print('open shutter')
             time.sleep(openTime)
-            ser.write(Close)
+            #ser.write(Close)
+            print('close shutter')
 
-            ser.close()
+            #ser.close()
 
 
 # Shows The Window
