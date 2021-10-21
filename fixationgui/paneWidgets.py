@@ -949,6 +949,7 @@ class QuickLocationsPanel(wx.Panel):
         self.SetBackgroundColour('black')
         self._rootparent = rootparent
         self._protocolref = protocolref
+        self.checked = 0
 
         self.__deg_symbol = u'\N{DEGREE SIGN}'
 
@@ -1029,29 +1030,83 @@ class QuickLocationsPanel(wx.Panel):
         for button in self.buttonList:
             if pressed is button:
                 if button.GetLabelText() == 'TLC':
+                    # put something here to check if the crosshair is on and hasn't been confirmed that it is on yet
+                    if self.checked == 0:
+                        self.checked = 1
+                        if self._protocolref.fixationVisible:
+                            dlg = wx.MessageDialog(self, 'Fixation Target is on!', 'Warning')
+                            if dlg.ShowModal() == wx.ID_OK:
+                                dlg.Destroy()
                     self._rootparent.update_fixation_location(wx.Point2D(-h_fov/2, v_fov/2))
                     self._protocolref.quickLoc(button.GetLabelText())
                 elif button.GetLabelText() == 'MTE':
+                    if self.checked == 0:
+                        self.checked = 1
+                        if self._protocolref.fixationVisible:
+                            dlg = wx.MessageDialog(self, 'Fixation Target is on!', 'Warning')
+                            if dlg.ShowModal() == wx.ID_OK:
+                                dlg.Destroy()
                     self._rootparent.update_fixation_location(wx.Point2D(0, v_fov / 2))
                     self._protocolref.quickLoc(button.GetLabelText())
                 elif button.GetLabelText() == 'TRC':
+                    if self.checked == 0:
+                        self.checked = 1
+                        if self._protocolref.fixationVisible:
+                            dlg = wx.MessageDialog(self, 'Fixation Target is on!', 'Warning')
+                            if dlg.ShowModal() == wx.ID_OK:
+                                dlg.Destroy()
                     self._rootparent.update_fixation_location(wx.Point2D(h_fov/2, v_fov/2))
                     self._protocolref.quickLoc(button.GetLabelText())
                 elif button.GetLabelText() == 'MRE':
+                    if self.checked == 0:
+                        self.checked = 1
+                        if self._protocolref.fixationVisible:
+                            dlg = wx.MessageDialog(self, 'Fixation Target is on!', 'Warning')
+                            if dlg.ShowModal() == wx.ID_OK:
+                                dlg.Destroy()
                     self._rootparent.update_fixation_location(wx.Point2D(h_fov / 2, 0))
                     self._protocolref.quickLoc(button.GetLabelText())
                 elif button.GetLabelText() == 'BRC':
+                    if self.checked == 0:
+                        self.checked = 1
+                        if self._protocolref.fixationVisible:
+                            dlg = wx.MessageDialog(self, 'Fixation Target is on!', 'Warning')
+                            if dlg.ShowModal() == wx.ID_OK:
+                                dlg.Destroy()
                     self._rootparent.update_fixation_location(wx.Point2D(h_fov/2, -v_fov/2))
                     self._protocolref.quickLoc(button.GetLabelText())
                 elif button.GetLabelText() == 'MBE':
+                    if self.checked == 0:
+                        self.checked = 1
+                        if self._protocolref.fixationVisible:
+                            dlg = wx.MessageDialog(self, 'Fixation Target is on!', 'Warning')
+                            if dlg.ShowModal() == wx.ID_OK:
+                                dlg.Destroy()
                     self._rootparent.update_fixation_location(wx.Point2D(0, -v_fov/2))
                     self._protocolref.quickLoc(button.GetLabelText())
                 elif button.GetLabelText() == 'BLC':
+                    if self.checked == 0:
+                        self.checked = 1
+                        if self._protocolref.fixationVisible:
+                            dlg = wx.MessageDialog(self, 'Fixation Target is on!', 'Warning')
+                            if dlg.ShowModal() == wx.ID_OK:
+                                dlg.Destroy()
                     self._rootparent.update_fixation_location(wx.Point2D(-h_fov/2, -v_fov/2))
                     self._protocolref.quickLoc(button.GetLabelText())
                 elif button.GetLabelText() == 'MLE':
+                    if self.checked == 0:
+                        self.checked = 1
+                        if self._protocolref.fixationVisible:
+                            dlg = wx.MessageDialog(self, 'Fixation Target is on!', 'Warning')
+                            if dlg.ShowModal() == wx.ID_OK:
+                                dlg.Destroy()
                     self._rootparent.update_fixation_location(wx.Point2D(-h_fov/2, 0))
                     self._protocolref.quickLoc(button.GetLabelText())
                 elif button.GetLabelText() == 'CTR':
+                    if self._protocolref.fixationVisible == 0 and self.checked == 1:
+                        dlg = wx.MessageDialog(self, 'Fixation Target is off!', 'Warning')
+                        if dlg.ShowModal() == wx.ID_OK:
+                            dlg.Destroy()
+                        self.checked = 0
                     self._rootparent.update_fixation_location(wx.Point2D(0, 0))
                     self._protocolref.quickLoc(button.GetLabelText())

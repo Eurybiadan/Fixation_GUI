@@ -440,8 +440,10 @@ class wxFixationFrame(wx.Frame):
     def on_toggle_press(self, event):
         if event.Id == self.id_on_toggle:
             self.LCCanvas.show_fixation(True)
+            self.protocolpane.fixationOn(1)
         elif event.Id == self.id_off_toggle:
             self.LCCanvas.show_fixation(False)
+            self.protocolpane.fixationOn(0)
 
     def on_FOV_toggle(self, event):
         if event.Id == self.id_on_toggleFOV:

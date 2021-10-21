@@ -72,6 +72,7 @@ class ProtocolPane(wx.Panel):
         self.enabled = 1  # notes are enabled by default
         self.popupEN = 1  # popup is enabled by default
         self.quickLocClicked = 0
+        self.fixationVisible = 1 # by default since by default is on
 
 
     def loadMessageEvtObjects(self, messageEvent, myEvtRetMsg):
@@ -515,6 +516,9 @@ class ProtocolPane(wx.Panel):
             self.on_activated(0, 1)
 
         return 0
+
+    def fixationOn(self, value):
+        self.fixationVisible = value
 
     def updateFOVtoggle(self, fovtoggle):
         self.guiSendFOV = fovtoggle

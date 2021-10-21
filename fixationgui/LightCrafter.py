@@ -416,7 +416,7 @@ class LightCrafterCanvas(wx.Window):
             # messages to send to the driver
             Open = struct.pack('!B', 64)
             Close = struct.pack('!B', 65)
-            timeDelay = float(timeDelay)
+            # timeDelay = float(timeDelay)
             stimulusDuration = float(stimulusDuration)
 
             # time.sleep(timeDelay)
