@@ -44,8 +44,8 @@ class wxLightCrafterFrame(wx.Frame):
     def set_fixation_size(self, size):
         self.LCCanvas.set_fixation_size(size)
 
-    def set_fixation_cursor(self, cursor, start=0, port=100, wavelength=550, frequency=10):
-        return self.LCCanvas.set_fixation_cursor(cursor, start, port, wavelength, frequency)
+    def set_fixation_cursor(self, cursor, start=0, port=100, wavelength=550, frequency=10, timeDelay=1.33, stimulusDuration=1):
+        return self.LCCanvas.set_fixation_cursor(cursor, start, port, wavelength, frequency, timeDelay, stimulusDuration)
 
     def get_fixation_cursor(self):
         return self.LCCanvas.get_fixation_cursor()
@@ -73,8 +73,8 @@ class LightCrafterCanvas(wx.Window):
         self._brush = wx.Brush(wx.GREEN, wx.BRUSHSTYLE_SOLID)
         self._stimpen = wx.Pen(wx.GREEN, self._fixsize, wx.PENSTYLE_SOLID)
         self._stimbrush = wx.Brush(wx.GREEN, wx.BRUSHSTYLE_SOLID)
-        # self.draw_target = True
-        self.draw_target = False  #changed to be off by default JG 10/19/2021
+        self.draw_target = True
+        # self.draw_target = False  #changed to be off by default JG 10/19/2021
 
 
         self.on_size(None)
@@ -107,10 +107,10 @@ class LightCrafterCanvas(wx.Window):
         self._fixsize = size
         self.repaint()
 
-    def set_fixation_cursor(self, cursor, start=0, port=100, wavelength=500, frequency=10):
+    def set_fixation_cursor(self, cursor, start=0, port=100, wavelength=500, frequency=10, timeDelay=1.33, stimulusDuration=1):
         lastcursor = self._cursor
         self._cursor = cursor
-        self.repaint(start, port, wavelength, frequency)
+        self.repaint(start, port, wavelength, frequency, timeDelay, stimulusDuration)
         return lastcursor
 
     def set_visible(self, is_visible):
@@ -129,7 +129,7 @@ class LightCrafterCanvas(wx.Window):
         self._Buffer = wx.Bitmap(*self.thisSize)
         self.repaint()
 
-    def repaint(self, start=0, port=100, wavelength=500, frequency=10):
+    def repaint(self, start=0, port=100, wavelength=500, frequency=10,timeDelay=1.33, stimulusDuration=1):
         dc = wx.MemoryDC()
         dc.SelectObject(self._Buffer)
 
@@ -242,7 +242,8 @@ class LightCrafterCanvas(wx.Window):
             return
 
         elif self._cursor is 8:  # animal stimulus - set to open shutter after 20 frames (1.33 sec) then close after 1 second
-            self.animal_stimulus(port)
+            self.animal_stimulus(port, timeDelay, stimulusDuration)
+            self.set_fixation_cursor(0)
 
         del dc  # need to get rid of the MemoryDC before Update() is called.
         self.Refresh(eraseBackground=False)
@@ -400,7 +401,7 @@ class LightCrafterCanvas(wx.Window):
 
             ser.close()
 
-    def animal_stimulus(self, port):  # this will wait 20 frames (1.33 sec), open for one sec, then close
+    def animal_stimulus(self, port, timeDelay, stimulusDuration):  # this will wait 20 frames (1.33 sec), open for one sec, then close
 
         with serial.Serial() as ser:
 
@@ -415,13 +416,13 @@ class LightCrafterCanvas(wx.Window):
             # messages to send to the driver
             Open = struct.pack('!B', 64)
             Close = struct.pack('!B', 65)
-            delayTime = 1.33
-            openTime = 1
+            timeDelay = float(timeDelay)
+            stimulusDuration = float(stimulusDuration)
 
-            time.sleep(delayTime)
+            # time.sleep(timeDelay)
             #ser.write(Open)
             print('open shutter')
-            time.sleep(openTime)
+            time.sleep(stimulusDuration)
             #ser.write(Close)
             print('close shutter')
 

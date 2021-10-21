@@ -58,6 +58,8 @@ class wxFixationFrame(wx.Frame):
         self.wavelength = 550
         self.frequency = 10
         self.FixStat = 0
+        self.timeDelay = 1.33
+        self.stimulusDuration = 1
 
         self._locationfname = None
         self._locationpath = None
@@ -233,6 +235,9 @@ class wxFixationFrame(wx.Frame):
         self.id_noPopup = 10014
         self.id_save_notes_loc = 10064
         self.id_animal_stim = 10065
+        self.id_SetTimeDelay = 10066
+        self.id_SetStimulusDuration = 10067
+
 
 
 
@@ -241,6 +246,7 @@ class wxFixationFrame(wx.Frame):
         fileMenu = wx.Menu()
         protoMenu = wx.Menu()
         targetMenu = wx.Menu()
+        StimulusMenu = wx.Menu()
         FOVMenu = wx.Menu()
         MEAOMenu = wx.Menu()
         NotesMenu = wx.Menu()
@@ -248,6 +254,7 @@ class wxFixationFrame(wx.Frame):
         menubar.Append(protoMenu, 'Protocol')
         menubar.Append(NotesMenu, 'Notes')
         menubar.Append(targetMenu, 'Target')
+        menubar.Append(StimulusMenu, 'Stimulus')
         menubar.Append(MEAOMenu, 'System')
         menubar.Append(FOVMenu, 'FOV')
 
@@ -284,10 +291,10 @@ class wxFixationFrame(wx.Frame):
 
         # Toggle on/off
         self.toggleMenu = wx.Menu()
-        self.off_toggle = self.toggleMenu.AppendRadioItem(self.id_off_toggle, 'No')
-        self.Bind(wx.EVT_MENU, self.on_toggle_press, self.off_toggle)
         self.on_toggle = self.toggleMenu.AppendRadioItem(self.id_on_toggle, 'Yes')
         self.Bind(wx.EVT_MENU, self.on_toggle_press, self.on_toggle)
+        self.off_toggle = self.toggleMenu.AppendRadioItem(self.id_off_toggle, 'No')
+        self.Bind(wx.EVT_MENU, self.on_toggle_press, self.off_toggle)
         targetMenu.AppendSubMenu(self.toggleMenu,'Visible')
         # Alignment
         self.alignMenu = wx.Menu()
@@ -302,12 +309,14 @@ class wxFixationFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_grid_press, self.off_grid)
         self.on_grid = self.gridMenu.AppendRadioItem(self.id_on_grid, 'On')
         self.Bind(wx.EVT_MENU, self.on_grid_press, self.on_grid)
+
+
         targetMenu.AppendSubMenu(self.gridMenu, 'Grid')
         # # Heather Stimulus
         # targetMenu.Append(self.id_flicker_stimulus, 'Set Flicker\t')  # this was a proof of concept from earlier - JG
         # self.Bind(wx.EVT_MENU, self.on_run_flicker_stimulus, id=self.id_flicker_stimulus)
 
-        targetMenu.Append(self.id_stimulus, 'Set AO2 Stimulus\t')
+        StimulusMenu.Append(self.id_stimulus, 'Set AO2 Stimulus\t')
         self.Bind(wx.EVT_MENU, self.on_run_stimulus, id=self.id_stimulus)
 
         # Stimulus options
@@ -331,19 +340,26 @@ class wxFixationFrame(wx.Frame):
         self.on_30_press = self.FrequencyOptionsMenu.AppendRadioItem(self.id_on_30_press, '30Hz')
         self.Bind(wx.EVT_MENU, self.on_frequency, self.on_30_press)
 
-        targetMenu.AppendSubMenu(self.AO2StimulusOptionsMenu, 'AO2 Stimulus Options')
+        StimulusMenu.AppendSubMenu(self.AO2StimulusOptionsMenu, 'AO2 Stimulus Options')
         self.AO2StimulusOptionsMenu.AppendSubMenu(self.WavelengthOptionsMenu, 'Set Wavelength')
         self.AO2StimulusOptionsMenu.AppendSubMenu(self.FrequencyOptionsMenu, 'Set Frequency')
 
-        targetMenu.Append(self.id_animal_stim, 'Set Animal Stimulus\t')
+        StimulusMenu.Append(self.id_animal_stim, 'Set Animal Stimulus\t')
         self.Bind(wx.EVT_MENU, self.on_run_animal_stimulus, id=self.id_animal_stim)
 
-        targetMenu.Append(self.id_test, 'Test Stimulus\t')  # 'Test Stimulus/Flicker\t')
+        # Animal Stimulus options
+        self.AnimalStimulusOptionsMenu = wx.Menu()
+        self.AnimalStimulusOptionsMenu.Append(self.id_SetTimeDelay, 'Set Time Delay\t')
+        self.Bind(wx.EVT_MENU, self.setAnimalOptions, id=self.id_SetTimeDelay)
+        self.AnimalStimulusOptionsMenu.Append(self.id_SetStimulusDuration, 'Set Stimulus Duration\t')
+        self.Bind(wx.EVT_MENU, self.setAnimalOptions, id=self.id_SetStimulusDuration)
+
+        StimulusMenu.AppendSubMenu(self.AnimalStimulusOptionsMenu, 'Animal Stimulus Options')
+
+        StimulusMenu.Append(self.id_test, 'Test Stimulus\t')  # 'Test Stimulus/Flicker\t')
         self.Bind(wx.EVT_MENU, self.on_test, id=self.id_test)
 
-
-
-        targetMenu.Append(self.id_normal, 'Reset to Normal Imaging\t')
+        StimulusMenu.Append(self.id_normal, 'Reset to Normal Imaging\t')
         self.Bind(wx.EVT_MENU, self.on_normal, id=self.id_normal)
 
         # Toggle FOV sending from fixation on/off
@@ -453,8 +469,6 @@ class wxFixationFrame(wx.Frame):
         elif event.Id == self.id_noPopup:
             self.protocolpane.popupEnabled(0)
 
-
-
     # Alignment
     def on_align_presss(self, event):
         pass
@@ -500,13 +514,25 @@ class wxFixationFrame(wx.Frame):
         self.flicker_stimulus = 0
         self.stimulus = 0
 
+    def setAnimalOptions(self, event):
+        if event.Id == self.id_SetTimeDelay:
+            dlg = wx.TextEntryDialog(self, 'How many seconds until stimulus on?:', 'Set Time Delay')
+            if dlg.ShowModal() == wx.ID_OK:
+                self.timeDelay = dlg.GetValue()
+            dlg.Destroy()
+        elif event.Id == self.id_SetStimulusDuration:
+            dlg = wx.TextEntryDialog(self, 'How many seconds for stimulus duration?:', 'Set Stimulus Duration')
+            if dlg.ShowModal() == wx.ID_OK:
+                self.stimulusDuration = dlg.GetValue()
+            dlg.Destroy()
+
     def on_test(self, event):
         if self.stimulus == 1:
             self.LCCanvas.set_fixation_cursor(7, 1, self.com, self.wavelength, self.frequency)
         if self.flicker_stimulus == 1:
             self.LCCanvas.set_fixation_cursor(6, 1, self.com)
         if self.animal_stim == 1:
-            self.LCCanvas.set_fixation_cursor(8, 1, self.com)
+            self.LCCanvas.set_fixation_cursor(8, 1, self.com, 1, 1, self.timeDelay, self.stimulusDuration)
 
     def on_normal(self, event):
         self.flicker_stimulus = 0
@@ -839,9 +865,15 @@ class wxFixationFrame(wx.Frame):
             print(hex(id(MessageEvent)))
             print(datetime.datetime.now())
             wx.PostEvent(self, evt)
+        if self.stimulus or self.flicker_stimulus:
+            t = threading.Timer(3, self.call_stimulus)  # this is the delay before the shutter opens for the first time
+            t.start()
+        if self.animal_stim:
+            timeDelay = float(self.timeDelay)
+            timeDelay = timeDelay-0.6  # this is an attempt to make the timing more accurate
+            t = threading.Timer(timeDelay, self.call_stimulus)  # this is the delay before the shutter opens for the first time
+            t.start()
 
-        t = threading.Timer(3, self.call_stimulus)
-        t.start()
         # elif event.GetKeyCode() == wx.WXK_NUMPAD_SUBTRACT:
         #     self.zoom_out(self)
 
