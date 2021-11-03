@@ -20,6 +20,7 @@ class wxLightCrafterFrame(wx.Frame):
         numdisplays = wx.Display().GetCount()
         # The Lightcrafter should be the LAST display index. Or we'll have problems.
         displayLC = wx.Display(numdisplays - 1)
+        displayLC = wx.Display(numdisplays-2)  # Comment out for AO computers, only use for Jenna's desktop
 
         geometry = displayLC.GetGeometry()
         # print 'Top Left' + str(geometry.GetTopLeft())
@@ -411,7 +412,7 @@ class LightCrafterCanvas(wx.Window):
 
             ser.baudrate = 9600
             ser.port = comPort
-            #ser.open()
+            ser.open()
 
             # messages to send to the driver
             Open = struct.pack('!B', 64)
@@ -420,13 +421,13 @@ class LightCrafterCanvas(wx.Window):
             stimulusDuration = float(stimulusDuration)
 
             # time.sleep(timeDelay)
-            #ser.write(Open)
-            print('open shutter')
+            ser.write(Open)
+            # print('open shutter')
             time.sleep(stimulusDuration)
-            #ser.write(Close)
-            print('close shutter')
+            ser.write(Close)
+            # print('close shutter')
 
-            #ser.close()
+            ser.close()
 
 
 # Shows The Window

@@ -229,7 +229,7 @@ class wxFixationFrame(wx.Frame):
         self.id_on_10_press = 10054
         self.id_off_toggleMEAO = 10056
         self.id_on_toggleMEAO = 1057
-        self.id_enabled = 10062
+        # self.id_enabled = 10062
         self.id_disabled = 10063
         self.id_Popup = 10013
         self.id_noPopup = 10014
@@ -393,10 +393,13 @@ class wxFixationFrame(wx.Frame):
 
         # Toggle Electronic Notes enabled or disabled
         self.Bind(wx.EVT_MENU, self.on_set_save_notes_location, id=self.id_save_notes_loc)
-        self.enabled = self.notes.AppendRadioItem(self.id_enabled, 'Yes')
-        self.Bind(wx.EVT_MENU, self.on_notes_toggle, self.enabled)
-        self.disabled = self.notes.AppendRadioItem(self.id_disabled, 'No')
+        self.disabled = self.notes.AppendCheckItem(self.id_disabled, 'No')
         self.Bind(wx.EVT_MENU, self.on_notes_toggle, self.disabled)
+        # commented out - used previously for radioitems in the menu. - JG 11/3/21
+        # self.enabled = self.notes.AppendRadioItem(self.id_enabled, 'Yes')
+        # self.Bind(wx.EVT_MENU, self.on_notes_toggle, self.enabled)
+        # self.disabled = self.notes.AppendRadioItem(self.id_disabled, 'No')
+        # self.Bind(wx.EVT_MENU, self.on_notes_toggle, self.disabled)
         NotesMenu.AppendSubMenu(self.notes, 'Record Electronic Notes?')
 
         # Compounds the Menu Bar
@@ -460,10 +463,24 @@ class wxFixationFrame(wx.Frame):
             self.MEAO = 0
 
     def on_notes_toggle(self, event):
-        if event.Id == self.id_enabled:
-            self.protocolpane.notesEnabled(1)
+        # commented out - used previously for radioitem in the menu.  - JG 11/3/21
+        # if event.Id == self.id_enabled:
+        #     self.protocolpane.notesEnabled(1)
+        if self.disabled.IsChecked() == False:
+            self.disabled.Check(True)
+            dlg = wx.MessageDialog(self, 'Electronic Notes cannot be enabled after being disabled', 'Warning')
+            if dlg.ShowModal() == wx.ID_OK:
+                dlg.Destroy()
         elif event.Id == self.id_disabled:
-            self.protocolpane.notesEnabled(0)
+            dlg = wx.MessageDialog(None, 'Are you sure you want disable recording electronic notes?', 'Disable Electronic Notes',
+                                   wx.YES_NO | wx.ICON_QUESTION)
+            result = dlg.ShowModal()
+            if result == wx.ID_YES:
+                self.protocolpane.notesEnabled(0)
+                self.disabled.Check(True)
+            else:
+                self.disabled.Check(False)
+                return
 
     def on_popup_toggle(self, event):
         if event.Id == self.id_Popup:
@@ -685,6 +702,11 @@ class wxFixationFrame(wx.Frame):
             self.viewpane.pane_to_file(locationpath + os.sep + locationfname)
 
     def on_set_save_notes_location(self, evt=None):
+        if self.disabled.IsChecked() == True:
+            dlg = wx.MessageDialog(self, 'Electronic Notes are disabled', 'Warning')
+            if dlg.ShowModal() == wx.ID_OK:
+                dlg.Destroy()
+            return
         self.protocolpane.savepdfas()
 
     def on_set_save_protocol_location(self, evt=None, loadplanMode=0):
@@ -831,6 +853,9 @@ class wxFixationFrame(wx.Frame):
             self.viewpane.clear_locations()
             self._locationfname = None
             self.curr_path = ''  # JG
+        dlg = wx.MessageDialog(self, 'Remember to set Savior video # to 0!', 'Warning')
+        if dlg.ShowModal() == wx.ID_OK:
+            dlg.Destroy()
 
     def on_open_background_image(self, evt=None):
         dialog = wx.FileDialog(self, 'Select background image:', self.header_dir, self.filename,

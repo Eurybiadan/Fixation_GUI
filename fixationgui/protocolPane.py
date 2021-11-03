@@ -212,7 +212,7 @@ class ProtocolPane(wx.Panel):
                 if annotation[SUBTYPE_KEY] == WIDGET_SUBTYPE_KEY:
                     if annotation[ANNOT_FIELD_KEY]:
                         key = annotation[ANNOT_FIELD_KEY][1:-1]
-                        #print(key)
+                        # print(key)
 
 
 
@@ -387,6 +387,9 @@ class ProtocolPane(wx.Panel):
         self.i = 0
         self._parent.set_horizontal_fov(0.1)
         self._parent.set_vertical_fov(0.1)
+        self.pdfcall = 0
+        self.count = 0
+        self._protocolNotes = []
 
     def update_protocol_list(self):
 
