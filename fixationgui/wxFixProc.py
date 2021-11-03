@@ -13,9 +13,9 @@ class FixGUIServer:
         thispath = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
         if platform.system() is 'Windows':
-            py3path = os.path.join(thispath, 'venv37', 'Scripts', 'pythonw.exe')
+            py3path = os.path.join(thispath, 'venv', 'Scripts', 'pythonw.exe')
         else:
-            py3path = os.path.join(thispath, 'venv37', 'bin', 'python3')
+            py3path = os.path.join(thispath, 'venv', 'bin', 'python3')
         guipath = os.path.join(thispath,'fixationgui', 'wxFixGUI.py')
         print('Launching the Fixation GUI at '+ py3path)
 

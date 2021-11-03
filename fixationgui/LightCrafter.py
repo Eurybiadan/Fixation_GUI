@@ -20,7 +20,7 @@ class wxLightCrafterFrame(wx.Frame):
         numdisplays = wx.Display().GetCount()
         # The Lightcrafter should be the LAST display index. Or we'll have problems.
         displayLC = wx.Display(numdisplays - 1)
-        displayLC = wx.Display(numdisplays-2)  # Comment out for AO computers, only use for Jenna's desktop
+        # displayLC = wx.Display(numdisplays-2)  # Comment out for AO computers, only use for Jenna's desktop
 
         geometry = displayLC.GetGeometry()
         # print 'Top Left' + str(geometry.GetTopLeft())
