@@ -48,6 +48,7 @@ class QueueWhisperer(asyncore.dispatcher):
         self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
         self.set_reuse_addr()
         self.connect((self.HOST, self.PORT))
+        self.prevTime = datetime.datetime.now()
 
 
     def writable(self):
@@ -56,10 +57,24 @@ class QueueWhisperer(asyncore.dispatcher):
     def handle_read(self):
         # reads things sent from gui to savior?
         recvmsg = self.recv(32).decode("utf-8")
-        print("read in fixproc")
-        print("Recieved: " + recvmsg)
-        print(datetime.datetime.now())
-        self._recvQueue.put(recvmsg)
+        if recvmsg == "F4" or "(" in recvmsg:
+            if recvmsg == "F4":  # to avoid unforseen issues with FOV switches
+                if (datetime.datetime.now() - self.prevTime) < datetime.timedelta(seconds=1):
+                    # t = threading.Timer(0.5, self.queueDelayed, args=recvmsg)  # this is a thread with a delay that will call the queueDelayed function
+                    # t.start()  # this starts the thread
+                    return  # return and let people hit F4 until at least a second has passed. This way there won't be any issues with F4 freaking out/lagging if the button is spammed. Just going to discard the F4 message and wait for the next
+            print("read in fixproc")
+            print("Recieved: " + recvmsg)
+            self._recvQueue.put(recvmsg)
+            self.prevTime = datetime.datetime.now()
+            print(self.prevTime)
+
+    # def queueDelayed(self, recvmsg):  # this is the function that adds the message to the queue after being delayed to prevent errors
+    #     print("In queueDelayed")
+    #     print("Recieved: " + recvmsg)
+    #     self._recvQueue.put(recvmsg)
+    #     self.prevTime = datetime.datetime.now()
+    #     print(self.prevTime)
 
     def handle_write(self):
         # writes the stuff coming into the fixation gui from savior
@@ -91,18 +106,22 @@ if __name__ == '__main__':
     CYANIDE = -1
     VIDNUM = 0
     FOV = 1
+    OPEN = 2
+    CLOSE = 3
 
     server = FixGUIServer(testQ, recvQ)
-    time.sleep(20)
+    # time.sleep(15)
     print("Starting test packets...")
     # before planned
-    testQ.put((FOV, 1.00, 1.00))
-    testQ.put((VIDNUM, '0001'))
-    # time.sleep(30)
     # testQ.put((FOV, 1.00, 1.00))
     # testQ.put((VIDNUM, '0001'))
-    # time.sleep(10)
-    # planned
+    # testQ.put((OPEN, 35))
+    # time.sleep(1)
+    # testQ.put((CLOSE, 35))
+    # testQ.put((FOV, 2.00, 2.00))
+    # testQ.put((VIDNUM, '0002'))
+    # time.sleep(20)
+    # # planned
     # testQ.put((FOV, 1.00, 1.00))
     # testQ.put((VIDNUM, '0003'))
     # time.sleep(10)
