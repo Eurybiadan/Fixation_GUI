@@ -20,7 +20,7 @@ class wxLightCrafterFrame(wx.Frame):
         numdisplays = wx.Display().GetCount()
         # The Lightcrafter should be the LAST display index. Or we'll have problems.
         displayLC = wx.Display(numdisplays - 1)
-        displayLC = wx.Display(numdisplays-2)  # Comment out for AO computers, only use for Jenna's desktop
+        # displayLC = wx.Display(numdisplays-2)  # Comment out for AO computers, only use for Jenna's desktop
 
         geometry = displayLC.GetGeometry()
         # print 'Top Left' + str(geometry.GetTopLeft())
@@ -406,7 +406,7 @@ class LightCrafterCanvas(wx.Window):
 
             ser.close()
 
-    def animal_stimulus_open(self, port):  # this will wait 20 frames (1.33 sec), open for one sec, then close
+    def animal_stimulus_open(self, port):
 
         with serial.Serial() as ser:
 
@@ -425,8 +425,8 @@ class LightCrafterCanvas(wx.Window):
             ser.write(Open)
             ser.close()
 
-    def animal_stimulus_close(self, port):  # this will wait 20 frames (1.33 sec), open for one sec, then close
-
+    def animal_stimulus_close(self, port):
+        
         with serial.Serial() as ser:
 
             # set the com port to the number the user specified
