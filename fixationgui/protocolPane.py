@@ -129,7 +129,7 @@ class ProtocolPane(wx.Panel):
                     width = float(fovtokens[0])
                     height = fovtokens[1]
                     height = float(height[2:])
-                fovset = str((width, height))
+                fovset = str((1, width, height))
                 # need to send width and height to savior.pyw
                 evt = self.messageEvent(self.myEvtRetMsg, -1, 4, fovset)
                 wx.PostEvent(self, evt)
@@ -192,7 +192,7 @@ class ProtocolPane(wx.Panel):
         if self.pdfcall == 1:
             pdf_template = self._Noteslocationpath
         else:
-            pdf_template = "AOSLO_Electronic_Notes_Template_v1.pdf"
+            pdf_template = "AOSLO_Electronic_Notes_Template_v2.pdf"
             if self.locSaved == 0 and init == 0:
                 self.savepdfas()
             self.pdfcall = 1
@@ -381,15 +381,16 @@ class ProtocolPane(wx.Panel):
     def is_protocol_empty(self):
         return not self._protocol
 
-    def clear_protocol(self):
+    def clear_protocol(self, switch=0):
         self._protocol = []
         self.list.DeleteAllItems()
         self.i = 0
         self._parent.set_horizontal_fov(0.1)
         self._parent.set_vertical_fov(0.1)
-        self.pdfcall = 0
-        self.count = 0
-        self._protocolNotes = []
+        # if switch == 0:  # JG WIP
+        #     self.pdfcall = 0
+        #     self.count = 0
+        #     self._protocolNotes = []
 
     def update_protocol_list(self):
 
@@ -575,7 +576,7 @@ class Notes(wx.Dialog):
             self.pPMTvis = dict.get(protocolNotesItem, 'PMTvis')
 
         if len(self.protocolref._protocolNotes) != 0:
-            if self.protoVidNum < len(self.protocolref._protocolNotes):
+            if self.protoVidNum < len(self.protocolref._protocolNotes):  # JG- 11/15/21 need to get around this when switching eyes. Can I change to <=?
                 protocolCurrNotes = self.protocolref._protocolNotes[self.protoVidNum]
                 if len(protocolCurrNotes) == 0:
                     if self.index < len(self.protocolref._protocol)-1:

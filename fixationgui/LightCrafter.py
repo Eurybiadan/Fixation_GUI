@@ -20,7 +20,7 @@ class wxLightCrafterFrame(wx.Frame):
         numdisplays = wx.Display().GetCount()
         # The Lightcrafter should be the LAST display index. Or we'll have problems.
         displayLC = wx.Display(numdisplays - 1)
-        # displayLC = wx.Display(numdisplays-2)  # Comment out for AO computers, only use for Jenna's desktop
+        displayLC = wx.Display(numdisplays-2)  # Comment out for AO computers, only use for Jenna's desktop
 
         geometry = displayLC.GetGeometry()
         # print 'Top Left' + str(geometry.GetTopLeft())
@@ -45,8 +45,8 @@ class wxLightCrafterFrame(wx.Frame):
     def set_fixation_size(self, size):
         self.LCCanvas.set_fixation_size(size)
 
-    def set_fixation_cursor(self, cursor, start=0, port=100, wavelength=550, frequency=10, timeDelay=1.33, stimulusDuration=1):
-        return self.LCCanvas.set_fixation_cursor(cursor, start, port, wavelength, frequency, timeDelay, stimulusDuration)
+    def set_fixation_cursor(self, cursor, start=0, port=100, wavelength=550, frequency=10):
+        return self.LCCanvas.set_fixation_cursor(cursor, start, port, wavelength, frequency)
 
     def get_fixation_cursor(self):
         return self.LCCanvas.get_fixation_cursor()
@@ -108,10 +108,10 @@ class LightCrafterCanvas(wx.Window):
         self._fixsize = size
         self.repaint()
 
-    def set_fixation_cursor(self, cursor, start=0, port=100, wavelength=500, frequency=10, timeDelay=1.33, stimulusDuration=1):
+    def set_fixation_cursor(self, cursor, start=0, port=100, wavelength=500, frequency=10):
         lastcursor = self._cursor
         self._cursor = cursor
-        self.repaint(start, port, wavelength, frequency, timeDelay, stimulusDuration)
+        self.repaint(start, port, wavelength, frequency)
         return lastcursor
 
     def set_visible(self, is_visible):
@@ -130,7 +130,7 @@ class LightCrafterCanvas(wx.Window):
         self._Buffer = wx.Bitmap(*self.thisSize)
         self.repaint()
 
-    def repaint(self, start=0, port=100, wavelength=500, frequency=10,timeDelay=1.33, stimulusDuration=1):
+    def repaint(self, start=0, port=100, wavelength=500, frequency=10):
         dc = wx.MemoryDC()
         dc.SelectObject(self._Buffer)
 
@@ -243,7 +243,11 @@ class LightCrafterCanvas(wx.Window):
             return
 
         elif self._cursor is 8:  # animal stimulus - set to open shutter after 20 frames (1.33 sec) then close after 1 second
-            self.animal_stimulus(port, timeDelay, stimulusDuration)
+            self.animal_stimulus_open(port)
+            self.set_fixation_cursor(0)
+
+        elif self._cursor is 9:  # animal stimulus - set to open shutter after 20 frames (1.33 sec) then close after 1 second
+            self.animal_stimulus_close(port)
             self.set_fixation_cursor(0)
 
         del dc  # need to get rid of the MemoryDC before Update() is called.
@@ -361,7 +365,7 @@ class LightCrafterCanvas(wx.Window):
             # keep track of how many times repaint has been called
             self.count = self.count + 1
 
-    def stimulus(self, port, frequency=10):  # edited to just deal with clock- no drawing JG 4/20
+    def stimulus(self, port, frequency=30):  # edited to just deal with clock- no drawing JG 4/20
         with serial.Serial() as ser:
 
             # default values
@@ -402,7 +406,7 @@ class LightCrafterCanvas(wx.Window):
 
             ser.close()
 
-    def animal_stimulus(self, port, timeDelay, stimulusDuration):  # this will wait 20 frames (1.33 sec), open for one sec, then close
+    def animal_stimulus_open(self, port):  # this will wait 20 frames (1.33 sec), open for one sec, then close
 
         with serial.Serial() as ser:
 
@@ -416,17 +420,28 @@ class LightCrafterCanvas(wx.Window):
 
             # messages to send to the driver
             Open = struct.pack('!B', 64)
-            Close = struct.pack('!B', 65)
-            # timeDelay = float(timeDelay)
-            stimulusDuration = float(stimulusDuration)
 
-            # time.sleep(timeDelay)
+            # print('Open @', time.perf_counter())
             ser.write(Open)
-            # print('open shutter')
-            time.sleep(stimulusDuration)
-            ser.write(Close)
-            # print('close shutter')
+            ser.close()
 
+    def animal_stimulus_close(self, port):  # this will wait 20 frames (1.33 sec), open for one sec, then close
+
+        with serial.Serial() as ser:
+
+            # set the com port to the number the user specified
+            comPort = 'COM' + str(port)
+            # print('comPort is: ', comPort)
+
+            ser.baudrate = 9600
+            ser.port = comPort
+            ser.open()
+
+            # messages to send to the driver
+            Close = struct.pack('!B', 65)
+
+            # print('Close @', time.perf_counter())
+            ser.write(Close)
             ser.close()
 
 

@@ -210,6 +210,7 @@ class wxFixationFrame(wx.Frame):
         self.id_open_proto_pcrash = 10006
         #
         self.id_clear_proto = 10007
+        self.id_switch_eyes = 10099
         # Heather Stimulus
         self.id_stimulus = 10008
         self.id_flicker_stimulus = 10020
@@ -235,8 +236,8 @@ class wxFixationFrame(wx.Frame):
         self.id_noPopup = 10014
         self.id_save_notes_loc = 10064
         self.id_animal_stim = 10065
-        self.id_SetTimeDelay = 10066
-        self.id_SetStimulusDuration = 10067
+        self.id_OpenShutterFrame = 10066
+        self.id_CloseShutterFrame = 10067
 
 
 
@@ -276,6 +277,9 @@ class wxFixationFrame(wx.Frame):
         #
         protoMenu.Append(self.id_clear_proto, 'Clear Protocol\t')
         self.Bind(wx.EVT_MENU, self.on_clear_protocol, id=self.id_clear_proto)
+
+        # protoMenu.Append(self.id_switch_eyes, 'Switch Eyes\t')
+        # self.Bind(wx.EVT_MENU, self.on_switch_eyes, id=self.id_switch_eyes) # JG WIP
 
         # Open a background image
         # fileMenu.Append(wx.ID_OPEN, 'Open Background Image...\tCtrl+B')
@@ -349,10 +353,10 @@ class wxFixationFrame(wx.Frame):
 
         # Animal Stimulus options
         self.AnimalStimulusOptionsMenu = wx.Menu()
-        self.AnimalStimulusOptionsMenu.Append(self.id_SetTimeDelay, 'Set Time Delay\t')
-        self.Bind(wx.EVT_MENU, self.setAnimalOptions, id=self.id_SetTimeDelay)
-        self.AnimalStimulusOptionsMenu.Append(self.id_SetStimulusDuration, 'Set Stimulus Duration\t')
-        self.Bind(wx.EVT_MENU, self.setAnimalOptions, id=self.id_SetStimulusDuration)
+        self.AnimalStimulusOptionsMenu.Append(self.id_OpenShutterFrame, 'Open Shutter Frame\t')
+        self.Bind(wx.EVT_MENU, self.setAnimalOptions, id=self.id_OpenShutterFrame)
+        self.AnimalStimulusOptionsMenu.Append(self.id_CloseShutterFrame, 'Close Shutter Frame\t')
+        self.Bind(wx.EVT_MENU, self.setAnimalOptions, id=self.id_CloseShutterFrame)
 
         StimulusMenu.AppendSubMenu(self.AnimalStimulusOptionsMenu, 'Animal Stimulus Options')
 
@@ -434,7 +438,9 @@ class wxFixationFrame(wx.Frame):
         switchboard = {
             -1: self.on_quit,
             0: self.mark_location,
-            1: self.set_FOV
+            1: self.set_FOV,
+            2: self.frame_number_start,
+            3: self.frame_number_end
         }
         if evt.get_datatype() in switchboard:
             switchboard.get(evt.get_datatype())(evt.get_data())
@@ -534,15 +540,27 @@ class wxFixationFrame(wx.Frame):
         self.stimulus = 0
 
     def setAnimalOptions(self, event):
-        if event.Id == self.id_SetTimeDelay:
-            dlg = wx.TextEntryDialog(self, 'How many seconds until stimulus on?:', 'Set Time Delay')
+        if event.Id == self.id_OpenShutterFrame:
+            dlg = wx.TextEntryDialog(self, 'Approximate Frame to Open Shutter?:', 'Set Open Shutter Frame')
             if dlg.ShowModal() == wx.ID_OK:
-                self.timeDelay = dlg.GetValue()
+                self.Oframe = dlg.GetValue()
+                self.Oframe = float(self.Oframe)
+                OframeMsg = str((2, self.Oframe))
+                # need to send frame to savior.pyw
+                evt = MessageEvent(myEVT_RETURN_MESSAGE, -1, 4, OframeMsg)
+                wx.PostEvent(self, evt)
+                print('sent Open')
             dlg.Destroy()
-        elif event.Id == self.id_SetStimulusDuration:
-            dlg = wx.TextEntryDialog(self, 'How many seconds for stimulus duration?:', 'Set Stimulus Duration')
+        elif event.Id == self.id_CloseShutterFrame:
+            dlg = wx.TextEntryDialog(self, 'Approximate Frame to Close Shutter?:', 'Set Close Shutter Frame')
             if dlg.ShowModal() == wx.ID_OK:
-                self.stimulusDuration = dlg.GetValue()
+                self.Cframe = dlg.GetValue()
+                self.Cframe = float(self.Cframe)
+                CframeMsg = str((3, self.Cframe))
+                # need to send frame to savior.pyw
+                evt = MessageEvent(myEVT_RETURN_MESSAGE, -1, 4, CframeMsg)
+                wx.PostEvent(self, evt)
+                print('sent Close')
             dlg.Destroy()
 
     def on_test(self, event):
@@ -551,7 +569,8 @@ class wxFixationFrame(wx.Frame):
         if self.flicker_stimulus == 1:
             self.LCCanvas.set_fixation_cursor(6, 1, self.com)
         if self.animal_stim == 1:
-            self.LCCanvas.set_fixation_cursor(8, 1, self.com, 1, 1, self.timeDelay, self.stimulusDuration)
+            self.LCCanvas.set_fixation_cursor(8, 1, self.com, 1, 1)
+            self.LCCanvas.set_fixation_cursor(9, 1, self.com, 1, 1)
 
     def on_normal(self, event):
         self.flicker_stimulus = 0
@@ -844,6 +863,16 @@ class wxFixationFrame(wx.Frame):
                 self.viewpane.Repaint(0, pcrash_list)
 
 
+    # def on_switch_eyes(self, evt=None):  # JG WIP
+    #     dlg = wx.MessageDialog(None, 'Are you sure you want to switch eyes?', 'Switch Eyes',
+    #                            wx.YES_NO | wx.ICON_QUESTION)
+    #     result = dlg.ShowModal()
+    #     if result == wx.ID_YES:
+    #         self.protocolpane.clear_protocol(1)
+    #         self.viewpane.clear_locations()
+    #         self._locationfname = None
+    #         self.curr_path = ''
+
     def on_clear_protocol(self, evt=None):
         dlg = wx.MessageDialog(None, 'Are you sure you want to clear the protocol?', 'Clear Protocol',
                                wx.YES_NO | wx.ICON_QUESTION)
@@ -853,9 +882,9 @@ class wxFixationFrame(wx.Frame):
             self.viewpane.clear_locations()
             self._locationfname = None
             self.curr_path = ''  # JG
-        dlg = wx.MessageDialog(self, 'Remember to set Savior video # to 0!', 'Warning')
-        if dlg.ShowModal() == wx.ID_OK:
-            dlg.Destroy()
+            dlg = wx.MessageDialog(self, 'Remember to set Savior video # to 0!', 'Warning')
+            if dlg.ShowModal() == wx.ID_OK:
+                dlg.Destroy()
 
     def on_open_background_image(self, evt=None):
         dialog = wx.FileDialog(self, 'Select background image:', self.header_dir, self.filename,
@@ -892,14 +921,16 @@ class wxFixationFrame(wx.Frame):
             print(hex(id(MessageEvent)))
             print(datetime.datetime.now())
             wx.PostEvent(self, evt)
-        if self.stimulus or self.flicker_stimulus:
-            t = threading.Timer(3, self.call_stimulus)  # this is the delay before the shutter opens for the first time
-            t.start()
-        if self.animal_stim:
-            timeDelay = float(self.timeDelay)
-            timeDelay = timeDelay-0.6  # this is an attempt to make the timing more accurate
-            t = threading.Timer(timeDelay, self.call_stimulus)  # this is the delay before the shutter opens for the first time
-            t.start()
+            # put these two ifs in the first if so that random keyboard presses won't trigger the stimulus - will need to test
+            if self.stimulus or self.flicker_stimulus:
+                t = threading.Timer(3, self.call_stimulus)  # this is the delay before the shutter opens for the first time
+                t.start()
+            if self.animal_stim:
+                # timeDelay = float(self.timeDelay)
+                # timeDelay = timeDelay-0.6  # this is an attempt to make the timing more accurate
+                # t = threading.Timer(timeDelay, self.call_stimulus)  # this is the delay before the shutter opens for the first time
+                # t.start()
+                self.call_stimulus()
 
         # elif event.GetKeyCode() == wx.WXK_NUMPAD_SUBTRACT:
         #     self.zoom_out(self)
@@ -912,10 +943,10 @@ class wxFixationFrame(wx.Frame):
     def call_stimulus(self):
         import datetime
         # Heather Stimulus
-        if self.stimulus is 1:
+        if self.flicker_stimulus is 1:
             print(datetime.datetime.now())
             self.LCCanvas.set_fixation_cursor(6, 1, self.com)
-        if self.flicker_stimulus is 1:
+        if self.stimulus is 1:
             print(datetime.datetime.now())
             self.LCCanvas.set_fixation_cursor(7, 1, self.com, self.wavelength, self.frequency)
         if self.animal_stim is 1:
@@ -1052,6 +1083,15 @@ class wxFixationFrame(wx.Frame):
         if fov != -1:
             self.viewpane.set_fov(fov)
             self.saviorfov = fov
+
+    def frame_number_start(self, num):  # added JG 2/15/22 frame number grabbing from savior testing
+        if self.animal_stim == 1:
+            self.LCCanvas.set_fixation_cursor(8, 1, self.com)
+
+    def frame_number_end(self, num):  # added JG 2/15/22 frame number grabbing from savior testing
+        if self.animal_stim == 1:
+            self.LCCanvas.set_fixation_cursor(9, 1, self.com)
+
 
     def update_fixation_color(self, penColor, brushColor):
         # This method allows the user to change the color on the LightCrafter DLP.
@@ -1217,7 +1257,7 @@ class QueueListener(asyncore.dispatcher_with_send):
     def handle_read(self):
         try:
             recvmsg = self.recv(32).decode("utf-8")
-            print("Recieved: "+recvmsg)
+            print("Recieved fixgui: "+recvmsg)
 
             list_o_msg = recvmsg.split("!")
 
