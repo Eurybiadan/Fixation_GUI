@@ -58,7 +58,7 @@ class wxFixationFrame(wx.Frame):
         self.wavelength = 550
         self.frequency = 10
         self.FixStat = 0
-        self.timeDelay = 1.33
+        self.timeDelay = 1.5
         self.stimulusDuration = 1
 
         self._locationfname = None
@@ -236,8 +236,8 @@ class wxFixationFrame(wx.Frame):
         self.id_noPopup = 10014
         self.id_save_notes_loc = 10064
         self.id_animal_stim = 10065
-        self.id_OpenShutterFrame = 10066
-        self.id_CloseShutterFrame = 10067
+        self.id_openShutterTime = 10066
+        self.id_shutterDuration = 10067
 
 
 
@@ -353,10 +353,10 @@ class wxFixationFrame(wx.Frame):
 
         # Animal Stimulus options
         self.AnimalStimulusOptionsMenu = wx.Menu()
-        self.AnimalStimulusOptionsMenu.Append(self.id_OpenShutterFrame, 'Open Shutter Frame\t')
-        self.Bind(wx.EVT_MENU, self.setAnimalOptions, id=self.id_OpenShutterFrame)
-        self.AnimalStimulusOptionsMenu.Append(self.id_CloseShutterFrame, 'Close Shutter Frame\t')
-        self.Bind(wx.EVT_MENU, self.setAnimalOptions, id=self.id_CloseShutterFrame)
+        self.AnimalStimulusOptionsMenu.Append(self.id_openShutterTime, 'Set Stimulus Start Time\t')
+        self.Bind(wx.EVT_MENU, self.setAnimalOptions, id=self.id_openShutterTime)
+        self.AnimalStimulusOptionsMenu.Append(self.id_shutterDuration, 'Set Stimulus Duration\t')
+        self.Bind(wx.EVT_MENU, self.setAnimalOptions, id=self.id_shutterDuration)
 
         StimulusMenu.AppendSubMenu(self.AnimalStimulusOptionsMenu, 'Animal Stimulus Options')
 
@@ -439,8 +439,8 @@ class wxFixationFrame(wx.Frame):
             -1: self.on_quit,
             0: self.mark_location,
             1: self.set_FOV,
-            2: self.frame_number_start,
-            3: self.frame_number_end
+            # 2: self.frame_number_start,
+            # 3: self.frame_number_end
         }
         if evt.get_datatype() in switchboard:
             switchboard.get(evt.get_datatype())(evt.get_data())
@@ -540,27 +540,38 @@ class wxFixationFrame(wx.Frame):
         self.stimulus = 0
 
     def setAnimalOptions(self, event):
-        if event.Id == self.id_OpenShutterFrame:
-            dlg = wx.TextEntryDialog(self, 'Approximate Frame to Open Shutter?:', 'Set Open Shutter Frame')
+        if event.Id == self.id_openShutterTime:
+            dlg = wx.TextEntryDialog(self, 'Stimulus Start Time (s):', 'Set Stimulus Start')
             if dlg.ShowModal() == wx.ID_OK:
-                self.Oframe = dlg.GetValue()
-                self.Oframe = float(self.Oframe)
-                OframeMsg = str((2, self.Oframe))
-                # need to send frame to savior.pyw
-                evt = MessageEvent(myEVT_RETURN_MESSAGE, -1, 4, OframeMsg)
-                wx.PostEvent(self, evt)
-                print('sent Open')
+                self.timeDelay = dlg.GetValue()
+
+            # Old code for shutter control via savior frames:
+            # dlg = wx.TextEntryDialog(self, 'Approximate Frame to Open Shutter?:', 'Set Open Shutter Frame')
+            # if dlg.ShowModal() == wx.ID_OK:
+            #     self.Oframe = dlg.GetValue()
+            #     self.Oframe = float(self.Oframe)
+            #     OframeMsg = str((2, self.Oframe))
+            #     # need to send frame to savior.pyw
+            #     evt = MessageEvent(myEVT_RETURN_MESSAGE, -1, 4, OframeMsg)
+            #     wx.PostEvent(self, evt)
+            #     print('sent Open')
             dlg.Destroy()
-        elif event.Id == self.id_CloseShutterFrame:
-            dlg = wx.TextEntryDialog(self, 'Approximate Frame to Close Shutter?:', 'Set Close Shutter Frame')
+        elif event.Id == self.id_shutterDuration:
+            dlg = wx.TextEntryDialog(self, 'Stimulus Duration?:', 'Set Stimulus Duration')
             if dlg.ShowModal() == wx.ID_OK:
-                self.Cframe = dlg.GetValue()
-                self.Cframe = float(self.Cframe)
-                CframeMsg = str((3, self.Cframe))
-                # need to send frame to savior.pyw
-                evt = MessageEvent(myEVT_RETURN_MESSAGE, -1, 4, CframeMsg)
-                wx.PostEvent(self, evt)
-                print('sent Close')
+                self.stimulusDuration = dlg.GetValue()
+                self.stimulusDuration = float(self.stimulusDuration)
+
+            # Old code for shutter control via savior frames:
+            # dlg = wx.TextEntryDialog(self, 'Approximate Frame to Close Shutter?:', 'Set Close Shutter Frame')
+            # if dlg.ShowModal() == wx.ID_OK:
+            #     self.Cframe = dlg.GetValue()
+            #     self.Cframe = float(self.Cframe)
+            #     CframeMsg = str((3, self.Cframe))
+            #     # need to send frame to savior.pyw
+            #     evt = MessageEvent(myEVT_RETURN_MESSAGE, -1, 4, CframeMsg)
+            #     wx.PostEvent(self, evt)
+            #     print('sent Close')
             dlg.Destroy()
 
     def on_test(self, event):
@@ -569,8 +580,12 @@ class wxFixationFrame(wx.Frame):
         if self.flicker_stimulus == 1:
             self.LCCanvas.set_fixation_cursor(6, 1, self.com)
         if self.animal_stim == 1:
-            self.LCCanvas.set_fixation_cursor(8, 1, self.com, 1, 1)
-            self.LCCanvas.set_fixation_cursor(9, 1, self.com, 1, 1)
+            timeDelay = float(self.timeDelay)
+            # timeDelay = timeDelay-0.6  # this is an attempt to make the timing more accurate
+            t = threading.Timer(timeDelay, self.call_stimulus)  # this is the delay before the shutter opens
+            t.start()
+            # self.LCCanvas.set_fixation_cursor(8, 1, self.com, 1, 1, self.stimulusDuration)
+            # self.LCCanvas.set_fixation_cursor(9, 1, self.com, 1, 1)
 
     def on_normal(self, event):
         self.flicker_stimulus = 0
@@ -926,11 +941,11 @@ class wxFixationFrame(wx.Frame):
                 t = threading.Timer(3, self.call_stimulus)  # this is the delay before the shutter opens for the first time
                 t.start()
             if self.animal_stim:
-                # timeDelay = float(self.timeDelay)
+                timeDelay = float(self.timeDelay)
                 # timeDelay = timeDelay-0.6  # this is an attempt to make the timing more accurate
-                # t = threading.Timer(timeDelay, self.call_stimulus)  # this is the delay before the shutter opens for the first time
-                # t.start()
-                self.call_stimulus()
+                t = threading.Timer(timeDelay, self.call_stimulus)  # this is the delay before the shutter opens for the first time
+                t.start()
+                # self.call_stimulus()
 
         # elif event.GetKeyCode() == wx.WXK_NUMPAD_SUBTRACT:
         #     self.zoom_out(self)
@@ -951,7 +966,7 @@ class wxFixationFrame(wx.Frame):
             self.LCCanvas.set_fixation_cursor(7, 1, self.com, self.wavelength, self.frequency)
         if self.animal_stim is 1:
             print(datetime.datetime.now())
-            self.LCCanvas.set_fixation_cursor(8, 1, self.com)
+            self.LCCanvas.set_fixation_cursor(8, 1, self.com, 1, 1, self.stimulusDuration)
 
     def on_image_alignment(self, event):
         if event.ControlDown():  # The image can only be moved if Control is being held down!
@@ -1084,13 +1099,13 @@ class wxFixationFrame(wx.Frame):
             self.viewpane.set_fov(fov)
             self.saviorfov = fov
 
-    def frame_number_start(self, num):  # added JG 2/15/22 frame number grabbing from savior testing
-        if self.animal_stim == 1:
-            self.LCCanvas.set_fixation_cursor(8, 1, self.com)
-
-    def frame_number_end(self, num):  # added JG 2/15/22 frame number grabbing from savior testing
-        if self.animal_stim == 1:
-            self.LCCanvas.set_fixation_cursor(9, 1, self.com)
+    # def frame_number_start(self, num):  # added JG 2/15/22 frame number grabbing from savior testing
+    #     if self.animal_stim == 1:
+    #         self.LCCanvas.set_fixation_cursor(8, 1, self.com)
+    #
+    # def frame_number_end(self, num):  # added JG 2/15/22 frame number grabbing from savior testing
+    #     if self.animal_stim == 1:
+    #         self.LCCanvas.set_fixation_cursor(9, 1, self.com)
 
 
     def update_fixation_color(self, penColor, brushColor):

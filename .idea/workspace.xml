@@ -7,6 +7,7 @@
     <list default="true" id="10265a4d-0c1d-4a65-8747-ae54663009dc" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fixationgui/LightCrafter.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/LightCrafter.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fixationgui/wxFixGUI.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/wxFixGUI.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fixationgui/wxFixProc.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/wxFixProc.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -134,7 +135,7 @@
       <recent name="$PROJECT_DIR$/fixationgui" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.wxFixProc">
+  <component name="RunManager" selected="Python.wxFixGUI">
     <configuration default="true" type="PythonConfigurationType" factoryName="Python">
       <module name="Fixation_GUI" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -292,8 +293,8 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.plannerMode" />
         <item itemvalue="Python.wxFixGUI" />
+        <item itemvalue="Python.plannerMode" />
         <item itemvalue="Python.testImage" />
         <item itemvalue="Python.protocolPane" />
         <item itemvalue="Python.wxSaviorBottomPanel" />
@@ -391,17 +392,17 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fixationgui/wxFixGUI.py</url>
-          <line>948</line>
+          <line>963</line>
           <option name="timeStamp" value="129" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fixationgui/wxFixGUI.py</url>
-          <line>884</line>
+          <line>899</line>
           <option name="timeStamp" value="131" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fixationgui/wxFixGUI.py</url>
-          <line>1083</line>
+          <line>1098</line>
           <option name="timeStamp" value="148" />
         </line-breakpoint>
       </breakpoints>
