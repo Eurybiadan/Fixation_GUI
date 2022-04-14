@@ -59,7 +59,7 @@ class wxFixationFrame(wx.Frame):
         self.frequency = 10
         self.FixStat = 0
         self.timeDelay = 1.5
-        self.stimulusDuration = 1
+        self.stimulusDuration = 0.8  # 1 second in reality - accounts for 0.2 second delay
 
         self._locationfname = None
         self._locationpath = None
@@ -544,6 +544,7 @@ class wxFixationFrame(wx.Frame):
             dlg = wx.TextEntryDialog(self, 'Stimulus Start Time (s):', 'Set Stimulus Start')
             if dlg.ShowModal() == wx.ID_OK:
                 self.timeDelay = dlg.GetValue()
+                self.timeDelay = float(self.timeDelay) - 0.2  # adjusted to account for 0.2 second delay
 
             # Old code for shutter control via savior frames:
             # dlg = wx.TextEntryDialog(self, 'Approximate Frame to Open Shutter?:', 'Set Open Shutter Frame')
