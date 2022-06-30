@@ -6,7 +6,9 @@
   <component name="ChangeListManager">
     <list default="true" id="10265a4d-0c1d-4a65-8747-ae54663009dc" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fixationgui/AOSLO_Electronic_Notes_Template_v2.pdf" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/AOSLO_Electronic_Notes_Template_v2.pdf" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fixationgui/LightCrafter.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/LightCrafter.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fixationgui/protocolPane.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/protocolPane.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fixationgui/wxFixGUI.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/wxFixGUI.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fixationgui/wxFixProc.py" beforeDir="false" afterPath="$PROJECT_DIR$/fixationgui/wxFixProc.py" afterDir="false" />
     </list>
@@ -135,7 +137,7 @@
       <recent name="$PROJECT_DIR$/fixationgui" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.wxFixGUI">
+  <component name="RunManager" selected="Python.wxFixProc">
     <configuration default="true" type="PythonConfigurationType" factoryName="Python">
       <module name="Fixation_GUI" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -284,11 +286,11 @@
       <method v="2" />
     </configuration>
     <list>
+      <item itemvalue="Python.wxFixProc" />
       <item itemvalue="Python.plannerMode" />
       <item itemvalue="Python.protocolPane" />
       <item itemvalue="Python.testImage" />
       <item itemvalue="Python.wxFixGUI" />
-      <item itemvalue="Python.wxFixProc" />
       <item itemvalue="Python.wxSaviorBottomPanel" />
     </list>
     <recent_temporary>
@@ -377,7 +379,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fixationgui/wxFixGUI.py</url>
-          <line>537</line>
+          <line>539</line>
           <option name="timeStamp" value="116" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -392,18 +394,28 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fixationgui/wxFixGUI.py</url>
-          <line>964</line>
+          <line>975</line>
           <option name="timeStamp" value="129" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fixationgui/wxFixGUI.py</url>
-          <line>900</line>
+          <line>903</line>
           <option name="timeStamp" value="131" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fixationgui/wxFixGUI.py</url>
-          <line>1099</line>
-          <option name="timeStamp" value="148" />
+          <url>file://$PROJECT_DIR$/fixationgui/protocolPane.py</url>
+          <line>541</line>
+          <option name="timeStamp" value="149" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/fixationgui/protocolPane.py</url>
+          <line>652</line>
+          <option name="timeStamp" value="151" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/fixationgui/wxFixProc.py</url>
+          <line>64</line>
+          <option name="timeStamp" value="156" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
@@ -414,6 +426,14 @@
         </breakpoint>
       </default-breakpoints>
     </breakpoint-manager>
+    <watches-manager>
+      <configuration name="PythonConfigurationType">
+        <watch expression="protocolref.Constraints" />
+        <watch expression="protocolref.selfArray" language="Python" />
+        <watch expression="self.listevt" language="Python" />
+        <watch expression="self.protoVidNum" language="Python" />
+      </configuration>
+    </watches-manager>
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/virtenv/lib/python3.6/site-packages/wx/core.pyi" />

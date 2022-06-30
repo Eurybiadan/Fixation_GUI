@@ -220,6 +220,7 @@ class ProtocolPane(wx.Panel):
         FOV = 'FOV ' + str(vidNum)
         locNotes = 'Location  Notes' + str(vidNum)
         focus = 'Focus ' + str(vidNum)
+        # print(focus)
         conf = 'Conf' + str(vidNum)
         dir = 'Dir' + str(vidNum)
         ref = 'Ref' + str(vidNum)
@@ -563,10 +564,11 @@ class Notes(wx.Dialog):
         self.protoLoc = self.protocolref.list.GetItemText(self.index, 1)
         self.protoFOV = self.protocolref.list.GetItemText(self.index, 2)
         self.protoEye = self.protocolref.list.GetItemText(self.index, 3)
-        # protocolItem = self._protocol[index]
-        # protoVidNum = dict.get(protocolItem, 'videoNumber')
+        # protocolItem = self.protocolref._protocol[self.index]
+        # self.protoVidNum = dict.get(protocolItem, 'videoNumber')  #JG 6/13/22 going to see if I can use the video number for the index
         self.protoVidNum = int(self.protoVidNum)
         print(self.protoVidNum)
+        # if it isn't the top entry in the protocol list (aka the video was just taken)
         if self.index < len(self.protocolref._protocol)-1:
             protocolNotesItem = self.protocolref._protocolNotes[self.protoVidNum - 1]
             self.pFocus = dict.get(protocolNotesItem, 'Focus')
@@ -575,6 +577,7 @@ class Notes(wx.Dialog):
             self.pPMTref = dict.get(protocolNotesItem, 'PMTref')
             self.pPMTvis = dict.get(protocolNotesItem, 'PMTvis')
 
+        # if this isn't the first entry in the notes datastructure
         if len(self.protocolref._protocolNotes) != 0:
             if self.protoVidNum < len(self.protocolref._protocolNotes):  # JG- 11/15/21 need to get around this when switching eyes. Can I change to <=?
                 protocolCurrNotes = self.protocolref._protocolNotes[self.protoVidNum]

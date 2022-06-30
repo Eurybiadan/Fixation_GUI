@@ -60,6 +60,7 @@ class wxFixationFrame(wx.Frame):
         self.FixStat = 0
         self.timeDelay = 1.5
         self.stimulusDuration = 0.8  # 1 second in reality - accounts for 0.2 second delay
+        self.eyeRemind = 0
 
         self._locationfname = None
         self._locationpath = None
@@ -928,6 +929,14 @@ class wxFixationFrame(wx.Frame):
         return x, y
 
     def on_keyboard_press(self, event):
+
+        if self.eyeRemind == 0:
+            dlg = wx.MessageDialog(self, 'Check that correct eye is selected before recording!', 'Reminder')
+            if dlg.ShowModal() == wx.ID_OK:
+                dlg.Destroy()
+                self.eyeRemind = 1
+            return
+
         import datetime
         # Allows For Arrow Control Of The Cursor
         if event.GetKeyCode() == wx.WXK_F4:
