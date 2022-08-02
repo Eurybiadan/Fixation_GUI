@@ -64,9 +64,9 @@ class QueueWhisperer(asyncore.dispatcher):
                     # t.start()  # this starts the thread
                     return  # return and let people hit F4 until at least a second has passed. This way there won't be any issues with F4 freaking out/lagging if the button is spammed. Just going to discard the F4 message and wait for the next
             self.prevTime = datetime.datetime.now()
-            print(self.prevTime)
-            print("read in fixproc")
-            print("Recieved: " + recvmsg)
+            # print(self.prevTime)
+            # print("read in fixproc")
+            # print("Recieved: " + recvmsg)
             self._recvQueue.put(recvmsg)
 
     # def queueDelayed(self, recvmsg):  # this is the function that adds the message to the queue after being delayed to prevent errors
@@ -129,8 +129,8 @@ if __name__ == '__main__':
     # testQ.put((VIDNUM, '0002'))
     # time.sleep(20)
     # # planned
-    # testQ.put((FOV, 1.00, 1.00))
-    # testQ.put((VIDNUM, '0003'))
+    testQ.put((FOV, 1.00, 1.00))
+    testQ.put((VIDNUM, '0001'))
     # time.sleep(10)
     # # middle of plan
     # testQ.put((FOV, 1.00, 1.00))

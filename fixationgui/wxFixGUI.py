@@ -930,17 +930,16 @@ class wxFixationFrame(wx.Frame):
 
     def on_keyboard_press(self, event):
 
-        if self.eyeRemind == 0:
-            dlg = wx.MessageDialog(self, 'Check that correct eye is selected before recording!', 'Reminder')
-            if dlg.ShowModal() == wx.ID_OK:
-                dlg.Destroy()
-                self.eyeRemind = 1
-            return
-
         import datetime
         # Allows For Arrow Control Of The Cursor
         if event.GetKeyCode() == wx.WXK_F4:
             evt = MessageEvent(myEVT_RETURN_MESSAGE, -1, 4, "F4")
+            if self.eyeRemind == 0:
+                dlg = wx.MessageDialog(self, 'Check that correct eye is selected before recording!', 'Reminder')
+                if dlg.ShowModal() == wx.ID_OK:
+                    dlg.Destroy()
+                    self.eyeRemind = 1
+                return
             print('fixgui message values:')
             print(hex(id(myEVT_RETURN_MESSAGE)))
             print(hex(id(MessageEvent)))
@@ -1281,6 +1280,7 @@ class QueueListener(asyncore.dispatcher_with_send):
 
     def handle_read(self):
         try:
+            # # print("recieving the message that a video was taken????? in fixgui")
             recvmsg = self.recv(32).decode("utf-8")
             print("Recieved fixgui: "+recvmsg)
 
