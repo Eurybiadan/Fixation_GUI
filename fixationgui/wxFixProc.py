@@ -5,11 +5,13 @@ import subprocess
 import sys, os, socket, platform
 import time
 import datetime
+import logging
 
 
 class FixGUIServer:
 
     def __init__(self, sendQueue=None, recvQueue=None):
+        logging.basicConfig(filename='fixGUIServer.log', level=logging.DEBUG)
         thispath = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
         if platform.system() is 'Windows':
@@ -55,19 +57,28 @@ class QueueWhisperer(asyncore.dispatcher):
         return self._sendQueue.qsize() > 0
 
     def handle_read(self):
+        # Add in lost connection check?
+
         # reads things sent from gui to savior?
         recvmsg = self.recv(32).decode("utf-8")
-        if recvmsg == "F4" or "(" in recvmsg:
-            if recvmsg == "F4":  # to avoid unforseen issues with FOV switches
-                if (datetime.datetime.now() - self.prevTime) < datetime.timedelta(seconds=1):
-                    # t = threading.Timer(0.5, self.queueDelayed, args=recvmsg)  # this is a thread with a delay that will call the queueDelayed function
-                    # t.start()  # this starts the thread
-                    return  # return and let people hit F4 until at least a second has passed. This way there won't be any issues with F4 freaking out/lagging if the button is spammed. Just going to discard the F4 message and wait for the next
-            self.prevTime = datetime.datetime.now()
-            # print(self.prevTime)
-            # print("read in fixproc")
-            # print("Recieved: " + recvmsg)
-            self._recvQueue.put(recvmsg)
+        list_o_msg = recvmsg.split("!")
+
+        for msg in list_o_msg:
+            logging.info(msg)
+            if msg == "F4" or "(" in msg:
+                if msg == "F4":  # to avoid unforseen issues with FOV switches
+                    if (datetime.datetime.now() - self.prevTime) < datetime.timedelta(seconds=1):
+                        # t = threading.Timer(0.5, self.queueDelayed, args=recvmsg)  # this is a thread with a delay that will call the queueDelayed function
+                        # t.start()  # this starts the thread
+                        return  # return and let people hit F4 until at least a second has passed. This way there won't be any issues with F4 freaking out/lagging if the button is spammed. Just going to discard the F4 message and wait for the next
+                self.prevTime = datetime.datetime.now()
+                # print(self.prevTime)
+                # print("read in fixproc")
+                # print("Recieved: " + recvmsg)
+                if self._recvQueue is not None:
+                    self._recvQueue.put(msg)
+                else:
+                    logging.warning("_recvQueue has been freed! OH NOES!")
 
     # def queueDelayed(self, recvmsg):  # this is the function that adds the message to the queue after being delayed to prevent errors
     #     print("In queueDelayed")
@@ -91,7 +102,7 @@ class QueueWhisperer(asyncore.dispatcher):
             self.send(msg)
 
         except RuntimeError:
-            print("Lost connection to the image listener!")
+            logging.warning("Lost connection to the image listener or sendQueue is freed!")
             self.close()
             if self.mainGUI:
                 self.mainGUI.kill()
