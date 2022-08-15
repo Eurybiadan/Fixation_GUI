@@ -1277,7 +1277,7 @@ class QueueListener(asyncore.dispatcher_with_send):
         # print("Sending from fixgui!")
         # print(evt.get_data().encode("utf-8"))
         msg=evt.get_data().encode("utf-8")
-        msg += "!"
+        msg += '!'.encode("utf-8")
         self.send(msg)
 
     def handle_read(self):
