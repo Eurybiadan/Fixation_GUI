@@ -13,5 +13,5 @@ python3 -m virtualenv "$THISPATH/venv"
 
 # Activate our virtualenv, then install wxPython 4 and numpy.
 source "$THISPATH/venv/bin/activate"
-python3 -m pip install wxPython && python3 -m pip install numpy
+python3 -m pip install wxPython numpy pdfrw opencv-python serial
 deactivate

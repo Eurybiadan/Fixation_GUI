@@ -465,7 +465,7 @@ class ViewPane(wx.Window):
                 dc.SetPen(self.THINORANGEPEN)
             else:
                 dc.SetPen(self.BLKPEN)
-            dc.DrawLine(0, rowNum * cellHgt, width, rowNum * cellHgt)
+            dc.DrawLine(int(0), int(rowNum * cellHgt), int(width), int(rowNum * cellHgt))
 
         # Draw Column lines
         for colNum in range(numCols + 1):
@@ -473,12 +473,12 @@ class ViewPane(wx.Window):
                 dc.SetPen(self.THINORANGEPEN)
             else:
                 dc.SetPen(self.BLKPEN)
-            dc.DrawLine(colNum * cellWid, 0, colNum * cellWid, height)
+            dc.DrawLine(int(colNum * cellWid), 0, int(colNum * cellWid), height)
 
         # Draws Center Lines
         dc.SetPen(self.MEDORANGEPEN)
-        dc.DrawLine(0, self._numgridlines / 2 * cellHgt, width, self._numgridlines / 2 * cellHgt)
-        dc.DrawLine(self._numgridlines / 2 * cellWid, 0, self._numgridlines / 2 * cellWid, height)
+        dc.DrawLine(0, int(self._numgridlines / 2 * cellHgt), width, int(self._numgridlines / 2 * cellHgt))
+        dc.DrawLine(int(self._numgridlines / 2 * cellWid), 0, int(self._numgridlines / 2 * cellWid), height)
 
         # Draws Viewable Region Circle - use the graphics context because its actually
         # Got a bit of AA in it (can do floating point drawing)

@@ -4,6 +4,7 @@ This software provides an easy-to-use interface to drive secondary-monitor fixat
 
 Fixation_GUI uses a socket-based interface to recieve notifications that an image has been acquired, or other aspects of imaging have been changed: e.g. the field of view of the instrument has been adjusted.
 
+![Screenshot](screenshot.png)
 
 ## General Usage:
 __IMPORTANT NOTE: for Savior users, skip to Savior Installation Instructions below__

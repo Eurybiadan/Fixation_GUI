@@ -154,8 +154,8 @@ class LightCrafterCanvas(wx.Window):
             if self._cursor is 0:
                 self._pen.SetWidth(self._fixsize)
                 dc.SetPen(self._pen)
-                dc.DrawLine(0, self._location.y, self.thisSize.x, self._location.y)
-                dc.DrawLine(self._location.x, 0, self._location.x, self.thisSize.y)
+                dc.DrawLine(0, int(self._location.y), int(self.thisSize.x), int(self._location.y))
+                dc.DrawLine(int(self._location.x), 0, int(self._location.x), int(self.thisSize.y))
             elif self._cursor is 1:
                 self._pen.SetWidth(self._fixsize/3)
                 dc.SetPen(self._pen)
