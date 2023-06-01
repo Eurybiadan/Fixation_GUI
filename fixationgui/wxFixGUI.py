@@ -117,7 +117,7 @@ class wxFixationFrame(wx.Frame):
         # Spawn the pair of listener threads so we can detect changes in the comm Queues passed by Savior
         self.fovListener = ConnListener(self)  # This will recieve a tuple of sizes
         self.fovListenerThread = threading.Thread(target=asyncore.loop, kwargs={'timeout': 1})
-        self.fovListenerThread.setDaemon(True)
+        self.fovListenerThread.daemon = True
         self.fovListenerThread.start()
 
     def initViewPane(self, parent):
@@ -663,7 +663,7 @@ class wxFixationFrame(wx.Frame):
             self.viewpane.SetMouseOffset(None)
 
     def on_mouse_wheel(self, event):
-        if self.viewpane.get_state() is 1 or self.viewpane.get_state() is 2:
+        if self.viewpane.get_state() == 1 or self.viewpane.get_state() == 2:
             print('okwheel')
         # uncomment this if you want the zoom scroll
         self.viewpane.SetBkgrdScale(math.copysign(1.0, event.GetWheelRotation()) * .01)
@@ -967,13 +967,13 @@ class wxFixationFrame(wx.Frame):
     def call_stimulus(self):
         import datetime
         # Heather Stimulus
-        if self.flicker_stimulus is 1:
+        if self.flicker_stimulus == 1:
             print(datetime.datetime.now())
             self.LCCanvas.set_fixation_cursor(6, 1, self.com)
-        if self.stimulus is 1:
+        if self.stimulus == 1:
             print(datetime.datetime.now())
             self.LCCanvas.set_fixation_cursor(7, 1, self.com, self.wavelength, self.frequency)
-        if self.animal_stim is 1:
+        if self.animal_stim == 1:
             print(datetime.datetime.now())
             self.LCCanvas.set_fixation_cursor(8, 1, self.com, 1, 1, self.stimulusDuration)
 
@@ -1149,7 +1149,7 @@ class wxFixationFrame(wx.Frame):
         # saviorfov = self.saviorfov
         # saviorfovh, saviorfovv = list(map(float, saviorfov))
         # Create a file that we will dump all of the relevant information to
-        if self._locationfname is None or loadplanmode is 1:
+        if self._locationfname == None or loadplanmode == 1:
             # If it doesn't exist, then prompt for the location before continuing...
             self.on_set_save_protocol_location(None, loadplanmode)
 
